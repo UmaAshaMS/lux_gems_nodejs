@@ -25,51 +25,50 @@ const login = (req, res) => {
 
 const loginPost = async (req, res) => {
     try {
-        //find from the database
-        const checkUser = await userSchema.findOne({ email: req.body.email })
+        // Find the user in the database by email
+        const checkUser = await userSchema.findOne({ email: req.body.email });
 
-        // Log the user found
+        // Log the found user details
         console.log('User found:', checkUser);
 
         if (!checkUser) {
-            //if user not found, set flash message as alert and redirect
-            req.flash('error', 'Invalid user credentials')
-            console.log('Invalid user credentials')
-            return res.redirect('/user/login')
+            // If the user is not found, set a flash message and redirect
+            req.flash('error', 'Invalid user credentials');
+            console.log('Invalid user credentials - user not found.');
+            return res.redirect('/user/login');
         }
+
         if (checkUser.isBlocked) {
-            // User is blocked, set flash message and redirect
-            console.log("User blocked by admin")
+            // If the user is blocked, set a flash message and redirect
+            console.log('User blocked by admin.');
             req.flash('error', 'Your account has been blocked. Please contact support.');
             return res.redirect('/user/login');
         }
 
-        // Compare the provided password with the stored hashed password
-        console.log("=========================",req.body.password)
-        const isPasswordValid = await bcrypt.compare(req.body.password.trim(), checkUser.password);
-        console.log(isPasswordValid)
+        // Log the provided password before comparison
+        console.log('Provided password:', req.body.password.trim());
+        console.log('Stored hashed password:', checkUser.password);
 
-        // // Log user and password
-        // console.log('Provided password:', req.body.password);
-        // console.log('Stored hashed password:', checkUser.password);
+        // Compare the provided password with the stored hashed password
+        const isPasswordValid = await bcrypt.compare(req.body.password.trim(), checkUser.password);
+        console.log('Password comparison result:', isPasswordValid);
 
         if (isPasswordValid) {
-            // If password is correct, redirect to home
+            // If the password is correct, set the session user and redirect to home
             req.session.user = checkUser;
             res.redirect('/user/home');
         } else {
-            // If password is incorrect, set flash message and redirect
+            // If the password is incorrect, set a flash message and redirect
             req.flash('error', 'Invalid user credentials');
-            console.log('Invalid user credentials');
+            console.log('Invalid user credentials - password mismatch.');
             res.redirect('/user/login');
         }
-
+    } catch (err) {
+        // Handle any unexpected errors
+        req.flash('error', 'An error occurred. Please try again later.');
+        console.log(`Error in Login: ${err}`);
     }
-    catch (err) {
-        req.flash('error', 'An error occurred. Please try again later.'); // Set flash message for errors
-        console.log(`Error in Login : ${err}`)
-    }
-}
+};
 
 const SignUp = (req, res) => {
     try {
@@ -86,65 +85,83 @@ const SignUp = (req, res) => {
 }
 
 const SignUpPost = async (req, res) => {
-
     const { name, phoneNumber, email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     console.log("Form Data:", req.body);
-    //res.redirect('/user/login')
+
     try {
-        console.log("Req received")
+        console.log("Req received");
 
-        if (!name || !phoneNumber || !email || !password) {
+        // Extract password and confirm password from array
+        const [password1, password2] = password;
+
+        // Check if all fields are provided
+        if (!name || !phoneNumber || !email || !password1 || !password2) {
             console.error('All fields are required');
-
+            req.flash('error', 'All fields are required');
             return res.redirect('/user/Sign-Up');
         }
+
+        // Validate email format
+        if (!emailRegex.test(email)) {
+            console.error('Invalid email format');
+            req.flash('error', 'Invalid email format');
+            return res.redirect('/user/Sign-Up');
+        }
+
+        // Check if passwords match
+        if (password1 !== password2) {
+            console.error('Passwords do not match');
+            req.flash('error', 'Passwords do not match');
+            return res.redirect('/user/Sign-Up');
+        }
+
+        // Check if user already exists
+        const checkUserExists = await userSchema.findOne({ email });
+
+        if (checkUserExists) {
+            req.flash('error', 'User already exists');
+            console.log('User already exists.');
+            return res.redirect('/user/Sign-Up');
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password1, 10);
+
         const userData = {
-            name: req.body.name,
-            phoneNumber: req.body.phoneNumber,
-            email: req.body.email,
-            password: await bcrypt.hash(req.body.password.toString(), 10)
-        }
+            name,
+            phoneNumber,
+            email,
+            password: hashedPassword
+        };
 
-        //check whether User exists or not
-        const checkUserExists = await userSchema.findOne({ email: req.body.email })
+        // Create a new user
+        await userSchema.create(userData);
+        console.log('New User created.');
 
-        if (!checkUserExists) {
-            // await userSchema.create(userData);
-            // console.log('Data of the new user : ', userData)
-            console.log('New User');
-            const otp = generateOTP()
-            sendOTP(userData.email, otp)
-            req.flash('success', `OTP sent to the ${userData.email} `)
-            console.log('OTP send to the user mail')
+        // Generate and send OTP
+        const otp = generateOTP();
+        await sendOTP(email, otp); // Ensure sendOTP is an async function if it involves I/O
 
-            req.session.otp = otp
-            req.session.otpTime = Date.now()
-            req.session.email = userData.email
-            req.session.name = userData.name
-            req.session.phoneNumber = userData.phoneNumber
-            req.session.password = userData.password
+        req.flash('success', `OTP sent to ${email}`);
+        console.log('OTP sent to the user email.');
 
-            // if (emailRegex.test(req.body.email)) {
-            //     // Generate and send OTP
-            //     await generateAndSendOTP(email);
-            // res.redirect('/user/OTP');  // Redirect to OTP verification page
+        // Store necessary data in the session
+        req.session.otp = otp;
+        req.session.otpTime = Date.now();
+        req.session.email = email;
+        req.session.name = name;
+        req.session.phoneNumber = phoneNumber;
 
-            // }
-            res.redirect('/user/OTPpage');  // Redirect to OTP verification page
-
-        }
-        else {
-            req.flash('error', 'User already exists')
-            console.log('User already exists.')
-            res.redirect('/user/Sign-Up')
-        }
+        // Redirect to OTP verification page
+        res.redirect('/user/OTPpage');
+    } catch (err) {
+        console.error(`Error submitting data during Sign-Up: ${err}`);
+        req.flash('error', 'An error occurred during sign-up. Please try again.');
+        res.redirect('/user/Sign-Up');
     }
-    catch (err) {
-        console.error(`Error submitting data while Sign-Up, ${err}`)
-    }
-}
+};
 
 const otpPage = (req, res) => {
     try {

@@ -94,12 +94,13 @@
                             id="mainImage" style="align-items: center;">
                     </div>
 
-                    <!-- <div class="thumbnail-images d-flex gap-2 mt-4"">
+                    <div class="thumbnail-images d-flex gap-2 mt-4">
                         <% product.productImage.forEach((image)=> { %>
                             <img src=" ../../<%=image %>" alt="Thumbnail"
-                        onclick="changeImage('<%= image.replace(/\\/g, '\\\\' ) %>')">
+                        onclick="changeImage('<%= image.replace(/\\/g, `\\\\` ) %>')">
                             <% }) %>
-                    </div> -->
+                    </div>
+                    
 
                 </div>
                 <div class="col-lg-4 product-info">
