@@ -1,0 +1,58 @@
+<body>
+    <style>
+        .Container{
+            display:flex;
+            flex :1;
+            border-radius: 10px;
+
+        }
+      
+
+        .SideBar .btn {
+            display: block; /* Make buttons stack vertically */
+            width: 150px ; 
+            margin-bottom: 10px; /* Space between buttons */
+            text-align: center; 
+        }
+
+
+
+        .SideBar {
+            width: 250px;
+            margin: 20px;
+            background-color: #caaf7a;
+            color: white;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+
+        }
+
+        .SideBar a{
+            text-decoration: none;
+            color:inherit
+        }
+    </style>
+
+
+
+<div class="Container">
+    <div class = 'SideBar'>
+        <button class="btn btn-dark"> <a href="/admin/home">Dashboard</a></button>
+        <button class="btn btn-dark"> <a href="/admin/Category">Category</a></button>
+        <button class="btn btn-dark"><a href="/admin/Products">Products</a></button>
+        <button class="btn btn-dark"><a href="/admin/Customers">Customers</a></button>
+        <button class="btn btn-dark">Order</button>
+        <button class="btn btn-dark">Coupons</button>
+        <button class="btn btn-dark">Banner</button>
+        <form action="/admin/logout" method="POST">
+            <button type="submit" class="btn btn-dark">Logout</button>
+        </form>
+       
+    </div>
+</div>    
+</body>

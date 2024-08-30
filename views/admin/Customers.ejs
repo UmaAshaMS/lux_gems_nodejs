@@ -1,0 +1,251 @@
+<body>
+    <style>
+        .Container {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            border-radius: 10px;
+        }
+
+
+        .SideBar .btn {
+            display: block;
+            /* Make buttons stack vertically */
+            width: 150px;
+            margin-bottom: 10px;
+            /* Space between buttons */
+            text-align: center;
+        }
+
+
+
+        .SideBar {
+            width: 250px;
+            margin: 20px;
+            background-color: #caaf7a;
+            color: white;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+
+        }
+
+        .SideBar a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        .Customer-Page {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .Customer-container {
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+            margin-left: 0px;
+            padding: 20px;
+            /* Arrange children side by side */
+            /* Space between sidebar and table */
+            
+        }
+
+        .Customer-container table {
+
+            text-align: center;
+            flex-direction: column;
+
+        }
+
+        .btn {
+            width: 100px;
+        }
+
+        .searchUser {
+            display: flex;
+            flex-direction: row;
+            border: 1px;
+            border-radius: 4px;
+            gap: 10px;
+            width:800px;
+            margin-top: 2%;
+
+        }
+
+        .Search form {
+                display: flex;
+            }
+        .form-control {
+                width: 500px;
+                margin-left: 90px;
+            }
+
+        .searchBtn {
+            flex: 2;
+            width: 10px;
+            color: white;
+            border: 2px;
+            flex-shrink: 0;
+            /* Prevent the button from shrinking */
+
+        }
+
+        .table {
+            margin-top: 0%;
+            width: 1000px;
+            height: auto;
+            border: black;
+            text-align: center;
+            align-self: center;
+        }
+    </style>
+    <div class="Customer-Page">
+        <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+            <div class="container">
+                <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Customers<span>.</span></a>
+                <div class="collapse navbar-collapse" id="navbars">
+                    <div class='Search'>
+                        <div class="searchCategory">
+                            <!-- Search for user -->
+                            <div class="searchUser">
+                                <form method="GET" action="/admin/Customers" class="mb-4">
+                                    <input type="text" name="searchQuery" placeholder="Search Users"class="form-control" value="<%= searchQuery %>">
+                                    <button type="submit" class="btn btn-white mt-2 searchBtn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+
+                                </form>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+        </nav>
+        <div class="Customer-container">
+            <div class="Container">
+
+                <div class='SideBar'>
+                    <a href="/admin/home" class="btn btn-dark">Dashboard</a>
+                    <a href="/admin/Category" class="btn btn-dark">Category</a>
+                    <a href="/admin/Products" class="btn btn-dark">Products</a>
+                    <a href="/admin/Customers" class="btn btn-dark">Customers</a>
+                    <button class="btn btn-dark">Order</button>
+                    <button class="btn btn-dark">Coupons</button>
+                    <button class="btn btn-dark">Banner</button>
+                    <form action="/admin/logout" method="POST">
+                        <button type="submit" class="btn btn-dark">Logout</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">UserID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Phone Number</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% userDetails.forEach((user,index)=> { %>
+
+
+                        <tr>
+                            <th scope="row">
+                                <%= index+1%>
+                            </th>
+                            <td>
+                                <%=user._id%>
+                            </td>
+                            <td>
+                                <%=user.name%>
+                            </td>
+                            <td>
+                                <%=user.email%>
+                            </td>
+                            <td>
+                                <%=user.phoneNumber%>
+                            </td>
+                            <td>
+                                <% if (user.isBlocked) { %>
+                                    Blocked
+                                    <% } else { %>
+                                        Active
+                                        <% } %>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <% if(user.isBlocked){ %>
+                                        <!-- Show unblock button -->
+                                        <button class="btn btn-success me-2" onclick="unblockUser('<%= user._id %>')">
+                                            Unblock
+                                        </button>
+                                        <% } else { %>
+                                            <!-- Show block button -->
+                                            <button class="btn btn-danger me-2" onclick="blockUser('<%= user._id %>')">
+                                                Block
+                                            </button>
+
+                                            <% } %>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    <script>
+        function blockUser(userId) {
+            fetch(`/admin/blockUser/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload(); // Reload the page to reflect changes
+                    } else {
+                        // console.error('Failed to block the user:', response.statusText);
+                        alert("Failed to block the user.");
+
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function unblockUser(userId) {
+            fetch(`/admin/unblockUser/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload(); // Reload the page to reflect changes
+                    } else {
+                        alert("Failed to unblock the user.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <%- include('footer') %>
+</body>

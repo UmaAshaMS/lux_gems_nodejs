@@ -1,0 +1,540 @@
+<body>
+
+
+
+
+    <style>
+        .Container {
+
+
+            border-radius: 10px;
+            display: flex;
+            /* Arrange children side by side */
+            gap: 50px;
+            /* Space between sidebar and table */
+            padding: 20px;
+
+        }
+
+        .SideBar .btn {
+            display: block;
+            /* Make buttons stack vertically */
+            width: 150px;
+            margin-bottom: 10px;
+            /* Space between buttons */
+            text-align: center;
+        }
+
+        .SideBar {
+            width: 250px;
+            margin: 20px;
+            background-color: #caaf7a;
+            color: white;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+
+
+
+        }
+
+        .SideBar a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        .Category-container {
+            display: flex;
+            flex: 2;
+            justify-content: center;
+
+        }
+
+        .btn {
+            width: 100px;
+        }
+
+        .italianno-regular {
+            font-family: "Italianno", cursive;
+            font-weight: 600;
+            font-style: normal;
+            font-size: 50px;
+            color: #caaf7a
+        }
+
+        .Search {
+            display: flex;
+            flex-direction: column;
+            font-size: 42px;
+            align-items: center;
+            margin-left: 85px;
+
+        }
+
+        .Search form {
+            display: flex;
+        }
+
+        .form-control {
+            width: 500px
+        }
+
+
+        .searchBtn {
+            flex: 2;
+            width: 10px;
+            color: white;
+            border: 2px;
+        }
+
+        .AddCategory {
+            background-color: #caaf7a;
+            color: black;
+            font-weight: 700;
+            width: 200px;
+            align-items: end;
+            align-self: flex-end;
+            margin-right: 0%;
+            transition: background-color 0.3s ease;
+            margin-top: 0%;
+            margin-right: 0%;
+            justify-content: center;
+        }
+
+        .AddCategory:hover,
+        .AddCategory:focus,
+        .AddCategory:active {
+            background-color: #b49569;
+            /* Slightly darker shade on interaction */
+            color: black;
+            /* Keep the text color black */
+            outline: none;
+            /* Remove outline */
+            box-shadow: none;
+            /* Remove any shadow applied by Bootstrap */
+        }
+
+
+        .searchCategory {
+            display: flex;
+            flex-direction: row;
+            border: 1px;
+            border-radius: 4px;
+            margin-top: 2%;
+
+        }
+
+        .Search {
+            display: flex;
+            flex-direction: row;
+            margin-top: 10px;
+        }
+
+        /* #categoryModal{
+        
+            } */
+
+        .table {
+            margin-top: 0%;
+            width: 900px;
+            height: auto;
+            border: black;
+            text-align: center;
+            height: fit-content;
+            align-self: center;
+        }
+
+        .editCatBtn {
+            width: 250px
+        }
+
+        .editCatIn {
+            width: 100%
+        }
+
+        #categoryName {
+            width: 100%
+        }
+    </style>
+
+
+    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Category<span>.</span></a>
+            <div class="collapse navbar-collapse  d-flex flex-grow-1 justify-content-between align-items-center"
+                id="navbars">
+                <div class='Search'>
+                    <div class="searchCategory">
+                        <form method="GET" action="/admin/Category" class="mb-4">
+                            <input type="text" name="searchQuery" placeholder="Search Category" class="form-control"
+                                value="<%= searchQuery %>">
+                            <button type="submit" class="btn btn-white mt-2 searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+
+                        </form>
+
+                    </div>
+                </div>
+                <!-- Button to Open the Modal -->
+                <form method="GET" action="">
+
+                    <button type="button" class="btn AddCategory" data-bs-toggle="modal" data-bs-target="#categoryModal"
+                        style="margin-right: 0%;">
+                        Add Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div class="header">
+        <!-- Add Modal Form -->
+        <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h3 class="modal-title fs-5" id="categoryModalLabel">Add New Category</h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <form id="categoryForm" action="/admin/addCategory" method="POST"
+                            onsubmit="return checkCategoryName()">
+                            <div class="mb-3">
+                                <label for="categoryName" class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+                                <label for="categoryName" class="form-label category-validation text-danger"></label>
+
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="reset" class="btn btn-warning" form="categoryForm">Clear</button>
+                        <button type="submit" class="btn btn-primary" form="categoryForm">Save</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Modal Form -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModal">Edit Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm" onsubmit="submitEditCategoryForm(); return false;">
+                        <input type="hidden" id="editCategoryId" name="categoryId">
+                        <div class="mb-3">
+                            <label for="editCategoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control editCatIn" id="editCategoryName" name="categoryName"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary editCatBtn">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Container">
+        <div class='SideBar'>
+            <button class="btn btn-dark"> <a href="/admin/home">Dashboard</a></button>
+            <button class="btn btn-dark"> <a href="/admin/Category">Category</a></button>
+            <button class="btn btn-dark"><a href="/admin/Products">Products</a></button>
+            <button class="btn btn-dark"><a href="/admin/Customers">Customers</a></button>
+            <button class="btn btn-dark">Order</button>
+            <button class="btn btn-dark">Coupons</button>
+            <button class="btn btn-dark">Banner</button>
+            <form action="/admin/logout" method="POST">
+                <button type="submit" class="btn btn-dark">Logout</button>
+            </form>
+        </div>
+
+        <div class="Category-container">
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Category Name</th>
+                        <th scope="col">Added On</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% categoryDetails.forEach((category, index)=> { %>
+                        <tr data-id="<%= category._id %>">
+                            <th scope="row">
+                                <%= index + 1 %>
+                            </th>
+                            <td class="category-name" data-id="<%= category._id %>">
+                                <%= category.name %>
+                            </td>
+                            <td>
+                                <%= category.createdAt.toDateString() %>
+                            </td>
+                            <td>
+                                <% if (category.isBlocked) { %>
+                                    Blocked
+                                    <% } else { %>
+                                        Active
+                                        <% } %>
+                            </td>
+                            <td>
+                                <% if (category.isBlocked) { %>
+                                    <!-- Show unblock and delete button -->
+                                    <button class="btn btn-success me-2"
+                                        onclick="unblockCategory('<%= category._id %>')">Unblock
+                                    </button>
+                                    <button class="btn btn-dark me-2"
+                                        onclick="deleteCategory('<%= category._id %>')">Delete
+                                    </button>
+                                    <% } else { %>
+                                        <!-- Show edit and block button -->
+                                        <button class="btn btn-warning me-2" data-bs-toggle="modal"
+                                            data-bs-target="#editCategoryModal"
+                                            onclick="editCategory('<%= category._id %>')">Edit
+                                        </button>
+                                        <button class="btn btn-danger me-2"
+                                            onclick="blockCategory('<%= category._id %>')">Block
+                                        </button>
+                                        <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script src="../../public/alert.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('editCategoryForm').addEventListener('submit', (event) => {
+                event.preventDefault();
+                submitEditCategoryForm();
+            });
+        });
+
+        // Function to check if the category name exists
+        async function checkCategoryName() {
+            const categoryName = document.getElementById('categoryName').value;
+            const categoryId = document.getElementById('categoryId') ? document.getElementById('categoryId').value : null;
+            try {
+                const response = await fetch('/admin/checkCategoryName', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ categoryName, categoryId })
+                });
+
+                const result = await response.json();
+
+                if (result.exists) {
+                    alert("Category name already exists!");
+
+                    // // Show SweetAlert notification
+                    // Swal.fire({
+                    //     icon: 'warning',
+                    //     title: 'Category Name Exists',
+                    //     text: 'Category already exists.',
+                    //     confirmButtonText: 'Okay'
+                    // });
+
+                    // Prevent form submission
+                    return false;
+                }
+
+                // Allow form submission
+                return true;
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Category already exists.',
+                    confirmButtonText: 'Okay'
+                });
+
+                // Prevent form submission
+                return false;
+            }
+        }
+
+
+
+        function editCategory(categoryId) {
+            // console.log('Edit function is called')
+            // Fetch category details to populate the modal
+            fetch(`/admin/Category/${categoryId}`, {
+                method: 'GET',
+
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`data: ${Object.keys(data)}`)
+
+                    if (data) {
+                        // if (data.success) {
+                            // Swal.fire({
+                           //     icon: 'success',
+                            //     title: 'Success',
+                            //     text:' ',
+                            // })
+                        // Populate modal form fields with category details
+                        console.log(`data._id: ${data._id}`)
+                        document.getElementById('editCategoryId').value = data._id;
+                        document.getElementById('editCategoryName').value = data.name;
+                        // Show the modal
+                        $('#editCategoryModal').modal('show');
+                    } else {
+                        alert("Category not found.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        //Function to handle edit category form submission
+        function submitEditCategoryForm() {
+            const categoryId = document.getElementById('editCategoryId').value;
+            const categoryName = document.getElementById('editCategoryName').value;
+
+            fetch(`/admin/editCategory/${categoryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: categoryName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update existing row in the table
+                        alert('Category updated successfully!');
+                        const row = document.querySelector(`tr[data-id="${categoryId}"]`);
+                        if (row) {
+                            const nameCell = row.querySelector('.category-name');
+                            if (nameCell) {
+                                nameCell.textContent = categoryName;
+                            }
+                        } else {
+                            console.log('Row not found.');
+                        }
+
+                        $('#editCategoryModal').modal('hide');
+
+                    } else {
+                        alert(data.message || 'Error updating category.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        //Function to Add category 
+        const addCategoryForm = document.getElementById('categoryForm')
+        const categoryName = document.getElementById('categoryName')
+
+        addCategoryForm.addEventListener('submit', (event) => {
+            event.preventDefault()
+            document.getElementsByClassName('category-validation')[0].innerHTML = ''
+
+
+            if (categoryName.value.trim() === 0 || categoryName.value.length > 50 || !isNaN(categoryName.value)) {
+                document.getElementsByClassName('category-validation')[0].innerHTML = 'invalid category'
+            } else {
+                addCategoryForm.submit()
+            }
+        })
+        //Function to block the Category
+        function blockCategory(categoryID) {
+            if (confirm("Are you sure you want to block this category?")) {
+                const URL = `/admin/blockCategory/${categoryID}`;
+                fetch(URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Category blocked successfully!");
+                            window.location.reload(); // Refresh the page to reflect changes
+                        } else {
+                            alert("Failed to block category. Please try again.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error during category block:", err);
+                        alert("An error occurred while blocking the category.");
+                    });
+            }
+        }
+        //function to Unblock Category
+
+        function unblockCategory(categoryID) {
+            if (confirm("Are you sure you want to unblock this category?")) {
+                const URL = `/admin/unblockCategory/${categoryID}`;
+                fetch(URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Category unblocked successfully!");
+                            window.location.reload(); // Refresh the page to reflect changes
+                        } else {
+                            alert("Failed to unblock category. Please try again.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error during category unblock:", err);
+                        alert("An error occurred while unblocking the category.");
+                    });
+            }
+        }
+
+        //Function to Delete Category
+        function deleteCategory(categoryID) {
+            if (confirm("Are you sure you want to delete this category?")) {
+                const URL = `/admin/deleteCategory/${categoryID}`;
+                fetch(URL, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Category deleted successfully!");
+                            window.location.reload(); // Refresh the page to reflect changes
+                        } else {
+                            alert("Failed to delete category. Please try again.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error during category deletion:", err);
+                        alert("An error occurred while deleting the category.");
+                    });
+            }
+        }
+    </script>
+    <%- include('footer') %>
+
+</body>

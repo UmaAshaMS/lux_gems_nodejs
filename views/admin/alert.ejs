@@ -1,0 +1,42 @@
+<style>
+    .alert-container{
+        background: pink;
+    }
+</style>
+
+<!--Success messages -->
+
+<% if(success.length > 0) { %>
+
+    <div class="alert-container">
+        <div class="alert d-flex justify-content-between" role="alert">
+            <h5><%= success %></h5>
+            <button class="btn btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    
+    <% } %>
+    
+    <!--error messages-->
+    
+    <% if(error.length > 0) { %>
+    
+    <div class="alert-container ">
+        <div class="alert alert-error d-flex justify-content-between" role="alert">
+            <h5><%= error %></h5>
+            <button class="btn btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    
+    <% } %>
+
+<script>
+    //----------------------- after 5s the flash message will disable ------------------------------
+    const alertDuration=5000;
+
+    setTimeout(()=>{
+        document.getElementsByClassName('alert-container')[0].style.display='none'
+    },alertDuration)
+
+
+</script>

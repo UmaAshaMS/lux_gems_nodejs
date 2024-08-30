@@ -1,0 +1,421 @@
+<!-- /*
+* Bootstrap 5
+* Template Name: Furni
+* Template Author: Untree.co
+* Template URI: https://untree.co/
+* License: https://creativecommons.org/licenses/by/3.0/
+*/ -->
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author" content="Untree.co">
+	<link rel="shortcut icon" href="favicon.png">
+
+	<meta name="description" content="" />
+	<meta name="keywords" content="bootstrap, bootstrap4" />
+
+	<!-- Bootstrap CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="css/tiny-slider.css" rel="stylesheet">
+	<link rel="stylesheet" href="../../public/style.css">
+
+
+</head>
+
+<body>
+
+	<!-- Start Header/Navigation -->
+	<%-include ('navbar.ejs',{ user: user })%>
+		<!-- End Header/Navigation -->
+
+		<!-- Start Hero Section -->
+		<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+			<div class="carousel-inner">
+				<!-- First Slide -->
+				<div class="carousel-item active">
+					<div class="container">
+						<div class="row justify-content-between">
+							<div class="col-lg-5">
+								<div class="intro-excerpt">
+									<h1>FOR MOMENTS THAT MATTERS THE MOST..</h1>
+									<p>
+										<a href="/productView" class="btn btn-secondary me-2">Shop Now</a>
+										<a href="/productView" class="btn btn-white-outline">Explore</a>
+									</p>
+								</div>
+							</div>
+							<div class="col-lg-7">
+								<div class="hero-img-wrap">
+									<img src="/public/assets/pexels-photo-6474917.webp" class="img-fluid"
+										alt="First Slide Image">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Second Slide -->
+				<div class="carousel-item">
+					<div class="container">
+						<div class="row justify-content-between">
+							<div class="col-lg-5">
+								<div class="intro-excerpt">
+									<h1>ANOTHER MOMENT TO CHERISH</h1>
+									<p>
+										<a href="/productView" class="btn btn-secondary me-2">Discover</a>
+										<a href="/productView" class="btn btn-white-outline">Learn More</a>
+									</p>
+								</div>
+							</div>
+							<div class="col-lg-7">
+								<div class="hero-img-wrap">
+									<img src="/public/assets/pexels-photo-6474922.webp" class="img-fluid"
+										alt="Second Slide Image">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Add more slides as needed -->
+			</div>
+
+			<!-- Carousel controls -->
+			<button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Previous</span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Next</span>
+			</button>
+		</div>
+		<!-- End Hero Section -->
+
+
+
+		<!-- Start Product Section -->
+		<div class="product-section">
+			<div class="container">
+				<div class="row">
+
+					<!-- Start Column 1 -->
+					<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
+						<h2 class="mb-4 section-title">Most Popular Collections.</h2>
+						<p class="mb-4">Browse through our curated selection of top-selling collections,
+							 showcasing the pieces that define elegance and style. </p>
+						<p><a href="/user/AllProducts" class="btn">Explore</a></p>
+					</div>
+					<!-- End Column 1 -->
+
+					<!-- Start Column 2 -->
+					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
+						<a class="product-item" href="cart.html">
+							<img src="/public/assets/ring.png" class="img-fluid product-thumbnail">
+							<h3 class="product-title">Rings</h3>
+							<span>Starting from </span><strong class="product-price">$50.00</strong>
+						</a>
+					</div>
+					<!-- End Column 2 -->
+
+					<!-- Start Column 3 -->
+					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
+						<a class="product-item" href="cart.html">
+							<img src="/public/assets/1-10.jpg" class="img-fluid product-thumbnail">
+							<h3 class="product-title">Necklace</h3>
+							<span>Starting from </span><strong class="product-price">$78.00</strong>	
+						</a>
+					</div>
+					<!-- End Column 3 -->
+
+					<!-- Start Column 4 -->
+					<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
+						<a class="product-item" href="cart.html">
+							<img src="/public/assets/1716958878_ad0be18d82d902291d2f.jpg" class="img-fluid product-thumbnail">
+							<h3 class="product-title">Bangles</h3>
+							<span>Starting from </span><strong class="product-price">$43.00</strong>	
+						</a>
+					</div>
+					<!-- End Column 4 -->
+				</div>
+			</div>
+		</div>
+
+		<!-- End Product Section -->
+
+		<!-- Start Why Choose Us Section -->
+		<div class="why-choose-section">
+			<div class="container">
+				<div class="row justify-content-between">
+					<div class="col-lg-6">
+						<h2 class="section-title">Why Choose Us</h2>
+						<p> Our diamonds are meticulously crafted to perfection, ensuring each piece is a masterpiece.
+							We offer only GIA-certified diamonds, guaranteeing authenticity and exceptional quality.
+						</p>
+
+						<div class="row my-5">
+							<div class="col-6 col-md-6">
+								<div class="feature">
+									<div class="icon">
+										<img src="/public/assets/truck.svg" alt="Image" class="imf-fluid">
+									</div>
+									<h3>Fast &amp; Free Shipping</h3>
+									<p>Delivering elegance swiftly, with no added cost. Your sparkle, right at your doorstep.</p>
+								</div>
+							</div>
+
+							<div class="col-6 col-md-6">
+								<div class="feature">
+									<div class="icon">
+										<img src="/public/assets/bag.svg" alt="Image" class="imf-fluid">
+									</div>
+									<h3>Easy to Shop</h3>
+									<p>Experience luxury at your fingertips—effortless browsing and seamless purchasing.</p>
+								</div>
+							</div>
+
+							<div class="col-6 col-md-6">
+								<div class="feature">
+									<div class="icon">
+										<img src="/public/assets/support.svg" alt="Image" class="imf-fluid">
+									</div>
+									<h3>24/7 Support</h3>
+									<p>Here for you, always. Expert advice and assistance, anytime you need it.</p>
+								</div>
+							</div>
+
+							<div class="col-6 col-md-6">
+								<div class="feature">
+									<div class="icon">
+										<img src="/public/assets/return.svg" alt="Image" class="imf-fluid">
+									</div>
+									<h3>Hassle Free Returns</h3>
+									<p>Shop with confidence. Simple returns for a worry-free shopping experience.</p>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<div class="col-lg-5">
+						<div class="img-wrap">
+							<img src="/public/assets/5-Must-Have-Diamond-Jewellery-Pieces-You-Cant-Ignore.jpg" alt="Image" class="img-fluid">
+							<br>
+							<h3>Five must have Diamond Jewelery pieces that you can't ignore</h3>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<!-- End Why Choose Us Section -->
+
+		<!-- Start We Help Section -->
+		<div class="we-help-section">
+			<div class="container">
+				<div class="row justify-content-between">
+					<div class="col-lg-7 mb-5 mb-lg-0">
+						<!-- <div class="imgs-grid">
+							<div class="grid grid-1"><img src="" alt="Untree.co"></div>
+							<div class="grid grid-2"><img src="images/img-grid-2.jpg" alt="Untree.co"></div>
+							<div class="grid grid-3"><img src="images/img-grid-3.jpg" alt="Untree.co"></div>
+						</div> -->
+						<div class="video-container">
+							<video controls autoplay muted loop width="100%">
+								<source src="/public/assets/video.mp4" type="video/mp4">
+								Your browser does not support the video tag.
+							</video>
+						</div>
+					</div>
+					<div class="col-lg-5 ps-lg-5">
+						<h2 class="section-title mb-4">We Help You Create the Perfect Wedding Jewelery</h2>
+						<p>At LuxGems, we understand that your wedding day is one of the most important moments of your life. 
+							That’s why we offer personalized jewelry customization to ensure every piece reflects your unique love story.
+							 Whether you envision a classic design or something modern and distinctive, 
+							our expert artisans work closely with you to bring your dream wedding jewelry to life.</p>
+
+						<ul class="list-unstyled custom-list my-4">
+							<li>Personal Consultation</li>
+							<li>Custom Design</li>
+							<li>Expert Craftsmanship </li>
+							<li>Unique Experinece</li>
+						</ul>
+						<p><a herf="#" class="btn">Explore</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- End We Help Section -->
+
+		<!-- Start Popular Product -->
+		<div class="popular-product">
+			<div class="container">
+				<div class="row">
+
+					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+						<div class="product-item-sm d-flex">
+							<div class="thumbnail">
+								<img src="/public/assets/birthStone.jpeg" alt="Image" class="img-fluid">
+							</div>
+							<div class="pt-3">
+								<h3>Birth Stone</h3>
+								<p>Celebrate your unique journey with a birthstone that resonates with your soul. </p>
+								<p><a href="#">View</a></p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+						<div class="product-item-sm d-flex">
+							<div class="thumbnail">
+								<img src="/public/assets/earring.jpg" alt="Image" class="img-fluid">
+							</div>
+							<div class="pt-3">
+								<h3>Earrings</h3>
+								<p>Frame your face with timeless beauty—explore our exquisite earring collection.</p>
+								<p><a href="#">View</a></p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
+						<div class="product-item-sm d-flex">
+							<div class="thumbnail">
+								<img src="/public/assets/cring1.webp" alt="Image" class="img-fluid">
+							</div>
+							<div class="pt-3">
+								<h3>Couple Rings</h3>
+								<p>Two hearts, one ring—celebrate your love with our exquisite couple rings.</p>
+								<p><a href="#">View</a></p>
+							</div>
+						</div>
+					</div>
+					
+
+				</div>
+			</div>
+		</div>
+		<!-- End Popular Product -->
+
+		<!-- Start Testimonial Slider -->
+		<div class="testimonial-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-7 mx-auto text-center">
+						<h2 class="section-title">Testimonials</h2>
+					</div>
+				</div>
+
+				<div class="row justify-content-center">
+					<div class="col-lg-12">
+						<div class="testimonial-slider-wrap text-center">
+
+							<div id="testimonial-nav">
+								<span class="prev" data-controls="prev"><span class="fa fa-chevron-left"></span></span>
+								<span class="next" data-controls="next"><span class="fa fa-chevron-right"></span></span>
+							</div>
+
+							<div class="testimonial-slider">
+
+								<div class="item">
+									<div class="row justify-content-center">
+										<div class="col-lg-8 mx-auto">
+
+											<div class="testimonial-block text-center">
+												<blockquote class="mb-5">
+													<p>&ldquo;From the moment I laid eyes on my LuxGems wedding jewelry, I knew it was the perfect choice for our special day.
+														 The exquisite craftsmanship and dazzling beauty of each piece left me speechless.
+														  LuxGems made my dream wedding a reality, and I felt like a true queen walking down the aisle.
+														   Thank you for creating memories that will shine forever.&rdquo;</p>
+												</blockquote>
+
+												<div class="author-info">
+													<div class="author-pic">
+														<img src="/public/assets/annehathaway.jpg" alt="Maria Jones"
+															class="img-fluid">
+													</div>
+													<h3 class="font-weight-bold">Samantha Greene</h3>
+													<span class="position d-block mb-3">Marketing Director, BrightWave Media</span>
+												</div>
+											</div>
+
+										</div>
+									</div>
+								</div>
+								<!-- END item -->
+
+							 <div class="item">
+									<div class="row justify-content-center">
+										<div class="col-lg-8 mx-auto">
+
+											<div class="testimonial-block text-center">
+												<blockquote class="mb-5">
+													<p>&ldquo; Choosing LuxGems for our engagement was one of the best decisions we made. T
+														he ring was absolutely stunning, and the attention to detail was unmatched. From the first consultation to the final delivery, 
+														their team was incredibly supportive, ensuring everything was perfect.
+														 LuxGems made our engagement unforgettable, and I can't wait to return for our wedding bands.&rdquo;</p>
+												</blockquote>
+
+												<div class="author-info">
+													<div class="author-pic">
+														<img src="/public/assets/test2.jpg" alt="Maria Jones"
+															class="img-fluid">
+													</div>
+													<h3 class="font-weight-bold">Jessica WilliamS</h3>
+													<span class="position d-block mb-3">Marketing Director, Creative Solutions</span>
+												</div>
+											</div>
+
+										</div>
+									</div>
+								</div>
+								<!-- END item -->
+
+								<div class="item">
+									<div class="row justify-content-center">
+										<div class="col-lg-8 mx-auto">
+
+											<div class="testimonial-block text-center">
+												<blockquote class="mb-5">
+													<p>&ldquo;LuxGems turned our anniversary into a truly magical experience. 
+														I wanted something special to mark the occasion, and their team helped me design a custom piece that left my wife speechless.
+														 The craftsmanship and quality exceeded all expectations. LuxGems has earned our trust, and we'll definitely be back for more&rdquo;</p>
+												</blockquote>
+
+												<div class="author-info">
+													<div class="author-pic">
+														<img src="/public/assets/test3.jpeg" alt="Maria Jones"
+															class="img-fluid">
+													</div>
+													<h3 class="font-weight-bold">Michael Anderson</h3>
+													<span class="position d-block mb-3">Senior Engineer, Tech Innovations</span>
+												</div>
+											</div>
+
+										</div>
+									</div>
+								</div>
+								<!-- END item -->
+
+						 </div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- End Testimonial Slider -->
+
+				
+		<script src="js/bootstrap.bundle.min.js"></script>
+		<script src="js/tiny-slider.js"></script>
+		<script src="js/custom.js"></script>
+
+		<%-include('footerHome')  %>
+</body>
+
+</html>

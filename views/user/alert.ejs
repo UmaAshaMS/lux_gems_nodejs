@@ -1,0 +1,19 @@
+<% if(alertMessage.length> 0) { %>
+
+
+
+
+    <div class="alert alert-info" role="alert">
+        <h2>
+            <%= alertMessage %>
+        </h2>
+    </div>
+
+    <% } %>
+
+        <script>
+            const alertDuration = 5000;
+            setTimeout(() => {
+                document.getElementsByClassName('alert')[0].style.display = 'none'
+            }, alertDuration)
+        </script>

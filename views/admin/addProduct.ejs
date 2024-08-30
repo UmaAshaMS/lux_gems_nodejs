@@ -1,0 +1,551 @@
+<body>
+    <style>
+        .Container {
+            display: flex;
+            flex: 1;
+            flex-direction: row;
+            border-radius: 10px;
+        }
+
+        .Form-container {
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+            margin-left: 0px;
+            padding: 20px;
+            background-color: #eaeaea;
+            box-sizing: border-box;
+            /* Arrange children side by side */
+            /* Space between sidebar and table */
+        }
+
+
+
+        .SideBar .btn {
+            display: block;
+            /* Make buttons stack vertically */
+            width: 150px;
+            margin-bottom: 10px;
+            /* Space between buttons */
+            text-align: center;
+        }
+
+
+
+        .SideBar {
+            width: 250px;
+            margin: 20px;
+            background-color: #caaf7a;
+            color: white;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+
+        }
+
+        .SideBar a {
+            text-decoration: none;
+            color: inherit
+        }
+
+        .Customer-Page {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100px;
+        }
+
+        .searchProducts {
+            display: flex;
+            flex-direction: row;
+            border: 1px;
+            border-radius: 4px;
+            gap: 10px;
+            width: 800px;
+            margin-top: 2%;
+
+        }
+
+        .Search form {
+            display: flex;
+        }
+
+        .form-control {
+            width: 500px;
+            margin-left: 90px;
+        }
+
+        .searchBtn {
+            flex: 2;
+            width: 10px;
+            color: white;
+            border: 2px;
+            flex-shrink: 0;
+            /* Prevent the button from shrinking */
+        }
+
+        .italianno-regular {
+            font-family: "Italianno", cursive;
+            font-weight: 600;
+            font-style: normal;
+            font-size: 50px;
+            color: #caaf7a
+        }
+
+        .AddProduct {
+            background-color: #caaf7a;
+            color: black;
+            font-weight: 700;
+            width: 200px;
+            align-items: end;
+            align-self: flex-end;
+            margin-right: 0%;
+            transition: background-color 0.3s ease;
+            margin-top: 0%;
+            margin-right: 0%;
+            justify-content: center;
+        }
+
+        .AddProduct a {
+            text-decoration: none;
+            color: black
+        }
+
+        .AddProduct:hover,
+        .AddProduct:focus,
+        .AddProduct:active {
+            background-color: #b49569;
+            /* Slightly darker shade on interaction */
+            color: black;
+            /* Keep the text color black */
+            outline: none;
+            /* Remove outline */
+            box-shadow: none;
+            /* Remove any shadow applied by Bootstrap */
+        }
+
+        .Form-Container {
+            margin-top: 20px;
+            padding: 20px;
+            margin-left: 250px;
+            background-color: #f8f9fa;
+            justify-content: center;
+            /* Center the form horizontally */
+
+            /* Light background color for the form */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            width: 600px;
+            /* Width of the form */
+        }
+
+
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        #productDescription {
+            width: 100%;
+            height: fit-content;
+            resize: none;
+        }
+
+        .form-group .btn {
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group input {
+            width: 65%;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+        }
+
+        .action-buttons .btn {
+            margin-right: 10px;
+        }
+
+        .chooseBtn {
+            width: 250px;
+            justify-self: center;
+            align-items: center;
+
+        }
+
+        .FormButtons {
+            justify-content: center;
+            text-align: center;
+        }
+
+
+
+        .FormButtons a {
+            text-decoration: none;
+            color: white
+        }
+
+        #imagePreview {
+            min-height: 100px;
+
+            /* max-width: 100px; */
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            width: 100px;
+            /* Set the width of each image container */
+            height: 100px;
+            /* Set the height of each image container */
+        }
+
+        .preview-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensures the image covers the entire container without distortion */
+            border-radius: 5px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 18px;
+        }
+
+        .preview-thumbnail {
+            cursor: pointer;
+            /* This will change the cursor to a hand when hovering over the image */
+        }
+
+        #cropModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            width: 80%;
+            height: 80%;
+        }
+
+        #cropImage {
+            min-height: auto;
+        }
+    </style>
+
+    <nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Products<span>.</span></a>
+            <div class="collapse navbar-collapse  d-flex flex-grow-1 justify-content-between align-items-center"
+                id="navbars">
+                <div class='Search'>
+                    <div class="searchProducts">
+                        <form method="GET" action="/admin/Products" class="mb-4">
+                            <input type="text" name="searchQuery" placeholder="Search Products" class="form-control"
+                                value="<%= searchQuery %>">
+                            <button type="submit" class="btn btn-white mt-2 searchBtn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+                <!-- Button to Open Add Product Form -->
+                <form method="GET" action="/admin/addProduct">
+                    <button type="submit" class="btn AddProduct" style="margin-right: 0%;">Add Product
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="Container">
+        <div class='SideBar'>
+            <button class="btn btn-dark"> <a href="/admin/home">Dashboard</a></button>
+            <button class="btn btn-dark"> <a href="/admin/Category">Category</a></button>
+            <button class="btn btn-dark"><a href="/admin/Products">Products</a></button>
+            <button class="btn btn-dark"><a href="/admin/Customers">Customers</a></button>
+            <button class="btn btn-dark">Order</button>
+            <button class="btn btn-dark">Coupons</button>
+            <button class="btn btn-dark">Banner</button>
+            <form action="/admin/logout" method="POST">
+                <button type="submit" class="btn btn-dark">Logout</button>
+            </form>
+        </div>
+        <!-- Form to add Products -->
+        <div class="Form-Container">
+            <form action="/admin/addProduct" method="POST" id="addProductForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="productName">Product Name : </label>
+                    <input type="text" id="productName" name="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="Category">Product Cataegory : </label>
+                    <select id="productCategory" name="productCategory" required>
+                        <option value="" disabled selected>Select Category</option>
+                        <% category.forEach(category=> { %>
+                            <option value="<%= category.name %>">
+                                <%= category.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">Product Price : </label>
+                    <input type="text" id="productPrice" name="productPrice" class="validate-add-product" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stock">Stock : </label>
+                    <input type="Number" id="stock" name="stock" class="validate-add-product" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDiscuont">Product Discount in % :</label>
+                    <input type="text" id="productDiscount" name="productDiscount" class="validate-add-product"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Product Description :</label>
+                    <textarea id="productDescription" name="productDescription" class="validate-add-product"
+                        required></textarea>
+                </div>
+                <!-- Choose Images Button -->
+                <div class="form-group">
+                    <button class="btn btn-dark chooseBtn" type="button" onclick="triggerFileInput()">Choose
+                        Images</button>
+                    <input type="file" id="productImage" name="productImage" accept="image/*" multiple
+                        style="display: none" onchange="previewImages(event)">
+                    <div class="container mt-4">
+                        <div id="imagePreview" class="row">
+                            <!-- Image previews will be appended here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="FormButtons">
+                    <button class="btn  btn-dark chooseBtn" type="submit" form="addProductForm">Add Product</button>
+                    <button class="btn btn-secondary"><a href="/admin/Products">Cancel</a></button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+    <!-- Modal for cropping -->
+
+    <div class="cropper-main">
+        <div id="cropModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeCropModal()">&times;</span>
+                <h2>Crop Image</h2>
+                <div>
+                    <img id="cropImage" src="" alt="Crop preview">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="cropImage()">Crop</button>
+                    <button onclick="closeCropModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%-include('footer.ejs')%>
+
+
+        <script>
+
+            const addProductForm = document.getElementById('addProductForm');
+            const productName = document.getElementById('productName');
+            const price = document.getElementById('productPrice');
+            const category = document.getElementById('productCategory');
+            const stock = document.getElementById('stock');
+            const description = document.getElementById('productDescription');
+            const discount = document.getElementById('productDiscount');
+            const productImage = document.getElementById('productImage');
+
+            addProductForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                let validate = true;
+                let errorMessage = "";
+
+                // Validation logic
+                if (productName.value.trim() === '' || productName.value.length > 150 || !isNaN(productName.value)) {
+                    errorMessage = 'Product name must be a string.';
+                    validate = false;
+                }
+                if (price.value > 1000000 || isNaN(price.value) || price.value <= 0) {
+                    errorMessage = 'Price must be a number and greater than 0.';
+                    validate = false;
+                }
+                if (!category.value) {
+                    errorMessage = 'Select a category';
+                    validate = false;
+                }
+                if (stock.value > 100000 || isNaN(stock.value) || stock.value <= 0) {
+                    errorMessage = 'Stock must be a number and greater than 0';
+                    validate = false;
+                }
+
+                if (description.value.trim() === '' || description.value.length > 500 || !isNaN(description.value) || description.value.length < 5) {
+                    errorMessage = 'Description cannot be empty and must be at least 6 characters';
+                    validate = false;
+                }
+
+                if (discount.value > 100000 || isNaN(discount.value) || discount.value <= 0) {
+                    errorMessage = 'Discount must be a number and greater than 0';
+                    validate = false;
+                }
+
+                if (validate) {
+                    addProductForm.submit();
+                }
+                else {
+                    console.log('Error in form validation')
+                    Swal.fire({
+                        title: "Invalid Inputs",
+                        text: errorMessage,
+                        icon: "error"
+                    });
+                }
+            });
+
+            let cropper;
+            let currentImageElement;
+
+            // Function to trigger the file input dialog
+            function triggerFileInput() {
+                document.getElementById('productImage').click();
+            }
+
+            function previewImages(event) {
+                const files = event.target.files;
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = "";
+                if (files.length > 4) {
+                    Swal.fire({
+                        title: "You can upload a maximum of 4 images!",
+                        text: "Maximum 4 Images!",
+                        icon: "error",
+                        timer: 12000
+                    });
+                    return;
+                }
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.classList.add('image-container');
+                        const img = document.createElement('img');
+                        img.classList.add('preview-thumbnail');
+                        img.src = event.target.result;
+                        imgContainer.appendChild(img);
+                        const removeBtn = document.createElement('button');
+                        removeBtn.classList.add('remove-image');
+                        removeBtn.innerHTML = '&times;';
+
+                        removeBtn.onclick = function () {
+                            imgContainer.remove();
+                            updateFileInput();
+                        };
+                        imgContainer.appendChild(removeBtn);
+                        img.onclick = function () {
+                            openCropModal(img);
+                        };
+                        preview.appendChild(imgContainer);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function openCropModal(imgElement) {
+                const cropModal = document.getElementById('cropModal');
+                const cropImage = document.getElementById('cropImage');
+                cropImage.src = imgElement.src;
+                currentImageElement = imgElement;
+                cropModal.style.display = 'block';
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 2
+                });
+            }
+            function closeCropModal() {
+                const cropModal = document.getElementById('cropModal');
+                cropModal.style.display = 'none';
+                if (cropper) {
+                    cropper.destroy();
+                }
+            }
+
+            function cropImage() {
+                const croppedCanvas = cropper.getCroppedCanvas();
+                currentImageElement.src = croppedCanvas.toDataURL();
+                closeCropModal();
+                updateFileInput();
+            }
+          
+            function updateFileInput() {
+                const preview = document.getElementById('imagePreview');
+                const images = preview.getElementsByClassName('preview-thumbnail');
+                const dataTransfer = new DataTransfer();
+                for (let i = 0; i < images.length; i++) {
+                    const dataURL = images[i].src;
+                    const file = dataURLtoFile(dataURL, 'image' + i + '.png');
+                    dataTransfer.items.add(file);
+                }
+                productImage.files = dataTransfer.files;
+            }
+
+            function dataURLtoFile(dataurl, filename) {
+                const arr = dataurl.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new File([u8arr], filename, { type: mime });
+            }
+
+            document.querySelector('.btn-dark.chooseBtn').addEventListener('click', function () {
+                console.log('Button clicked!');
+            });
+
+        </script>
+
+</body>

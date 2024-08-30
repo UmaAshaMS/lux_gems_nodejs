@@ -1,0 +1,200 @@
+<%-include('navbar.ejs' , { user: user })%>
+
+    <style>
+        .product-details {
+            padding: 20px;
+        }
+
+        .main-image {
+            /* width: 100%; */
+            /* Ensures the image is responsive */
+            max-width: 400px;
+            /* Sets a maximum width */
+            height: 400px;
+            /* Maintains aspect ratio */
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+
+        .thumbnail-images {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .thumbnail-images img {
+            width: 100px;
+            /* Set a fixed width for all thumbnails */
+            height: 100px;
+            /* Set a fixed height for all thumbnails */
+            object-fit: cover;
+            /* Ensure the image fills the dimensions while maintaining its aspect ratio */
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .product-info {
+            margin-top: 10px;
+            /* Remove margin to bring closer to image */
+            padding-right: 80px;
+            /* Adjust padding to control spacing */
+        }
+
+        .recommendations {
+            margin-top: 40px;
+        }
+
+        .recommendations .product-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .recommendations .product-item img {
+            width: 150px;
+            /* Set a fixed width for the recommended product images */
+            height: 150px;
+            /* Set a fixed height for the recommended product images */
+            object-fit: cover;
+            /* Ensure the image fills the dimensions while maintaining its aspect ratio */
+            border-radius: 5px;
+        }
+
+        /* Style for static 5-star rating */
+        .static-rating {
+            display: inline-block;
+        }
+
+        /* Style for stars */
+        .star {
+            font-size: 2rem;
+            /* Adjust size as needed */
+            color: #ccc;
+            /* Default color for unfilled stars */
+        }
+
+        /* Color for filled stars */
+        .star.filled {
+            color: gold;
+            /* Color for filled stars */
+        }
+    </style>
+
+    <body>
+        <div class="container product-details">
+            <!-- Main Product Image and Thumbnails -->
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="Main-Image-Box">
+                        <img src="/<%= product.productImage[0]%>" alt="<%= product.productName %>" class="main-image"
+                            id="mainImage" style="align-items: center;">
+                    </div>
+
+                    <!-- <div class="thumbnail-images d-flex gap-2 mt-4"">
+                        <% product.productImage.forEach((image)=> { %>
+                            <img src=" ../../<%=image %>" alt="Thumbnail"
+                        onclick="changeImage('<%= image.replace(/\\/g, '\\\\' ) %>')">
+                            <% }) %>
+                    </div> -->
+
+                </div>
+                <div class="col-lg-4 product-info">
+                    <h1>
+                        <%= product.productName %>
+                    </h1>
+                    <p>
+                        <%= product.productDescription %>
+                    </p>
+                    <p><strong>Price : </strong> <i class="fas fa-rupee-sign"></i>
+                        <%= product.productPrice %>
+                    </p>
+                    <% if (product.productDiscount) { %>
+                        <p><strong>Discount : </strong>
+                            <%= product.productDiscount %>% OFF
+                        </p>
+                        <% } %>
+                            <% if (product.stock) { %>
+                                <p>
+                                    <strong>Quantity : </strong>
+                                    <%= product.stock %>
+                                </p>
+                                <% } %>
+                                    <div class="static-rating">
+                                        <span class="star filled">&#9733;</span>
+                                        <span class="star filled">&#9733;</span>
+                                        <span class="star filled">&#9733;</span>
+                                        <span class="star filled">&#9733;</span>
+                                        <span class="star">&#9733;</span>
+                                    </div>
+                                    <br>
+                                    <button class="btn btn-warning">Add to Cart</button>
+                                    <button class="btn btn-dark">Add to Wishlist</button>
+                </div>
+            </div>
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h2>Related Products</h2>
+                <div class="row">
+                    <% recommendations.forEach((rec)=> { %>
+                        <div class="col-md-3">
+                            <div class="product-item">
+                                <a href="/user/productDetails/<%= rec._id %>">
+                                    <img src="/<%= rec.productImage[0] %>" alt="<%= rec.productName %>">
+                                    <h4>
+                                        <%= rec.name %>
+                                    </h4>
+
+                                </a>
+                                <p><strong>
+                                        <%= rec.productName %>
+                                    </strong></p>
+                                <p><strong>Price:</strong> <i class="fas fa-rupee-sign"></i>
+                                    <%= rec.productPrice %>
+                                </p>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Ensure the script runs after the DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', function () {
+                function changeImage(imageSrc) {
+                    // Log the imageSrc to check if it's correct
+                    console.log("Changing image to:", imageSrc);
+                    var mainImage = document.getElementById('mainImage');
+                    if (mainImage) {
+                        mainImage.src = '/' + imageSrc;
+                    } else {
+                        console.error('Main image not found!');
+                    }
+                }
+
+                // Attach changeImage function to global scope if needed
+                window.changeImage = changeImage;
+
+
+                const imageContainer = document.querySelector('.Main-Image-Box'); // Select the container element
+                const productImg = imageContainer.querySelector('.main-image'); // Select the image within the container
+
+                imageContainer.addEventListener("mousemove", (e) => {
+                    const rect = imageContainer.getBoundingClientRect(); // Get container's bounding rectangle
+                    const x = (e.clientX - rect.left) / rect.width; // Calculate relative X position
+                    const y = (e.clientY - rect.top) / rect.height; // Calculate relative Y position
+
+                    productImg.style.transformOrigin = `${x * 100}% ${y * 100}%`; // Set transform origin based on mouse position
+                    productImg.style.transform = "scale(1.5)"; // Apply zoom effect (adjust scale as needed)
+                });
+
+                imageContainer.addEventListener("mouseleave", () => {
+                    productImg.style.transformOrigin = "center"; // Reset transform origin to center
+                    productImg.style.transform = "scale(1)"; // Reset zoom to normal
+                });
+            });
+        </script>
+    </body>
