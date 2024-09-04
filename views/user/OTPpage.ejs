@@ -69,19 +69,19 @@
 
                                     <!-- Timer Display -->
                                     Your OTP expires in <span id="time-display">00:00</span> seconds
-                                    
+
                                     <!-- Separate form for resend OTP -->
-                                    
-                                    <form id="resend-otp-form" action="/user/resendOTP" method="POST"
+
+                                    <form id="resend-otp-form" action="/user/resendOTPsignUp" method="POST"
                                         style="display: inline;">
                                         <input type="hidden" name="email" value="<%= email %>">
                                         <p class="mb-5 pb-lg-2" style="color: #393f81;">
                                             Didn't Get OTP ?
-                                        <button type="submit"
-                                            style="color: #393f81; background: none; border: none; cursor: pointer; text-decoration: underline;">
-                                            RESEND OTP
-                                        </button>
-                                        | Back To Login ? <a href="/user/login" style="color: #393f81;">Login</a>
+                                            <button type="submit"
+                                                style="color: #393f81; background: none; border: none; cursor: pointer; text-decoration: underline;">
+                                                RESEND OTP
+                                            </button>
+                                            | Back To Login ? <a href="/user/login" style="color: #393f81;">Login</a>
                                     </form>
                                     </p>
 
@@ -102,7 +102,13 @@
 </body>
 
 <script>
-    const otpExpires = `<%= otpTime %> + (5 * 60 * 1000)`; // OTP expiry time in milliseconds
+
+    // var otpTime = <%= otpTime %>;
+    // console.log('OTP Time from Server:', otpTime); // For debugging
+    // Convert to milliseconds
+    otpTime = Date.now();
+    const otpExpires = otpTime + (2 * 60 * 1000);
+
 
     const updateTimer = () => {
         const now = Date.now();

@@ -1,0 +1,13 @@
+<div class=" Nav-Bottom">
+    <ul>
+        <% category.forEach((cat)=> { %>
+            <li><a href="/user/productCategory/<%= cat._id %>">
+                    <%= cat.name %>
+                </a></li>
+            <% }) %>
+                <li><a href="404">Rings</a></li>
+                <li><a href="404">Weddings</a></li>
+                <li><a href="404">Giftings</a></li>
+                <li><a href="404">Birth Stones</a></li>
+    </ul>
+</div>

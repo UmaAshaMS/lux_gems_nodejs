@@ -129,20 +129,19 @@ const SignUpPost = async (req, res) => {
         // Hash the password
         const hashedPassword = await bcrypt.hash(password1, 10);
 
-        const userData = {
+        const userData = new userSchema({
             name,
             phoneNumber,
             email,
-            password: hashedPassword
-        };
+            password: hashedPassword,
+            isVerified : false,
+        });
 
-        // Create a new user
-        await userSchema.create(userData);
-        console.log('New User created.');
+        await userData.save();
 
         // Generate and send OTP
         const otp = generateOTP();
-        await sendOTP(email, otp); // Ensure sendOTP is an async function if it involves I/O
+        await sendOTP(email, otp); 
 
         req.flash('success', `OTP sent to ${email}`);
         console.log('OTP sent to the user email.');
@@ -151,11 +150,16 @@ const SignUpPost = async (req, res) => {
         req.session.otp = otp;
         req.session.otpTime = Date.now();
         req.session.email = email;
-        req.session.name = name;
-        req.session.phoneNumber = phoneNumber;
+        
 
-        // Redirect to OTP verification page
-        res.redirect('/user/OTPpage');
+
+        // Render the OTP verification page
+        res.render('user/OTPpage', {
+            title: 'OTP Page',
+            email: req.session.email,
+            otpTime: req.session.otpTime,
+        })
+        
     } catch (err) {
         console.error(`Error submitting data during Sign-Up: ${err}`);
         req.flash('error', 'An error occurred during sign-up. Please try again.');
@@ -163,60 +167,50 @@ const SignUpPost = async (req, res) => {
     }
 };
 
-const otpPage = (req, res) => {
-    try {
-
-        res.render('user/OTPpage', {
-            title: 'OTP Page',
-            email: req.session.email,
-            otpTime: req.session.otpTime,
-            user: req.session.user
-        })
-    }
-    catch (err) {
-        console.log(`Error in rendering OTP Page: ${err}`)
-    }
-}
 
 const otpPagePost = async (req, res) => {
     // console.log('Reached otppagePost')
-    console.log(req.session)
+    console.log('Session data in OTP page : ',req.session)
+    const {otp} = req.body
     try {
-        // console.log('Reached otppagePost try')
-        if (req.session.otp !== undefined) {
-            console.log(req.session.otp)
-            const userData = {
-                name: req.session.name,
-                email: req.session.email,
-                password: req.session.password,
-                phoneNumber: req.session.phoneNumber
-            }
-            const userOtp = req.body.otp.trim();
-            const sessionOtp = req.session.otp.trim();
-            if (userOtp === sessionOtp) {
+        console.log('Reached otppagePost try')
+        if (req.session.otp === otp && Date.now() - req.session.otpTime < 30000) {
+            console.log(req.session.otpTime, req.session.otp)
 
-                // console.log('User entered OTP:', userOtp);
-                // console.log('Session stored OTP:', sessionOtp);
-                console.log('OTP matched')
+            const user = await userSchema.findOne({email : req.session.email})
+            if(user){
+                user.isVerified = true;
+                await user.save();
+                console.log(user)
+            
+                //Set user data
+                req.session.user = user
 
-                await userSchema
-                    .insertMany(userData)
-                    .then(() => {
-                        console.log(`New user registered successfully`)
-                        req.flash('success', 'user signup successfull')
-                        res.redirect('/user/login')
-                    })
-                    .catch(err => {
-                        console.log(`error while user signup ${err}`)
-                    })
-            } else {
-                req.flash('error', 'Invaild OTP , Try Again')
-                console.log('Error in OTP')
-                res.redirect('/user/OTPpage')
+                //Clear OTP from the session
+                req.session.otp = null;
+                req.session.otpTime = null;
+            
+                req.flash('sucess', 'Welcome!...New user verification successful');
+                console.log('New user verification successful');
+                res.redirect('/user/home');
+                }
+            else{
+                console.log('User not found')
+                req.flash('User Not found')
+                res.redirect('/user/Sign-Up');
+
             }
         }
+        else{
+            req.flash('error', 'Invaild OTP , Try Again')
+            console.log('Error in OTP')
+            res.redirect('/user/Sign-Up')
+        }    
+            
     } catch (error) {
         console.log(`error while verifying otp${error}`)
+        req.flash('error', 'Error in OTP verification')
+        res.redirect('/user/Sign-Up')
     }
 };
 
@@ -299,7 +293,6 @@ module.exports = {
     loginPost,
     SignUp,
     SignUpPost,
-    otpPage,
     otpPagePost,
     resendOTPSignUp,
     googleAuth,

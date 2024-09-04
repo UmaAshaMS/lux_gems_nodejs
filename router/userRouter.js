@@ -15,7 +15,6 @@ user.get('/user/login', checkUserLogin,userLoginControl.login)
 user.post('/user/login', checkUserLogin,userLoginControl.loginPost)
 user.get('/user/Sign-Up', checkUserLogin,userLoginControl.SignUp)
 user.post('/user/Sign-Up', checkUserLogin,userLoginControl.SignUpPost)
-user.get('/user/OTPpage', checkUserLogin, userLoginControl.otpPage)
 user.post('/user/OTPpage', checkUserLogin, userLoginControl.otpPagePost)
 //resend otp in sign-up
 user.post('/user/resendOTPsignUp', checkUserLogin, userLoginControl.resendOTPSignUp)
@@ -36,6 +35,9 @@ user.post('/user/resendOTPforgotPassword',checkUserLogin, forgotPassword.resendO
 
 
 user.get('/user/home', checkUserLogin, userHomeControl.home)
+//User Profile
+user.get('/user/profile', checkUserLogin , userHomeControl.profile)
+user.get('/user/address', checkUserLogin, userHomeControl.address)
 
 //All Products 
 user.get('/user/AllProducts',checkUserLogin, userProductControl.AllproductsRender)

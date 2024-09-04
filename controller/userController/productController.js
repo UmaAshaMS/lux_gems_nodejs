@@ -67,7 +67,7 @@ const productCategory = async(req,res) => {
         return res.status(404).send('Category not found');
     }
 
-    const products = await productSchema.find({ productCategory: categorySam.name });
+    const products = await productSchema.find({ productCategory: category._id });
     const user = req.session.user || null;
 
     

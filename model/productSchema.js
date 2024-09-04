@@ -20,7 +20,8 @@ const schema = new mongoose.Schema({
         type:Number,
     },
     productCategory: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'category'
        
     },
     productImage: {

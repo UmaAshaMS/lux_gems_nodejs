@@ -1,152 +1,45 @@
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="Untree.co">
-    <link rel="shortcut icon" href="favicon.png">
-
-    <meta name="description" content="" />
-    <meta name="keywords" content="bootstrap, bootstrap4" />
-
-    <!-- Bootstrap CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="css/tiny-slider.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../public/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-
-
-</head>
+<%-include('./layout/header')%>
+<%- include('./layout/navbar')%>
+<%-include('./layout/category_navbar') %>
 
 <body>
-    <style>
-        .ProductContainer {
-            padding: 20px;
-        }
+    <div class="ProductContainer">
+        <div class="container">
+            <div class="product-row">
 
-        .product-item {
-            flex: 1 1 calc(100% - 15px);
-            /* 4 items in a row with space  and takes full width*/
-            max-width: calc(100% - 15px);
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: center;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
+                <% product.forEach((prod)=> {%>
+                    <div class="product-item">
+                        <!-- Discount Badge -->
+                        <% if (!prod.stock) { %>
+                            <div class="stock-badge">
+                                Out Of Stock
+                            </div>
+                            <% } %>
 
-        .product-thumbnail {
-            max-width: 250px;
-            height: 200px; /* Set a fixed height for all images */
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .product-title {
-            font-size: 1.2rem;
-            margin: 10px 0;
-        }
-
-        .product-price {
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .discount-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #ff4d4d;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            z-index: 2;
-        }
-
-        .stock-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #726e6e;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            z-index: 10;
-        }
-
-        @media (min-width: 576px) {
-            .product-item {
-                flex: 1 1 calc(50% - 15px);
-                max-width: calc(50% - 15px);
-            }
-        }
-
-        @media (min-width: 768px) {
-            .product-item {
-                flex: 1 1 calc(33.33% - 15px);
-                max-width: calc(33.33% - 15px);
-            }
-        }
-
-        @media (min-width: 992px) {
-            .product-item {
-                flex: 1 1 calc(25% - 15px);
-                max-width: calc(25% - 15px);
-            }
-        }
-
-        .product-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            /* Space between items */
-        }
-    </style>
-    <%-include('navbar.ejs' , { user: user })%>
-
-        <div class="ProductContainer">
-            <div class="container">
-                <div class="product-row">
-
-                    <% product.forEach((prod)=> {%>
-                        <div class="product-item">
-                            <!-- Discount Badge -->
-                            <% if (!prod.stock) { %>
-                                <div class="stock-badge">
-                                    Out Of Stock
-                                </div>
-                                <% } %>
-
-                            <% if (prod.productDiscount) { %>
-                                <div class="discount-badge">
-                                    <%= prod.productDiscount %>% OFF
-                                </div>
-                                <% } %>
+                                <% if (prod.productDiscount) { %>
+                                    <div class="discount-badge">
+                                        <%= prod.productDiscount %>% OFF
+                                    </div>
+                                    <% } %>
 
 
-                                    <!-- Clickable Image -->
-                                    <a href="/user/productDetails/<%= prod._id %>">
-                                        <img src="/<%= prod.productImage[0] %>" class="img-fluid product-thumbnail"
-                                            alt="<%= prod.productName %>">
-                                    </a>
-                                    <h3 class="product-title">
-                                        <%= prod.productName %>
-                                    </h3>
-                                    <span></span><strong class="product-price"><i class="fas fa-rupee-sign"></i>
-                                        <%= prod.productPrice %>
-                                    </strong>
+                                        <!-- Clickable Image -->
+                                        <a href="/user/productDetails/<%= prod._id %>">
+                                            <img src="/<%= prod.productImage[0] %>" class="img-fluid product-thumbnail"
+                                                alt="<%= prod.productName %>">
+                                        </a>
+                                        <h3 class="product-title">
+                                            <%= prod.productName %>
+                                        </h3>
+                                        <span></span><strong class="product-price"><i class="fas fa-rupee-sign"></i>
+                                            <%= prod.productPrice %>
+                                        </strong>
 
 
-                                    <h4><i class='fas fa-heart' style="color:red"></i>
-                                        <i class="fas fa-shopping-cart" style="color:black"></i>
-                                    </h4>
-                        </div>
-                        <% })%>
-
-</body>
+                                        <h4><i class='fas fa-heart' style="color:red"></i>
+                                            <i class="fas fa-shopping-cart" style="color:black"></i>
+                                        </h4>
+                    </div>
+                <% })%>
 
 <%-include('footer') %>

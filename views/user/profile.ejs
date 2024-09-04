@@ -1,0 +1,74 @@
+<%-include('./layout/header')%>
+<%-include('./layout/navbar')%>
+<%-include('./layout/category_navbar') %>
+
+<h4>Your Account</h4>
+<div class="userProfileConatiner">
+    
+    <!-- Sidebar -->
+    <div class="userProfile">
+        <form action="/user/Orders" method="GET"><button>Your Orders
+            <p>Track, Return, Cancel and Buy Again</p>
+        </button></form>
+        <form action="/user/editPrfile" method="GET"><button>Login and Security
+            <p>Edit Login, name, mobile number, and Password </p>
+        </button></form>
+        <form action="/user/address" method="GET"><button>Your Address
+            <p>Edit Address and Add multiple Addresses.</p>
+        </button></form>
+        <form action="/user/Wallet" method="GET"><button>Wallet
+            <p>Add money to your balance.</p>
+        </button></form>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-container">
+        <h2>User Information</h2>
+        <form>
+            <div class="form-group full">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" value=<%=user.name%>>
+            </div>
+            <div class="form-group half">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" value=<%= user.phoneNumber %>>
+            </div>
+            <div class="form-group half">
+                <label for="email">Email ID:</label>
+                <input type="email" id="email" name="email" value=<%= user.email%>>
+            </div>
+            <div class="clearfix"></div>
+            <div class="form-group full">
+                <label for="address1">Address Line 1:</label>
+                <input type="text" id="address1" name="address1" required>
+            </div>
+            <div class="form-group full">
+                <label for="address2">Address Line 2:</label>
+                <input type="text" id="address2" name="address2">
+            </div>
+            <div class="form-group half">
+                <label for="pincode">PINCODE:</label>
+                <input type="text" id="pincode" name="pincode" required>
+            </div>
+            <div class="form-group half">
+                <label for="state">State:</label>
+                <select id="state" name="state" required>
+                    <option value="" disabled selected>Select your state</option>
+                    <option value="State1">Kerala</option>
+                    <option value="State2">State2</option>
+                    <option value="State3">State3</option>
+                </select>
+            </div>
+            <div class="clearfix"></div>
+            <div class="form-group full">
+                <label for="country">Country:</label>
+                <select id="country" name="country" required>
+                    <option value="" disabled selected>Select your country</option>
+                    <option value="Country1">India</option>
+                    <option value="Country2">Country2</option>
+                    <option value="Country3">Country3</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>

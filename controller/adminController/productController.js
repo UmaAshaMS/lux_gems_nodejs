@@ -75,7 +75,7 @@ const addProductPost = async (req, res) => {
         // Create a product instance
         const productDetails = new productSchema({
             productName,
-            productCategory,
+            productCategory : category._id,
             productPrice,
             stock,
             productDescription,
@@ -206,17 +206,14 @@ const editProductPost = async (req, res) => {
         // Extract deletedImages from request body
         const deletedImages = JSON.parse(req.body.deletedImages || '[]');
 
-        // Handle image deletion
+        // Handle image deletion from filesystem
         deletedImages.forEach(imagePath => {
-            try {
-                const absolutePath = path.resolve(__dirname, '../../uploads', imagePath); 
-                if (fs.existsSync(absolutePath)) {
-                    fs.unlinkSync(absolutePath); // Delete the image from the filesystem
-                } else {
-                    console.warn(`Image not found: ${absolutePath}`);
-                }
-            } catch (error) {
-                console.error(`Error deleting image: ${imagePath}`, error);
+            const absolutePath = path.resolve(__dirname, '../../uploads', imagePath); 
+            if (fs.existsSync(absolutePath)) {
+                fs.unlinkSync(absolutePath); // Delete the image from the filesystem
+                console.log(`Deleted image: ${absolutePath}`);
+            } else {
+                console.warn(`Image not found: ${absolutePath}`);
             }
         });
 
@@ -249,7 +246,7 @@ const editProductPost = async (req, res) => {
         // Prepare the update data
         const updateData = {
             productName,
-            productCategory,
+            productCategory : category._id,
             productPrice,
             stock,
             productDescription,
@@ -267,11 +264,30 @@ const editProductPost = async (req, res) => {
         req.flash('success', 'Product updated successfully.');
         res.redirect('/admin/Products');
     } catch (err) {
-        console.log(`Error in submitting edit product form: ${err}: ${err.stack}`);
+        console.error(`Error in submitting edit product form: ${err}`);
         req.flash('error', 'An error occurred while updating the product.');
         res.redirect(`/admin/editProduct/${req.params.id}`);
     }
 };
+const deleteImage = (req, res) => {
+    const imageName = decodeURIComponent(req.params.imageName); // Decode image name
+    const absolutePath = path.resolve(__dirname, '../../uploads', imageName);
+
+    if (fs.existsSync(absolutePath)) {
+        fs.unlink(absolutePath, (err) => {
+            if (err) {
+                console.error(`Error deleting image: ${err}`);
+                return res.status(500).json({ success: false });
+            }
+            console.log(`Deleted image: ${absolutePath}`);
+            res.json({ success: true });
+        });
+    } else {
+        console.warn(`Image not found: ${absolutePath}`);
+        res.status(404).json({ success: false });
+    }
+};
+
 module.exports = {
     getproduct,
     addProduct,
@@ -281,4 +297,5 @@ module.exports = {
     blockProduct,
     unblockProduct,
     deleteProduct,
+    deleteImage
 }

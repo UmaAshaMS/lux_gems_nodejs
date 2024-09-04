@@ -314,11 +314,11 @@
                         <% category.forEach(category=> {
                             if (category.name == product.productCategory ) {
                             %>
-                            <option value="<%=category.name%>" selected="selected">
+                            <option value="<%=category._id%>" selected="selected">
                                 <%= category.name %>
                             </option>
                             <% } else { %>
-                                <option value="<%= category.name %>">
+                                <option value="<%= category._id %>">
                                     <%= category.name %>
                                 </option>
                                 <% } }) %>
@@ -498,9 +498,10 @@ document.addEventListener("DOMContentLoaded", function () {
         currentImageElement.src = croppedCanvas.toDataURL();
         closeCropModal();
     };
-
+    
     // Function to handle image deletion
     window.deleteImage = function (index, imageName) {
+
         if (confirm('Are you sure you want to delete this image?')) {
             // Remove the image element from the DOM
             document.getElementById(`image-${index}`).remove();

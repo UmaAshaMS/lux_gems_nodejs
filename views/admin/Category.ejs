@@ -456,7 +456,9 @@
 
             if (categoryName.value.trim() === 0 || categoryName.value.length > 50 || !isNaN(categoryName.value)) {
                 document.getElementsByClassName('category-validation')[0].innerHTML = 'invalid category'
-            } else {
+            } 
+            
+            else {
                 addCategoryForm.submit()
             }
         })

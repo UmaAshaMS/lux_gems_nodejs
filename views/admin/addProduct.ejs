@@ -316,7 +316,7 @@
                     <select id="productCategory" name="productCategory" required>
                         <option value="" disabled selected>Select Category</option>
                         <% category.forEach(category=> { %>
-                            <option value="<%= category.name %>">
+                            <option value="<%= category._id %>">
                                 <%= category.name %>
                             </option>
                             <% }) %>
@@ -412,7 +412,7 @@
                     errorMessage = 'Select a category';
                     validate = false;
                 }
-                if (stock.value > 100000 || isNaN(stock.value) || stock.value <= 0) {
+                if (stock.value > 100000 || isNaN(stock.value)) {
                     errorMessage = 'Stock must be a number and greater than 0';
                     validate = false;
                 }

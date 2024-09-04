@@ -1,88 +1,7 @@
-<%-include('navbar.ejs' , { user: user })%>
+<%-include('./layout/header')%>
+<%- include('./layout/navbar')%>
+<%-include('./layout/category_navbar') %>
 
-    <style>
-        .product-details {
-            padding: 20px;
-        }
-
-        .main-image {
-            /* width: 100%; */
-            /* Ensures the image is responsive */
-            max-width: 400px;
-            /* Sets a maximum width */
-            height: 400px;
-            /* Maintains aspect ratio */
-            border-radius: 5px;
-            object-fit: cover;
-        }
-
-
-        .thumbnail-images {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .thumbnail-images img {
-            width: 100px;
-            /* Set a fixed width for all thumbnails */
-            height: 100px;
-            /* Set a fixed height for all thumbnails */
-            object-fit: cover;
-            /* Ensure the image fills the dimensions while maintaining its aspect ratio */
-            cursor: pointer;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .product-info {
-            margin-top: 10px;
-            /* Remove margin to bring closer to image */
-            padding-right: 80px;
-            /* Adjust padding to control spacing */
-        }
-
-        .recommendations {
-            margin-top: 40px;
-        }
-
-        .recommendations .product-item {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .recommendations .product-item img {
-            width: 150px;
-            /* Set a fixed width for the recommended product images */
-            height: 150px;
-            /* Set a fixed height for the recommended product images */
-            object-fit: cover;
-            /* Ensure the image fills the dimensions while maintaining its aspect ratio */
-            border-radius: 5px;
-        }
-
-        /* Style for static 5-star rating */
-        .static-rating {
-            display: inline-block;
-        }
-
-        /* Style for stars */
-        .star {
-            font-size: 2rem;
-            /* Adjust size as needed */
-            color: #ccc;
-            /* Default color for unfilled stars */
-        }
-
-        /* Color for filled stars */
-        .star.filled {
-            color: gold;
-            /* Color for filled stars */
-        }
-    </style>
 
     <body>
         <div class="container product-details">
@@ -132,8 +51,10 @@
                                         <span class="star">&#9733;</span>
                                     </div>
                                     <br>
+                                    <div class="Cart_WishlistButton">
                                     <button class="btn btn-warning">Add to Cart</button>
                                     <button class="btn btn-dark">Add to Wishlist</button>
+                                    </div>
                 </div>
             </div>
             <!-- Recommendations -->
