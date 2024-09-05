@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const addressSchema = require('./addressSchema')
+
 const schema = new mongoose.Schema({
     name: {
         type: String,

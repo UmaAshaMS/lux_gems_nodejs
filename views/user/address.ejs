@@ -1,99 +1,179 @@
 <%- include('./layout/header') %>
-<%- include('./layout/navbar') %>
-<%- include('./layout/category_navbar') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
 
-<div class="breadcrumbs mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="/user/profile" style="text-decoration:none">Your Account</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">Your Address</li>
-    </ol>
-</div>
-<h4>Your Addresses</h4>
-<div class="add-address  text-center mb-4">
-    
-    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-        <i class="fas fa-plus-square"></i> Add New Address
-    </button>
-</div>
+            <div class="breadcrumbs mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/user/profile" style="text-decoration:none">Your Account</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Your Address</li>
+                </ol>
+            </div>
+            <h4>Your Addresses</h4>
+            <div class="add-address  text-center mb-4">
 
-<!-- Card for displaying existing address -->
-<div class="card mb-3" style="width: 18rem;">
-    <div class="card-body">
-        <h5 class="card-title">Address</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <div class="d-flex justify-content-between">
-            <a href="#" class="card-link text-primary"><i class="fas fa-edit"></i> Edit</a>
-            <a href="#" class="card-link text-danger"><i class="fas fa-trash-alt"></i> Delete</a>
-            <a href="#" class="card-link text-success"><i class="fas fa-check"></i> Set as Default</a>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for adding new address -->
-<div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog" aria-labelledby="addAddressModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                    <i class="fas fa-plus-square"></i> Add New Address
                 </button>
             </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label for="fullName">Full Name:</label>
-                        <input type="text" class="form-control" id="fullName" name="fullName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phoneNumber">Phone Number:</label>
-                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email ID:</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="address1">Address Line 1:</label>
-                        <input type="text" class="form-control" id="address1" name="address1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="address2">Address Line 2:</label>
-                        <input type="text" class="form-control" id="address2" name="address2">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="pincode">PINCODE:</label>
-                            <input type="text" class="form-control" id="pincode" name="pincode" required>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="state">State:</label>
-                            <select class="form-control" id="state" name="state" required>
-                                <option value="" disabled selected>Select your state</option>
-                                <option value="State1">Kerala</option>
-                                <option value="State2">Tamil Nadu</option>
-                                <option value="State3">Karnataka</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="country">Country:</label>
-                        <select class="form-control" id="country" name="country" required>
-                            <option value="" disabled selected>Select your country</option>
-                            <option value="Country1">India</option>
-                            <option value="Country2">Pakistan</option>
-                            <option value="Country3">Bangladesh</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>
 
+            
+
+            <!-- Modal for adding new address -->
+            <div class="modal fade" id="addAddressModal" tabindex="-1" role="dialog"
+                aria-labelledby="addAddressModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addAddressForm" onsubmit="return addAddress(event)">
+                                <div class="form-group">
+                                    <label for="fullName">Full Name:</label>
+                                    <input type="text" class="form-control" id="fullName" name="fullName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phoneNumber">Phone Number:</label>
+                                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email ID:</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="addressLine1">Address Line 1:</label>
+                                    <input type="text" class="form-control" id="addressLine1" name="addressLine1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="addressLine2">Address Line 2:</label>
+                                    <input type="text" class="form-control" id="addressLine2" name="addressLine2">
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="city">City:</label>
+                                        <input type="text" class="form-control" id="city" name="city" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="pincode">PINCODE:</label>
+                                        <input type="text" class="form-control" id="pincode" name="pincode" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="form-group col-md-6">
+                                        <label for="state">State:</label>
+                                        <select class="form-control" id="state" name="state" required>
+                                            <option value="" disabled selected>Select your state</option>
+                                            <option value="Kerala">Kerala</option>
+                                            <option value="Tamil Nadu">Tamil Nadu</option>
+                                            <option value="Karnataka">Karnataka</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label for="country">Country:</label>
+                                        <select class="form-control" id="country" name="country" required>
+                                            <option value="" disabled selected>Select your country</option>
+                                            <option value="India"> India</option>
+                                            
+                                        </select>
+                                    </div>
+                                </div>
+
+                            
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" form ="addAddressForm">Save</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- a loop for showing multiple addresess -->
+            <div class="container my-5">
+                <div class="row">
+                    <!-- Loop through each address -->
+                    <% user.address.forEach((address, index) => { %>
+                        <div class="col-md-4 d-flex">
+                            <div class="card address-card flex-fill">
+                                <div class="card-body">
+                                    <h5 class="address-card-title">Address <%= index + 1 %></h5>
+                                    <p class="address-card-text"><strong><%= address.fullName %></strong></p>
+                                    <p class="address-card-text">
+                                        <%= address.phoneNumber %><br>
+                                        <%= address.email %><br>
+                                        <%= address.addressLine1 %>, <%= address.addressLine2 %><br>
+                                        <%= address.city %> - <%= address.pincode %><br>
+                                        <%= address.state %>, <%= address.country %>
+                                    </p>
+                                    <div class="d-flex justify-content-between">
+                                        <a href="#" class="address-card-link text-primary"><i class="fas fa-edit"></i> Edit</a>
+                                        <a href="#" class="address-card-link text-danger"><i class="fas fa-trash-alt"></i> Delete</a>
+                                        <a href="#" class="address-card-link text-success"><i class="fas fa-check"></i> Set as Default</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            
+<script>
+    //Function to add address
+    function addAddress(event){
+        event.preventDefault()
+
+        // Collect data from form
+    const form = document.getElementById('addAddressForm');
+    const formData = new FormData(form);
+    const data = {
+        fullName: formData.get('fullName'),
+        phoneNumber: formData.get('phoneNumber'),
+        email: formData.get('email'),
+        addressLine1: formData.get('addressLine1'),
+        addressLine2: formData.get('addressLine2'),
+        city: formData.get('city'),
+        pincode: formData.get('pincode'),
+        state: formData.get('state'),
+        country: formData.get('country')
+    };
+
+        const URL = `/user/addAddress`;
+        fetch(URL,{
+            method : 'POST',
+            headers : {'Content-Type' : 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if(response.ok){
+                Swal.fire({
+                    title:'Success!',
+                    text: 'Address added successfully.',
+                    icon: 'Success'
+                })
+                console.log("About to reload the page...");
+                location.reload(); // Refresh the page to reflect changes
+            }
+            else{
+                Swal.fire({
+                    title:"Error!",
+                    text : 'Error in adding address.',
+                    icon:'error'
+                })
+            }
+        })
+        .catch(error => {
+            console.log(`Error in adding address ${error}`)
+        })
+    }
+
+</script>

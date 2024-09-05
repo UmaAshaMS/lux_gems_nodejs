@@ -35,9 +35,11 @@ user.post('/user/resendOTPforgotPassword',checkUserLogin, forgotPassword.resendO
 
 
 user.get('/user/home', checkUserLogin, userHomeControl.home)
+
 //User Profile
 user.get('/user/profile', checkUserLogin , userHomeControl.profile)
 user.get('/user/address', checkUserLogin, userHomeControl.address)
+user.post('/user/addAddress', checkUserLogin, userHomeControl.addAddress)
 
 //All Products 
 user.get('/user/AllProducts',checkUserLogin, userProductControl.AllproductsRender)

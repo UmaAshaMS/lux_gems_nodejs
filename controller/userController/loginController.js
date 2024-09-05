@@ -174,7 +174,7 @@ const otpPagePost = async (req, res) => {
     const {otp} = req.body
     try {
         console.log('Reached otppagePost try')
-        if (req.session.otp === otp && Date.now() - req.session.otpTime < 30000) {
+        if (req.session.otp === otp && Date.now() - req.session.otpTime < 300000) {
             console.log(req.session.otpTime, req.session.otp)
 
             const user = await userSchema.findOne({email : req.session.email})
