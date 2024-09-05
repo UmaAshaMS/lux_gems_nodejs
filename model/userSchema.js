@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const addressSchema = require('./addressSchema')
 const schema = new mongoose.Schema({
     name: {
         type: String,
@@ -18,7 +19,12 @@ const schema = new mongoose.Schema({
     },
     isBlocked: { 
         type: Boolean, 
-        default: false },
-    }, 
+        default: false 
+    },
+    address: {
+        type:[addressSchema],
+        default:[]
+    }
+},
     { timestamps: true })
 module.exports = mongoose.model('user', schema)
