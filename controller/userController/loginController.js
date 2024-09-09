@@ -11,12 +11,7 @@ const auth = require('../../services/auth')
 
 const login = (req, res) => {
     try {
-        if (req.session.user) {
-            res.render('user/home')
-        }
-        else {
-            res.render('user/login', { title: 'Login', user: req.session.user, query: req.query, alertMessage: req.flash('error'), })
-        }
+        res.render('user/login', { title: 'Login', user: req.session.user, query: req.query, alertMessage: req.flash('error'), })
     }
     catch (err) {
         console.log(`Error in rendering login page ${err}`)
@@ -45,17 +40,12 @@ const loginPost = async (req, res) => {
             return res.redirect('/user/login');
         }
 
-        // Log the provided password before comparison
-        console.log('Provided password:', req.body.password.trim());
-        console.log('Stored hashed password:', checkUser.password);
-
         // Compare the provided password with the stored hashed password
         const isPasswordValid = await bcrypt.compare(req.body.password.trim(), checkUser.password);
-        console.log('Password comparison result:', isPasswordValid);
 
         if (isPasswordValid) {
             // If the password is correct, set the session user and redirect to home
-            req.session.user = checkUser;
+            req.session.user = checkUser._id;
             res.redirect('/user/home');
         } else {
             // If the password is incorrect, set a flash message and redirect
@@ -72,12 +62,7 @@ const loginPost = async (req, res) => {
 
 const SignUp = (req, res) => {
     try {
-        if (req.session.user) {
-            res.redirect('/home')
-        }
-        else {
-            res.render('user/Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })
-        }
+        res.render('user/Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })    
     }
     catch (err) {
         console.log(`Error in rendering Sign-Up page, ${err}`)
@@ -88,10 +73,7 @@ const SignUpPost = async (req, res) => {
     const { name, phoneNumber, email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    console.log("Form Data:", req.body);
-
     try {
-        console.log("Req received");
 
         // Extract password and confirm password from array
         const [password1, password2] = password;
@@ -169,22 +151,17 @@ const SignUpPost = async (req, res) => {
 
 
 const otpPagePost = async (req, res) => {
-    // console.log('Reached otppagePost')
-    console.log('Session data in OTP page : ',req.session)
     const {otp} = req.body
     try {
         console.log('Reached otppagePost try')
         if (req.session.otp === otp && Date.now() - req.session.otpTime < 300000) {
-            console.log(req.session.otpTime, req.session.otp)
-
             const user = await userSchema.findOne({email : req.session.email})
             if(user){
                 user.isVerified = true;
                 await user.save();
-                console.log(user)
             
                 //Set user data
-                req.session.user = user
+                req.session.user = user._id
 
                 //Clear OTP from the session
                 req.session.otp = null;

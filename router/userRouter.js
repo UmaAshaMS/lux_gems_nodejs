@@ -9,6 +9,7 @@ const userLoginControl = require('../controller/userController/loginController')
 const userHomeControl = require('../controller/userController/homeController')
 const userProductControl = require('../controller/userController/productController')
 const forgotPassword = require('../controller/userController/forgotPassword')
+const userProfileControl = require('../controller/userController/profileController')
 
 //user Login
 user.get('/user/login', checkUserLogin,userLoginControl.login)
@@ -37,16 +38,16 @@ user.post('/user/resendOTPforgotPassword',checkUserLogin, forgotPassword.resendO
 user.get('/user/home', checkUserLogin, userHomeControl.home)
 
 //User Profile
-user.get('/user/profile', checkUserLogin , userHomeControl.profile)
-user.get('/user/address', checkUserLogin, userHomeControl.address)
-user.post('/user/addAddress', checkUserLogin, userHomeControl.addAddress)
+user.get('/user/profile', checkUserLogin , userProfileControl.profile)
+user.get('/user/address', checkUserLogin, userProfileControl.address)
+user.post('/user/addAddress', checkUserLogin, userProfileControl.addAddress)
+user.delete('/user/deleteAddress/:index', checkUserLogin, userProfileControl.deleteAddress)
+
 
 //All Products 
 user.get('/user/AllProducts',checkUserLogin, userProductControl.AllproductsRender)
 user.get('/user/productDetails/:id',checkUserLogin, userProductControl.productDetails)
 user.get('/user/productCategory/:id', checkUserLogin,userProductControl.productCategory)
-
-
 
 //logout
 user.post('/user/logout', userLoginControl.logout)

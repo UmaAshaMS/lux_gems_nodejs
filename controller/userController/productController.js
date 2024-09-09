@@ -56,7 +56,6 @@ const productDetails = async (req,res) => {
     }
 }
 
-
 const productCategory = async(req,res) => {
     try{
     const categoryId = req.params.id

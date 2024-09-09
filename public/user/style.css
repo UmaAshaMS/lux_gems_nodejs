@@ -207,7 +207,7 @@
                 margin-bottom: 15px;
             }
         }
-
+/* PRODUCT DETAILS PAGE */
         .product-details {
             padding: 20px;
         }
@@ -247,6 +247,10 @@
             /* Remove margin to bring closer to image */
             padding-right: 80px;
             /* Adjust padding to control spacing */
+        }
+
+        .Cart_WishlistButton btn{
+            background-color: yellow;
         }
 
         .recommendations {

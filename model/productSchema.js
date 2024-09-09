@@ -10,11 +10,9 @@ const schema = new mongoose.Schema({
     },
     productPrice : {
         type : Number,
-        
     },
     productDescription:{
         type: String,
-       
     },
     productDiscount:{
         type:Number,
