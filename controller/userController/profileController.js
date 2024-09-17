@@ -28,7 +28,6 @@ const address = async(req,res) => {
     catch(error){
         console.log("Error in fetching address:", error)
     }
-    
     res.render('user/address', {title:' Add Address', category, user: req.session.user,address})
 }
 
@@ -39,9 +38,6 @@ const addAddress = async(req,res) => {
         console.log('Form details in adding address', req.body.fullName)
 
         const user = await userSchema.findOne({_id:userID})
-
-        console.log("..........................")
-        console.log(user)
 
         const newAddress = {
           fullName,
@@ -75,8 +71,6 @@ const deleteAddress = async(req,res) => {
         const index = parseInt(req.params.index, 10)
         const userID = req.session.user 
         const user = await userSchema.findOne({_id:userID},{address:1})
-        console.log('===============================================================')
-        console.log(user)
         user.address.splice(index,1)
         await user.save()
         res.status(200).json({ message: 'Address deleted successfully' });
@@ -89,10 +83,21 @@ const deleteAddress = async(req,res) => {
     }
 }
 
+const editAddress = async(req,res) => {
+    try{
+        const category = await categorySchema.find();
+        res.render('user/editaddress', {title:' Edit Address', category, user: req.session.user})
+    }
+    catch(error){
+        console.log(`Error in loading edit address page : ${error}`)
+    }
+}
+
 
 module.exports = {
     profile,
     address,
     addAddress,
     deleteAddress,
+    editAddress,
 }

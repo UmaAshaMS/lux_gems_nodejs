@@ -1,59 +1,62 @@
-const express = require('express')
-const userSchema = require('../model/userSchema')
-const user = express.Router()
-const { checkUserLogin } = require('../middleware/userSession')
-const {checkUserSession} = require('../middleware/checkUserSession')
+const express = require('express');
+const path = require('path');
+const user = express.Router();
+const { checkUserLogin } = require('../middleware/userSession');
+const { checkUserSession } = require('../middleware/checkUserSession');
 
+const userLoginControl = require('../controller/userController/loginController');
+const userHomeControl = require('../controller/userController/homeController');
+const userProductControl = require('../controller/userController/productController');
+const forgotPassword = require('../controller/userController/forgotPassword');
+const userProfileControl = require('../controller/userController/profileController');
+const cartController = require('../controller/userController/cartController');
 
-const userLoginControl = require('../controller/userController/loginController')
-const userHomeControl = require('../controller/userController/homeController')
-const userProductControl = require('../controller/userController/productController')
-const forgotPassword = require('../controller/userController/forgotPassword')
-const userProfileControl = require('../controller/userController/profileController')
+// Serve static files from the 'uploads' directory
+user.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-//user Login
-user.get('/user/login', checkUserLogin,userLoginControl.login)
-user.post('/user/login', checkUserLogin,userLoginControl.loginPost)
-user.get('/user/Sign-Up', checkUserLogin,userLoginControl.SignUp)
-user.post('/user/Sign-Up', checkUserLogin,userLoginControl.SignUpPost)
-user.post('/user/OTPpage', checkUserLogin, userLoginControl.otpPagePost)
-//resend otp in sign-up
-user.post('/user/resendOTPsignUp', checkUserLogin, userLoginControl.resendOTPSignUp)
+// User Login
+user.get('/login', checkUserLogin, userLoginControl.login);
+user.post('/login', checkUserLogin, userLoginControl.loginPost);
+user.get('/sign-up', checkUserLogin, userLoginControl.SignUp);
+user.post('/sign-up', checkUserLogin, userLoginControl.SignUpPost);
+user.post('/otp-page', checkUserLogin, userLoginControl.otpPagePost);
+user.post('/resend-otp-sign-up', checkUserLogin, userLoginControl.resendOTPSignUp);
 
-//Authentication
-user.get('/auth/google', userLoginControl.googleAuth)
-user.get('/auth/google/callback' ,userLoginControl.googleAuthCallback)
+// Authentication
+user.get('/auth/google', userLoginControl.googleAuth);
+user.get('/auth/google/callback', userLoginControl.googleAuthCallback);
 
-//Forgot Password
-user.get('/user/Forgot-Password', checkUserLogin, forgotPassword.ForgotPassword)
-user.post('/user/Forgot-Password', checkUserLogin, forgotPassword.ForgotPasswordpost)
-user.get('/user/ForgotPasswordOtp', checkUserLogin, forgotPassword.ForgotPasswordOtp)
-user.post('/user/ForgotPasswordOtp', checkUserLogin, forgotPassword.ForgotPasswordOtpPost)
-user.get('/user/resetPassword', checkUserLogin, forgotPassword.resetPassword)
-user.post('/user/resetPassword', checkUserLogin,forgotPassword.resetPasswordPost)
-//resend otp in forgot password
-user.post('/user/resendOTPforgotPassword',checkUserLogin, forgotPassword.resendOTPforgotPassword)
+// Forgot Password
+user.get('/forgot-password', checkUserLogin, forgotPassword.ForgotPassword);
+user.post('/forgot-password', checkUserLogin, forgotPassword.ForgotPasswordpost);
+user.get('/forgot-password-otp', checkUserLogin, forgotPassword.ForgotPasswordOtp);
+user.post('/forgot-password-otp', checkUserLogin, forgotPassword.ForgotPasswordOtpPost);
+user.get('/reset-password', checkUserLogin, forgotPassword.resetPassword);
+user.post('/reset-password', checkUserLogin, forgotPassword.resetPasswordPost);
+user.post('/resend-otp-forgot-password', checkUserLogin, forgotPassword.resendOTPforgotPassword);
 
+// Home
+user.get('/home', checkUserLogin, userHomeControl.home);
 
-user.get('/user/home', checkUserLogin, userHomeControl.home)
+// User Profile
+user.get('/profile', checkUserLogin, userProfileControl.profile);
+user.get('/address', checkUserLogin, userProfileControl.address);
+user.post('/add-address', checkUserLogin, userProfileControl.addAddress);
+user.delete('/delete-address/:index', checkUserLogin, userProfileControl.deleteAddress);
+user.get('/edit-address', checkUserLogin, userProfileControl.editAddress);
 
-//User Profile
-user.get('/user/profile', checkUserLogin , userProfileControl.profile)
-user.get('/user/address', checkUserLogin, userProfileControl.address)
-user.post('/user/addAddress', checkUserLogin, userProfileControl.addAddress)
-user.delete('/user/deleteAddress/:index', checkUserLogin, userProfileControl.deleteAddress)
+// Products
+user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
+user.get('/product-details/:id', checkUserLogin, userProductControl.productDetails);
+user.get('/product-category/:id', checkUserLogin, userProductControl.productCategory);
 
+// Cart
+user.get('/cart', checkUserLogin, cartController.cart);
+user.post('/cart/:productId', checkUserLogin, cartController.addToCart);
+user.post('/cart/remove/:productId', checkUserLogin, cartController.removeFromCart);
+user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuantity);
 
-//All Products 
-user.get('/user/AllProducts',checkUserLogin, userProductControl.AllproductsRender)
-user.get('/user/productDetails/:id',checkUserLogin, userProductControl.productDetails)
-user.get('/user/productCategory/:id', checkUserLogin,userProductControl.productCategory)
+// Logout
+user.post('/logout', userLoginControl.logout);
 
-//logout
-user.post('/user/logout', userLoginControl.logout)
-
-
-
-
-
-module.exports = user
+module.exports = user;

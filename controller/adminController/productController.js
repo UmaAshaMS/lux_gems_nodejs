@@ -2,6 +2,8 @@ const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const upload = require('../../middleware/multer')
 const fs = require('fs');
+const {ObjectId} = require('mongodb');
+const { productCategory } = require('../userController/productController');
 
 
 
@@ -9,7 +11,7 @@ const fs = require('fs');
 const getproduct = async (req, res) => {
     try {
         const searchQuery = req.query.searchQuery || ''
-        const productDetails = await productSchema.find({ productName: { $regex: searchQuery, $options: 'i' } })
+        const productDetails = await productSchema.find({ productName: { $regex: searchQuery, $options: 'i' } }).populate('productCategory', 'name'); 
         if (productDetails.length === 0) {
             console.log('No product found')
         }
@@ -26,8 +28,7 @@ const addProduct = async (req, res) => {
     try {
         const searchQuery = req.query.searchQuery || ''
         const category = await categorySchema.find({ isBlocked: false })
-
-        res.render('admin/addProduct', { title: 'Add products', searchQuery, category })
+        res.render('admin/addProduct', { title: 'Add products', searchQuery,category})
     }
     catch (err) {
         console.log(`Error in rendering addProducts page ${err}`)
@@ -40,7 +41,7 @@ const addProductPost = async (req, res) => {
     console.log('post called')
     console.log('Image details', req.files); // Check if files are being processed
     console.log('Request body', req.body)
-
+    req.body.productCategory = new ObjectId(req.body.productCategory)
 
     try {
         // Handle image uploads (assuming req.files.productImage is an array of images)
@@ -54,9 +55,10 @@ const addProductPost = async (req, res) => {
         })
 
         // Extract form data from the request body
-
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body
         // const productImages = req.files;
+
+        const category = await categorySchema.findOne({_id: new ObjectId(productCategory) });
 
         // Check if a product with the same name and collection already exists
         const existingProduct = await productSchema.findOne({
@@ -98,6 +100,7 @@ const addProductPost = async (req, res) => {
 }
 
 const blockProduct = async (req, res) => {
+    req.body.productCategory = new ObjectId(req.body.productCategory)
     try {
         const productId = req.params.id;
         if (!productId) {
@@ -106,7 +109,7 @@ const blockProduct = async (req, res) => {
         // Find product by productId
         const product = await productSchema.findById(productId)
         if (!product) {
-            return res.send(404).json({ message: "Product does not exists." })
+            return res.status(404).json({ message: "Product does not exists." })
         }
 
         //Mark the product as blocked
@@ -121,6 +124,7 @@ const blockProduct = async (req, res) => {
 }
 
 const unblockProduct = async (req, res) => {
+    req.body.productCategory = new ObjectId(req.body.productCategory)
     try {
         const productId = req.params.id;
         if (!productId) {
@@ -134,7 +138,7 @@ const unblockProduct = async (req, res) => {
         }
 
         // Find category by product's category name
-        const category = await categorySchema.findOne({ name: product.productCategory });
+        const category = await categorySchema.findOne({ _id: new ObjectId(product.productCategory) });
         if (!category) {
             return res.status(404).json({ message: "Category does not exist." });
         }
@@ -160,6 +164,7 @@ const unblockProduct = async (req, res) => {
 
 
 const deleteProduct = async (req, res) => {
+    req.body.productCategory = new ObjectId(req.body.productCategory)
     console.log('Req for delete')
     try {
         const productId = req.params.id;

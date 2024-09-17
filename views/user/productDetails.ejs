@@ -1,122 +1,206 @@
 <%-include('./layout/header')%>
-<%- include('./layout/navbar')%>
-<%-include('./layout/category_navbar') %>
+    <%- include('./layout/navbar')%>
+        <%-include('./layout/category_navbar') %>
 
 
-    <body>
-        <div class="container product-details">
-            <!-- Main Product Image and Thumbnails -->
-            <div class="row">
-                <div class="col-lg-7">
-                    <div class="Main-Image-Box">
-                        <img src="/<%= product.productImage[0]%>" alt="<%= product.productName %>" class="main-image"
-                            id="mainImage" style="align-items: center;">
-                    </div>
+            <body>
+                <div class="container product-details">
+                    <!-- Main Product Image and Thumbnails -->
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="Main-Image-Box">
+                                <img src="/<%= product.productImage[0]%>" alt="<%= product.productName %>"
+                                    class="main-image" id="mainImage" style="align-items: center;">
+                            </div>
 
-                    <div class="thumbnail-images d-flex gap-2 mt-4">
-                        <% product.productImage.forEach((image)=> { %>
-                            <img src=" ../../<%=image %>" alt="Thumbnail"
-                        onclick="changeImage('<%= image.replace(/\\/g, `\\\\` ) %>')">
-                            <% }) %>
-                    </div>
-                    
+                            <div class="thumbnail-images d-flex gap-2 mt-4">
+                                <% product.productImage.forEach((image)=> { %>
+                                    <img src=" ../../<%=image %>" alt="Thumbnail"
+                                        onclick="changeImage('<%= image.replace(/\\/g, `\\\\` ) %>')">
+                                    <% }) %>
+                            </div>
 
-                </div>
-                <div class="col-lg-4 product-info">
-                    <h1>
-                        <%= product.productName %>
-                    </h1>
-                    <p>
-                        <%= product.productDescription %>
-                    </p>
-                    <p><strong>Price : </strong> <i class="fas fa-rupee-sign"></i>
-                        <%= product.productPrice %>
-                    </p>
-                    <% if (product.productDiscount) { %>
-                        <p><strong>Discount : </strong>
-                            <%= product.productDiscount %>% OFF
-                        </p>
-                        <% } %>
-                            <% if (product.stock) { %>
-                                <p>
-                                    <strong>Quantity : </strong>
-                                    <%= product.stock %>
+
+                        </div>
+                        <div class="col-lg-4 product-info">
+                            <h1>
+                                <%= product.productName %>
+                            </h1>
+                            <p>
+                                <%= product.productDescription %>
+                            </p>
+                            <p><strong>Price : </strong> <i class="fas fa-rupee-sign"></i>
+                                <%= product.productPrice %>
+                            </p>
+                            <% if (product.productDiscount) { %>
+                                <p><strong>Discount : </strong>
+                                    <%= product.productDiscount %>% OFF
                                 </p>
                                 <% } %>
-                                    <div class="static-rating">
-                                        <span class="star filled">&#9733;</span>
-                                        <span class="star filled">&#9733;</span>
-                                        <span class="star filled">&#9733;</span>
-                                        <span class="star filled">&#9733;</span>
-                                        <span class="star">&#9733;</span>
-                                    </div>
-                                    <br>
-                                    <div class="Cart_WishlistButton">
-                                    <button class="btn">Add to Cart</button>
-                                    <button class="btn">Add to Wishlist</button>
-                                    </div>
-                </div>
-            </div>
-            <!-- Recommendations -->
-            <div class="recommendations">
-                <h2>Related Products</h2>
-                <div class="row">
-                    <% recommendations.forEach((rec)=> { %>
-                        <div class="col-md-3">
-                            <div class="product-item">
-                                <a href="/user/productDetails/<%= rec._id %>">
-                                    <img src="/<%= rec.productImage[0] %>" alt="<%= rec.productName %>">
-                                    <h4>
-                                        <%= rec.name %>
-                                    </h4>
-
-                                </a>
-                                <p><strong>
-                                        <%= rec.productName %>
-                                    </strong></p>
-                                <p><strong>Price:</strong> <i class="fas fa-rupee-sign"></i>
-                                    <%= rec.productPrice %>
-                                </p>
-                            </div>
+                                    <% if (product.stock) { %>
+                                        <p style="color: red;">
+                                            <strong>Only <%= product.stock %> left</strong>
+                                        </p>
+                                        <% } %>
+                                            <div class="static-rating">
+                                                <span class="star filled">&#9733;</span>
+                                                <span class="star filled">&#9733;</span>
+                                                <span class="star filled">&#9733;</span>
+                                                <span class="star filled">&#9733;</span>
+                                                <span class="star">&#9733;</span>
+                                            </div>
+                                            <br>
+                                            <div class="Cart_WishlistButton">
+                                                <% if(product.stock>= 1) { %>
+                                                    <button class="btn" onclick="addToCart('<%= product._id %>')">Add to
+                                                        Cart</button>
+                                                    <button class="btn"
+                                                        onclick="addToWishlist('<%= product._id %>')">Add to
+                                                        Wishlist</button>
+                                                    <% } else { %>
+                                                        <h2>Product Out Of Stock</h2>
+                                                        <% } %>
+                                            </div>
                         </div>
-                        <% }) %>
+                    </div>
+                    <!-- Recommendations -->
+                    <div class="recommendations">
+                        <h2>Related Products</h2>
+                        <div class="row">
+                            <% recommendations.forEach((rec)=> { %>
+                                <div class="col-md-3">
+                                    <div class="product-item">
+                                        <a href="/productDetails/<%= rec._id %>">
+                                            <img src="/<%= rec.productImage[0] %>" alt="<%= rec.productName %>">
+                                            <h4>
+                                                <%= rec.name %>
+                                            </h4>
+
+                                        </a>
+                                        <p><strong>
+                                                <%= rec.productName %>
+                                            </strong></p>
+                                        <p><strong>Price:</strong> <i class="fas fa-rupee-sign"></i>
+                                            <%= rec.productPrice %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <script>
-            // Ensure the script runs after the DOM is fully loaded
-            document.addEventListener('DOMContentLoaded', function () {
-                function changeImage(imageSrc) {
-                    // Log the imageSrc to check if it's correct
-                    console.log("Changing image to:", imageSrc);
-                    var mainImage = document.getElementById('mainImage');
-                    if (mainImage) {
-                        mainImage.src = '/' + imageSrc;
-                    } else {
-                        console.error('Main image not found!');
+                <script>
+                    // Ensure the script runs after the DOM is fully loaded
+                    document.addEventListener('DOMContentLoaded', function () {
+                        function changeImage(imageSrc) {
+                            // Log the imageSrc to check if it's correct
+                            console.log("Changing image to:", imageSrc);
+                            var mainImage = document.getElementById('mainImage');
+                            if (mainImage) {
+                                mainImage.src = '/' + imageSrc;
+                            } else {
+                                console.error('Main image not found!');
+                            }
+                        }
+
+                        // Attach changeImage function to global scope if needed
+                        window.changeImage = changeImage;
+
+
+                        const imageContainer = document.querySelector('.Main-Image-Box'); // Select the container element
+                        const productImg = imageContainer.querySelector('.main-image'); // Select the image within the container
+
+                        imageContainer.addEventListener("mousemove", (e) => {
+                            const rect = imageContainer.getBoundingClientRect(); // Get container's bounding rectangle
+                            const x = (e.clientX - rect.left) / rect.width; // Calculate relative X position
+                            const y = (e.clientY - rect.top) / rect.height; // Calculate relative Y position
+
+                            productImg.style.transformOrigin = `${x * 100}% ${y * 100}%`; // Set transform origin based on mouse position
+                            productImg.style.transform = "scale(1.5)"; // Apply zoom effect (adjust scale as needed)
+                        });
+
+                        imageContainer.addEventListener("mouseleave", () => {
+                            productImg.style.transformOrigin = "center"; // Reset transform origin to center
+                            productImg.style.transform = "scale(1)"; // Reset zoom to normal
+                        });
+                    });
+
+
+                    // Function to add product to the cart
+                    function addToCart(productId) {
+                        const URL = `/cart/${productId}`;
+
+                        fetch(URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                            .then(response => response.json().then(data => ({ data, status: response.status })))
+                            .then(({ data, status }) => {
+                                // Check if response was successful (status 200)
+                                if (status === 200) {
+                                    Swal.fire({
+                                        title: 'Success',
+                                        icon: 'success',
+                                        text: data.message,  // Success message from server
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Redirect to the same page after confirmation
+                                        window.location.href = `/productDetails/${productId}`;
+                                        
+                                    });
+                                } else {
+                                    // If the request failed, show an error message
+                                    Swal.fire({
+                                        title: 'Error',
+                                        icon: 'error',
+                                        text: data.message || 'Failed to add product to cart.',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                // Catch any other errors in the fetch process
+                                console.error('Error adding product to cart:', error);
+                            });
                     }
-                }
-
-                // Attach changeImage function to global scope if needed
-                window.changeImage = changeImage;
 
 
-                const imageContainer = document.querySelector('.Main-Image-Box'); // Select the container element
-                const productImg = imageContainer.querySelector('.main-image'); // Select the image within the container
+                    //fucntion add to Wishlist
+                    function addToWishlist(productId) {
+                        const URL = `/wishlist/${productId}`;
 
-                imageContainer.addEventListener("mousemove", (e) => {
-                    const rect = imageContainer.getBoundingClientRect(); // Get container's bounding rectangle
-                    const x = (e.clientX - rect.left) / rect.width; // Calculate relative X position
-                    const y = (e.clientY - rect.top) / rect.height; // Calculate relative Y position
-
-                    productImg.style.transformOrigin = `${x * 100}% ${y * 100}%`; // Set transform origin based on mouse position
-                    productImg.style.transform = "scale(1.5)"; // Apply zoom effect (adjust scale as needed)
-                });
-
-                imageContainer.addEventListener("mouseleave", () => {
-                    productImg.style.transformOrigin = "center"; // Reset transform origin to center
-                    productImg.style.transform = "scale(1)"; // Reset zoom to normal
-                });
-            });
-        </script>
-    </body>
+                        fetch(URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                            .then(response => response.json().then(data => ({ data, status: response.status })))
+                            .then(({ data, status }) => {
+                                // Check if response was successful (status 200)
+                                if (status === 200) {
+                                    Swal.fire({
+                                        title: 'Success',
+                                        icon: 'success',
+                                        text: data.message,  // Success message from server
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        // Redirect to the same page after confirmation
+                                        window.location.href = `/productDetails/${productId}`;
+                                        
+                                    });
+                                } else {
+                                    // If the request failed, show an error message
+                                    Swal.fire({
+                                        title: 'Error',
+                                        icon: 'error',
+                                        text: data.message || 'Failed to add product to wishlist.',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                // Catch any other errors in the fetch process
+                                console.error('Error adding product to wishlist:', error);
+                            });
+                    }
+                </script>
+            </body>

@@ -5,7 +5,7 @@
             <div class="breadcrumbs mb-4">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="/user/profile" style="text-decoration:none">Your Account</a>
+                        <a href="/profile" style="text-decoration:none">Your Account</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">Your Address</li>
                 </ol>
@@ -98,6 +98,8 @@
                 </div>
             </div>
 
+
+
             <!-- a loop for showing multiple addresess -->
             <div class="container my-5">
                 <div class="row">
@@ -119,7 +121,7 @@
                                                                 <%= address.state %>, <%= address.country %>
                                     </p>
                                     <div class="d-flex justify-content-between">
-                                        <a class="address-card-link text-primary" style="cursor:pointer"><i class="fas fa-edit"></i>
+                                        <a href= "/editAddress" class="address-card-link text-primary" style="cursor:pointer"><i class="fas fa-edit"></i>
                                             Edit</a>
                                         <a class="address-card-link text-danger" style="cursor:pointer" onclick="deleteAddress(`<%= index %>`)"
                                             data-index="<%= index %>"><i class="fas fa-trash-alt"></i> Delete</a>
@@ -154,7 +156,7 @@
                         country: formData.get('country')
                     };
 
-                    const URL = `/user/addAddress`;
+                    const URL = `/addAddress`;
                     fetch(URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -190,7 +192,7 @@
                     console.log('Address index received:', index);
                     if (confirm("Are you sure you want to delete this address ? ")) {
 
-                        const URL = `/user/deleteAddress/${index}`;
+                        const URL = `/deleteAddress/${index}`;
                         fetch(URL, {
                             method: 'DELETE',
                             headers: {

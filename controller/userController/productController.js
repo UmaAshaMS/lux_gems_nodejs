@@ -5,21 +5,16 @@ const categorySchema = require('../../model/categorySchema')
 const AllproductsRender  = async(req,res) => {
     // Retrieve non-blocked categories
     const categories = await categorySchema.find({ isBlocked: 0 });
-    console.log('Non blocked categories:',categories)
-        
-    
 
     // Retrieve products that are active and belong to non-blocked categories
     const products = await productSchema.find({
         isActive: 1,
         // productCategory: { $in: validCategoryIds }
     });
-    console.log('Filtered products:', products);
 
     // Retrieve user from the session, or set to null if not present
     const user = req.session.user || null;
  
-
     try{
         res.render('user/AllProducts',{title:'Products', 
         category: categories,
@@ -38,12 +33,11 @@ const productDetails = async (req,res) => {
 
     try{
         // Fetch product details
-        const product = await productSchema.findById(productID).exec();
+        const product = await productSchema.findById(productID).populate('productCategory', 'name').exec();
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
-        console.log(product); // Check the structure of the product object
         // Fetch recommended products (same category)
         const recommendations = await productSchema.find({
             productCategory: product.productCategory,

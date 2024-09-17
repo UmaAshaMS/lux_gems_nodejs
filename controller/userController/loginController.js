@@ -24,7 +24,7 @@ const loginPost = async (req, res) => {
         const checkUser = await userSchema.findOne({ email: req.body.email });
 
         // Log the found user details
-        console.log('User found:', checkUser);
+        // console.log('User found:', checkUser);
 
         if (!checkUser) {
             // If the user is not found, set a flash message and redirect
