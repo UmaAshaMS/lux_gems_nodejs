@@ -10,6 +10,7 @@ const userProductControl = require('../controller/userController/productControll
 const forgotPassword = require('../controller/userController/forgotPassword');
 const userProfileControl = require('../controller/userController/profileController');
 const cartController = require('../controller/userController/cartController');
+const checkoutController = require('../controller/userController/checkoutController')
 
 // Serve static files from the 'uploads' directory
 user.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -47,7 +48,7 @@ user.get('/edit-address', checkUserLogin, userProfileControl.editAddress);
 
 // Products
 user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
-user.get('/product-details/:id', checkUserLogin, userProductControl.productDetails);
+user.get('/productDetails/:id', checkUserLogin, userProductControl.productDetails);
 user.get('/product-category/:id', checkUserLogin, userProductControl.productCategory);
 
 // Cart
@@ -55,6 +56,9 @@ user.get('/cart', checkUserLogin, cartController.cart);
 user.post('/cart/:productId', checkUserLogin, cartController.addToCart);
 user.post('/cart/remove/:productId', checkUserLogin, cartController.removeFromCart);
 user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuantity);
+
+//Checkout
+user.get('/checkout', checkUserLogin, checkoutController.checkout)
 
 // Logout
 user.post('/logout', userLoginControl.logout);

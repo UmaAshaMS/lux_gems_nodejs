@@ -98,11 +98,11 @@ const addToCart = async (req, res) => {
         // Save the updated cart
         await cart.save();
 
-        // Reduce the product stock
-        await productSchema.updateOne(
-            { _id: new ObjectId(productId) },
-            { $inc: { stock: -1 } }
-        );
+        // // Reduce the product stock
+        // await productSchema.updateOne(
+        //     { _id: new ObjectId(productId) },
+        //     { $inc: { stock: -1 } }
+        // );
 
         // Respond with a success message
         res.status(200).json({ message: 'Product added to cart successfully.' });
@@ -140,15 +140,15 @@ const removeFromCart = async (req, res) => {
         // Get the product quantity from the cart
         const productQuantity = cart.product[productIndex].quantity;
 
-        // Update the product's stock by adding back the removed quantity
-        const product = await productSchema.findById(productId);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
+        // // Update the product's stock by adding back the removed quantity
+        // const product = await productSchema.findById(productId);
+        // if (!product) {
+        //     return res.status(404).json({ message: 'Product not found' });
+        // }
 
-        // Update the stock
-        product.stock += productQuantity;
-        await product.save();
+        // // Update the stock
+        // product.stock += productQuantity;
+        // await product.save();
 
         // Remove the product from the cart
         cart.product.splice(productIndex, 1); // Remove the product from the cart array
@@ -185,12 +185,12 @@ const updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
         }
 
-        // Find the product to check stock
-        const product = await productSchema.findById(productId);
+        // // Find the product to check stock
+        // const product = await productSchema.findById(productId);
 
-        if (!product) {
-            return res.status(404).json({ success: false, message: 'Product not found' });
-        }
+        // if (!product) {
+        //     return res.status(404).json({ success: false, message: 'Product not found' });
+        // }
 
         // Calculate new quantity
         const newQuantity = item.quantity + change;
@@ -210,11 +210,11 @@ const updateQuantity = async (req, res) => {
         // Save updated cart
         await cart.save();
 
-        // Update stock of the product
-        product.stock -= change;
+        // // Update stock of the product
+        // product.stock -= change;
 
-        // Save updated product
-        await product.save();
+        // // Save updated product
+        // await product.save();
 
         res.json({ success: true, message: 'Quantity updated successfully!' });
     } catch (error) {

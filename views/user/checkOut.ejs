@@ -1,0 +1,282 @@
+<%- include('./layout/header') %>
+<%- include('./layout/navbar') %>
+<%- include('./layout/category_navbar') %>
+
+    <div class="container my-5">
+        <h2 class="mb-4">Checkout</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Address Section -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Delivery Address</h5>
+                            <% if (defaultAddress) { %>
+                            <p class="card-text"><strong><%= defaultAddress.fullName %></strong></p>
+                            <p class="card-text"><%= defaultAddress.addressLine1 %>, <%= defaultAddress.addressLine2 %></p>
+                            <p class="card-text"><%= defaultAddress.city %>, <%= defaultAddress.state %>, <%=defaultAddress.country %></p>
+                            <p class="card-text">PINCODE : <%= defaultAddress.pincode %></p>
+                            <p class="card-text">Phone Number : <%= defaultAddress.phoneNumber %></p>
+                            <button type="button" class="btn btn-secondary" data-toggle="modal"data-target="#addressModal">Change Address</button>
+
+                            <% } else { %>
+                                <p class="card-text">No default address available. Please add one.</p>
+                                <a href="/add-address" class="btn btn-primary">Add Address</a>
+                            <% } %>
+                            </div>
+                        </div>
+
+
+                        <!-- The Modal -->
+                        <div id="addressModal" class="modal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Select Delivery Address</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
+                                            <% userAddress.address.forEach((address)=> { %>
+                                                <div class="address-item d-flex align-items-start mb-3">
+                                                    <!-- Checkbox for Address Selection -->
+                                                    <input type="radio" name="selectedAddress"
+                                                        id="modalAddress<%= address._id %>" value="<%= address._id %>"
+                                                        class="me-2">
+
+                                                    <!-- Address Details -->
+                                                    <label for="modalAddress<%= address._id %>" class="w-100">
+                                                        <div>
+                                                            <p class="mb-1">
+                                                                <strong>
+                                                                    <%= address.fullName %>
+                                                                </strong>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <%= address.addressLine1 %>, <%= address.addressLine2 %>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <%= address.city %>, <%= address.state %>, <%=
+                                                                            address.country %>
+                                                            </p>
+                                                            <p class="mb-1">PINCODE: <%= address.pincode %>
+                                                            </p>
+                                                            <p>Phone Number: <%= address.phoneNumber %>
+                                                            </p>
+                                                        </div>
+                                                    </label>
+
+                                                    <!-- Edit Button -->
+                                                    <button class=" ms-3"
+                                                        onclick="editAddress('<%= address._id %>')">Edit</button>
+                                                </div>
+                                                <% }); %>
+                                                    <% } else { %>
+                                                        <p>No addresses available. Please add a new address.</p>
+                                                        <% } %>
+                                                            <a href="/add-address" class="btn">Add New Address</a>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary"
+                                            onclick="confirmAddressSelection()">Confirm</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Coupon Section -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Apply Coupon</h5>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Enter Coupon Code">
+                                    <button class="btn btn-outline-secondary" type="button">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary Section -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Order Summary</h5>
+                                <ul class="list-group list-group-flush">
+                                    <% if (cart && cart.product && cart.product.length> 0) { %>
+                                        <% cart.product.forEach(productItem=> { %>
+                                            <li class="list-group-item">
+                                                <%= productItem.productId.productName %>:
+                                                    Rs <%= productItem.productId.productPrice %> x <%=
+                                                            productItem.quantity %> =
+                                                            Rs <%= productItem.productId.productPrice *
+                                                                productItem.quantity %>
+                                            </li>
+                                            <% }); %>
+
+                                                <li class="list-group-item">
+                                                    <strong>Total: Rs <%= cart.product.reduce((total, item)=> total +
+                                                            (item.productId.productPrice * item.quantity), 0)
+                                                            %></strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <strong>Delivery Charge: </strong> Rs <%= deliveryCharge.toFixed(2)
+                                                        %>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <strong>Promotion Applied : </strong> Rs <%=
+                                                        promotionAmount.toFixed(2) %>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <h4 style="color:rgb(139, 12, 12)"><strong>Order Total : </strong>
+                                                        Rs <%= (subtotal + deliveryCharge - promotionAmount).toFixed(2)
+                                                            %>
+                                                    </h4>
+                                                </li>
+
+                                                <% } else { %>
+                                                    <li class="list-group-item">Your cart is empty.</li>
+                                                    <% } %>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Payment Method -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Payment Options</h5>
+
+                                <!-- Payment Options -->
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption">
+                                    <label class="form-check-label" for="walletOption">
+                                        <strong>Wallet</strong> (Balance: Rs 50.00)
+                                    </label>
+                                </div>
+
+
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod"
+                                        id="debitCardOption">
+                                    <label class="form-check-label" for="debitCardOption">
+                                        <strong>Debit Card</strong>
+                                    </label>
+                                    <div class="mt-2">
+                                        <input type="text" class="form-control mb-2" placeholder="Card Number">
+                                        <input type="text" class="form-control mb-2" placeholder="Expiry Date (MM/YY)">
+                                        <input type="text" class="form-control mb-2" placeholder="CVV">
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod"
+                                        id="creditCardOption">
+                                    <label class="form-check-label" for="creditCardOption">
+                                        <strong>Credit Card</strong>
+                                    </label>
+                                    <div class="mt-2">
+                                        <input type="text" class="form-control mb-2" placeholder="Card Number">
+                                        <input type="text" class="form-control mb-2" placeholder="Expiry Date (MM/YY)">
+                                        <input type="text" class="form-control mb-2" placeholder="CVV">
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption">
+                                    <label class="form-check-label" for="upiOption">
+                                        <strong>UPI</strong>
+                                    </label>
+                                    <div class="mt-2">
+                                        <input type="text" class="form-control" placeholder="Enter UPI ID">
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption">
+                                    <label class="form-check-label" for="codOption">
+                                        <strong>Cash on Delivery (COD)</strong>
+                                    </label>
+                                    <p class="mb-0">Pay when your order is delivered.</p>
+                                </div>
+
+                                <!-- Use this Payment Method Button -->
+                                <div class="text-start">
+                                    <button class="btn mt-3" id="submitPayment">Use this Payment Method</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Place Order Button -->
+                <div class="form-group text-center mt-5">
+                    <button class="btn btn-black btn-lg py-3" id="placeOrderButton">Place Order</button>
+                </div>
+            </div>
+
+
+            <script>
+                document.getElementById('submitPayment').addEventListener('click', function () {
+                    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+
+                    if (!paymentMethodSelected) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Please select a payment method before proceeding.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        // Proceed with form submission
+                        document.getElementById('paymentForm').submit();
+                    }
+                });
+
+                document.getElementById('placeOrderButton').addEventListener('click', function () {
+                    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+
+                    if (!paymentMethodSelected) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Please select a payment method before placing the order.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        // Proceed with form submission
+                        document.getElementById('orderForm').submit();
+                    }
+                });
+
+                function confirmAddressSelection() {
+                    // Get the selected radio button value
+                    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+                    if (selectedAddress) {
+                        const addressId = selectedAddress.value;
+
+                        // Send the selected address ID to the server to update the default address
+                        fetch('/update-default-address', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ addressId: addressId })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Reload the page to update the displayed default address
+                                    location.reload();
+                                } else {
+                                    alert('Failed to update the default address.');
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    } else {
+                        alert('Please select an address.');
+                    }
+                }
+
+
+            </script>

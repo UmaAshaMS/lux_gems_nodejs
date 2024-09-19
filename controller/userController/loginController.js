@@ -30,14 +30,14 @@ const loginPost = async (req, res) => {
             // If the user is not found, set a flash message and redirect
             req.flash('error', 'Invalid user credentials');
             console.log('Invalid user credentials - user not found.');
-            return res.redirect('/user/login');
+            return res.redirect('login');
         }
 
         if (checkUser.isBlocked) {
             // If the user is blocked, set a flash message and redirect
             console.log('User blocked by admin.');
             req.flash('error', 'Your account has been blocked. Please contact support.');
-            return res.redirect('/user/login');
+            return res.redirect('user/login');
         }
 
         // Compare the provided password with the stored hashed password
@@ -46,12 +46,12 @@ const loginPost = async (req, res) => {
         if (isPasswordValid) {
             // If the password is correct, set the session user and redirect to home
             req.session.user = checkUser._id;
-            res.redirect('/user/home');
+            res.redirect('/home');
         } else {
             // If the password is incorrect, set a flash message and redirect
             req.flash('error', 'Invalid user credentials');
             console.log('Invalid user credentials - password mismatch.');
-            res.redirect('/user/login');
+            res.redirect('user/login');
         }
     } catch (err) {
         // Handle any unexpected errors
@@ -62,7 +62,7 @@ const loginPost = async (req, res) => {
 
 const SignUp = (req, res) => {
     try {
-        res.render('user/Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })    
+        res.render('Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })    
     }
     catch (err) {
         console.log(`Error in rendering Sign-Up page, ${err}`)
@@ -82,21 +82,21 @@ const SignUpPost = async (req, res) => {
         if (!name || !phoneNumber || !email || !password1 || !password2) {
             console.error('All fields are required');
             req.flash('error', 'All fields are required');
-            return res.redirect('/user/Sign-Up');
+            return res.redirect('user/Sign-Up');
         }
 
         // Validate email format
         if (!emailRegex.test(email)) {
             console.error('Invalid email format');
             req.flash('error', 'Invalid email format');
-            return res.redirect('/user/Sign-Up');
+            return res.redirect('user/Sign-Up');
         }
 
         // Check if passwords match
         if (password1 !== password2) {
             console.error('Passwords do not match');
             req.flash('error', 'Passwords do not match');
-            return res.redirect('/user/Sign-Up');
+            return res.redirect('user/Sign-Up');
         }
 
         // Check if user already exists
@@ -105,7 +105,7 @@ const SignUpPost = async (req, res) => {
         if (checkUserExists) {
             req.flash('error', 'User already exists');
             console.log('User already exists.');
-            return res.redirect('/user/Sign-Up');
+            return res.redirect('user/Sign-Up');
         }
 
         // Hash the password
@@ -136,7 +136,7 @@ const SignUpPost = async (req, res) => {
 
 
         // Render the OTP verification page
-        res.render('user/OTPpage', {
+        res.render('OTPpage', {
             title: 'OTP Page',
             email: req.session.email,
             otpTime: req.session.otpTime,
@@ -145,7 +145,7 @@ const SignUpPost = async (req, res) => {
     } catch (err) {
         console.error(`Error submitting data during Sign-Up: ${err}`);
         req.flash('error', 'An error occurred during sign-up. Please try again.');
-        res.redirect('/user/Sign-Up');
+        res.redirect('Sign-Up');
     }
 };
 
@@ -169,25 +169,25 @@ const otpPagePost = async (req, res) => {
             
                 req.flash('sucess', 'Welcome!...New user verification successful');
                 console.log('New user verification successful');
-                res.redirect('/user/home');
+                res.redirect('user/home');
                 }
             else{
                 console.log('User not found')
                 req.flash('User Not found')
-                res.redirect('/user/Sign-Up');
+                res.redirect('user/Sign-Up');
 
             }
         }
         else{
             req.flash('error', 'Invaild OTP , Try Again')
             console.log('Error in OTP')
-            res.redirect('/user/Sign-Up')
+            res.redirect('user/Sign-Up')
         }    
             
     } catch (error) {
         console.log(`error while verifying otp${error}`)
         req.flash('error', 'Error in OTP verification')
-        res.redirect('/user/Sign-Up')
+        res.redirect('user/Sign-Up')
     }
 };
 
@@ -201,7 +201,7 @@ const resendOTPSignUp = async (req, res) => {
         req.session.otpTime = Date.now();
 
         req.flash('success', 'OTP resent successfully');
-        res.redirect('/user/OTPpage');
+        res.redirect('user/OTPpage');
     } catch (error) {
         console.log(`Error while resending OTP: ${error}`);
         res.status(500).send('Internal Server Error');
@@ -232,10 +232,10 @@ const googleAuthCallback = (req, res, next) => {
             }
             if (user.isBlocked) {
                 req.flash('error', 'User access is blocked by admin')
-                return res.redirect('/user/login')
+                return res.redirect('login')
             }
             if (!user) {
-                return res.redirect('/user/login');
+                return res.redirect('login');
             }
             req.logIn(user, (err) => {
                 if (err) {
@@ -243,7 +243,7 @@ const googleAuthCallback = (req, res, next) => {
                 }
                 req.session.user = user.id;
                 console.log('User logged in, redirecting to home');
-                return res.redirect('/user/home');
+                return res.redirect('/home');
             });
         })(req, res, next);
     } catch (err) {
@@ -259,7 +259,7 @@ const logout = (req, res) => {
                 console.log(`Error in logout ${error}`)
             }
         })
-        res.redirect('/user/home')
+        res.redirect('home')
     } catch (error) {
         console.log(`Error in user logout ${error}`)
     }
