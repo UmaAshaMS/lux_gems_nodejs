@@ -1,27 +1,37 @@
 <%- include('./layout/header') %>
-<%- include('./layout/navbar') %>
-<%- include('./layout/category_navbar') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
 
-    <div class="container my-5">
-        <h2 class="mb-4">Checkout</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- Address Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Delivery Address</h5>
-                            <% if (defaultAddress) { %>
-                            <p class="card-text"><strong><%= defaultAddress.fullName %></strong></p>
-                            <p class="card-text"><%= defaultAddress.addressLine1 %>, <%= defaultAddress.addressLine2 %></p>
-                            <p class="card-text"><%= defaultAddress.city %>, <%= defaultAddress.state %>, <%=defaultAddress.country %></p>
-                            <p class="card-text">PINCODE : <%= defaultAddress.pincode %></p>
-                            <p class="card-text">Phone Number : <%= defaultAddress.phoneNumber %></p>
-                            <button type="button" class="btn btn-secondary" data-toggle="modal"data-target="#addressModal">Change Address</button>
-
-                            <% } else { %>
-                                <p class="card-text">No default address available. Please add one.</p>
-                                <a href="/add-address" class="btn btn-primary">Add Address</a>
-                            <% } %>
+            <div class="container my-5">
+                <form method="POST" action="/submitPayment">
+                <h2 class="mb-4">Checkout</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Address Section -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Delivery Address</h5>
+                                <% if (defaultAddress) { %>
+                                    <p class="card-text"><strong><%= defaultAddress.fullName %></strong></p>
+                                    <p class="card-text"><%= defaultAddress.addressLine1 %>, <%= defaultAddress.addressLine2 %></p>
+                                    <p class="card-text"><%= defaultAddress.city %>, <%= defaultAddress.state %>,<%=defaultAddress.country %></p>
+                                    <p class="card-text">PINCODE : <%= defaultAddress.pincode %></p>
+                                    <p class="card-text">Phone Number : <%= defaultAddress.phoneNumber %></p>
+                                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#addressModal">Change Address</button>
+                                    
+                                    <% } else if(selectedAddress){ %>
+                                    <!-- Display selected address if available -->
+                                    <% const selectedAddr=userAddress.find(addr=> addr._id.toString() === selectedAddress.toString()); %>
+                                    <p class="card-text"><strong><%= selectedAddr.fullName %></strong></p>
+                                    <p class="card-text"><%= selectedAddr.addressLine1 %>, <%= selectedAddr.addressLine2 %></p>
+                                    <p class="card-text"><%= selectedAddr.city %>, <%= selectedAddr.state %>, <%=selectedAddr.country %></p>
+                                    <p class="card-text">PINCODE: <%= selectedAddr.pincode %></p>
+                                    <p class="card-text">Phone Number: <%= selectedAddr.phoneNumber %></p>
+                                    
+                                    <% } else { %>
+                                    <p class="card-text">No default address available. Please add one.</p>
+                                    <a href="/addAddress" class="btn btn-primary">Add Address</a>
+                                    <% } %>
                             </div>
                         </div>
 
@@ -67,14 +77,16 @@
                                                     </label>
 
                                                     <!-- Edit Button -->
-                                                    <button class=" ms-3"
-                                                        onclick="editAddress('<%= address._id %>')">Edit</button>
+                                                    <button class=" ms-3" onclick="editAddress('<%= address._id %>')"><i
+                                                            class="fas fa-edit"></i></button>
+                                                    <button class=" ms-3" onclick="editAddress('<%= address._id %>')"><i
+                                                            class="fas fa-trash-alt"></i></button>
                                                 </div>
                                                 <% }); %>
                                                     <% } else { %>
                                                         <p>No addresses available. Please add a new address.</p>
                                                         <% } %>
-                                                            <a href="/add-address" class="btn">Add New Address</a>
+                                                            <a href="/addAddress" class="btn">Add New Address</a>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
@@ -148,10 +160,12 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Payment Options</h5>
+                                
 
                                 <!-- Payment Options -->
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption"
+                                        value="0">
                                     <label class="form-check-label" for="walletOption">
                                         <strong>Wallet</strong> (Balance: Rs 50.00)
                                     </label>
@@ -184,7 +198,8 @@
                                     </div>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
+                                        value="1">
                                     <label class="form-check-label" for="upiOption">
                                         <strong>UPI</strong>
                                     </label>
@@ -193,7 +208,8 @@
                                     </div>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption"
+                                        value="2">
                                     <label class="form-check-label" for="codOption">
                                         <strong>Cash on Delivery (COD)</strong>
                                     </label>
@@ -204,6 +220,7 @@
                                 <div class="text-start">
                                     <button class="btn mt-3" id="submitPayment">Use this Payment Method</button>
                                 </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -215,68 +232,127 @@
                 </div>
             </div>
 
-
             <script>
-                document.getElementById('submitPayment').addEventListener('click', function () {
-                    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
 
-                    if (!paymentMethodSelected) {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Please select a payment method before proceeding.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        // Proceed with form submission
-                        document.getElementById('paymentForm').submit();
-                    }
-                });
+    document.getElementById('submitPayment').addEventListener('click', function (e) {
+    e.preventDefault(); // Prevent form submission
+    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
 
-                document.getElementById('placeOrderButton').addEventListener('click', function () {
-                    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+    if (!paymentMethodSelected) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Please select a payment method before proceeding.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    } else {
+        // Proceed with form submission
+        document.getElementById('paymentForm').submit();
+    }
+});
 
-                    if (!paymentMethodSelected) {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Please select a payment method before placing the order.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    } else {
-                        // Proceed with form submission
-                        document.getElementById('orderForm').submit();
-                    }
-                });
+document.getElementById('placeOrderButton').addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent default form submission
+    placeOrderButton();
+});
 
-                function confirmAddressSelection() {
-                    // Get the selected radio button value
-                    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-                    if (selectedAddress) {
-                        const addressId = selectedAddress.value;
+function placeOrderButton() {
+    console.log("Place order button clicked");
+    const addressRadio = document.querySelectorAll("input[name='selectedAddress']");
+    const paymentOptions = document.querySelectorAll("input[name='paymentMethod']");
+    
+    let selectedAddressOption = null;
+    let selectedPaymentOption = null;
+    const defaultAddressId = '<%= defaultAddress ? defaultAddress._id : "null" %>';
 
-                        // Send the selected address ID to the server to update the default address
-                        fetch('/update-default-address', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ addressId: addressId })
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Reload the page to update the displayed default address
-                                    location.reload();
-                                } else {
-                                    alert('Failed to update the default address.');
-                                }
-                            })
-                            .catch(error => console.error('Error:', error));
-                    } else {
-                        alert('Please select an address.');
-                    }
-                }
+    // Check if any address is selected
+    for (let i = 0; i < addressRadio.length; i++) {
+        if (addressRadio[i].checked) {
+            selectedAddressOption = addressRadio[i].value;
+            break;
+        }
+    }
+
+    // Use default address if no address is selected
+    if (!selectedAddressOption) {
+        if (defaultAddressId === "null") {
+            alert('Please select or add a delivery address.');
+            return;
+        } else {
+            selectedAddressOption = defaultAddressId;
+        }
+    }
+
+    // Check if a payment method is selected
+    for (let i = 0; i < paymentOptions.length; i++) {
+        if (paymentOptions[i].checked) {
+            selectedPaymentOption = paymentOptions[i].value;
+            break;
+        }
+    }
+
+    // If no payment method is selected, stop the process
+    if (!selectedPaymentOption) {
+        alert('Please select a payment method.');
+        return;
+    }
+
+    // Prepare order data
+    const URL = `/placeOrder`;
+    
+    // Send the order details to the server
+    fetch(URL, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+        addressId: selectedAddressOption,
+        paymentMethod: selectedPaymentOption,
+    })
+})
+
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const orderId = data.orderId;
+            // Redirect to success page or display order confirmation
+            Swal.fire({
+                title: 'Order Placed!',
+                text: 'Your order has been successfully placed.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = `/orderConfirmed/${orderId}`; // Redirect
+            });
+        } else {
+            // Show error message
+            Swal.fire({
+                title: 'Error',
+                text: 'There was an issue placing your order. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again later.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+}
+
+console.log({
+    addressId: selectedAddressOption,
+    paymentMethod: selectedPaymentOption,
+});
 
 
-            </script>
+</script>
+
+
+                

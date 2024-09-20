@@ -11,6 +11,7 @@ const forgotPassword = require('../controller/userController/forgotPassword');
 const userProfileControl = require('../controller/userController/profileController');
 const cartController = require('../controller/userController/cartController');
 const checkoutController = require('../controller/userController/checkoutController')
+const orderController = require('../controller/userController/orderController')
 
 // Serve static files from the 'uploads' directory
 user.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -42,9 +43,14 @@ user.get('/home', checkUserLogin, userHomeControl.home);
 // User Profile
 user.get('/profile', checkUserLogin, userProfileControl.profile);
 user.get('/address', checkUserLogin, userProfileControl.address);
-user.post('/add-address', checkUserLogin, userProfileControl.addAddress);
-user.delete('/delete-address/:index', checkUserLogin, userProfileControl.deleteAddress);
-user.get('/edit-address', checkUserLogin, userProfileControl.editAddress);
+user.post('/addAddress', checkUserLogin, userProfileControl.addAddress);
+user.delete('/deleteAddress/:index', checkUserLogin, userProfileControl.deleteAddress);
+user.get('/editAddress/:index', checkUserLogin, userProfileControl.editAddress);
+user.post('/editAddress/:index',checkUserLogin, userProfileControl.editAddressPost);
+user.put('/setDefaultAddress/:index', checkUserLogin, userProfileControl.setDefaultAddress)
+
+
+user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
 
 // Products
 user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
@@ -59,6 +65,10 @@ user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuanti
 
 //Checkout
 user.get('/checkout', checkUserLogin, checkoutController.checkout)
+
+//Order
+user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
+user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfirmed)
 
 // Logout
 user.post('/logout', userLoginControl.logout);

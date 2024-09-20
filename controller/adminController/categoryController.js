@@ -83,7 +83,7 @@ const editCategory = async (req, res) => {
         req.flash('success', 'Category added successfully');
         return res.status(200).json({ success: true, message: "Category updated successfully" });
 
-        
+    
     } catch (err) {
         console.error(`Error in editing category: ${err}`);
         req.flash('error', 'Server Error');

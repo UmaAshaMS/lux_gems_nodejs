@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const schema = new mongoose.Schema(
     {
     userId: { 
-        type: userSchema.Types.ObjectId, 
-        ref: 'User', 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'user', 
     },
     address: {
         fullName: String,
@@ -17,10 +17,19 @@ const schema = new mongoose.Schema(
     },
     items: [
         {
-            productId: { type: productSchema.Types.ObjectId, ref: 'Product',  },
-            name: String,
-            price: Number,
-            quantity: Number
+            productId: { 
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'product',  
+            },
+            productName : {
+                type: String
+            },
+            productPrice: {
+                type : String
+            },
+            productImage : {
+                type : String
+            }
         }
     ],
     paymentMethod: {
@@ -31,7 +40,8 @@ const schema = new mongoose.Schema(
         default: 'Pending'
     },
     orderDate: { 
-        type: Date, default: Date.now 
+        type: Date, 
+        default: Date.now 
     },
     totalAmount: {
         type: Number, 

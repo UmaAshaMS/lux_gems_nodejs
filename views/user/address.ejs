@@ -121,11 +121,15 @@
                                                                 <%= address.state %>, <%= address.country %>
                                     </p>
                                     <div class="d-flex justify-content-between">
-                                        <a href= "/editAddress" class="address-card-link text-primary" style="cursor:pointer"><i class="fas fa-edit"></i>
+                                        <a class="address-card-link text-primary" style="cursor:pointer"  
+                                        href="/editAddress/<%= index %>">
+                                        <i class="fas fa-edit"></i>
                                             Edit</a>
-                                        <a class="address-card-link text-danger" style="cursor:pointer" onclick="deleteAddress(`<%= index %>`)"
-                                            data-index="<%= index %>"><i class="fas fa-trash-alt"></i> Delete</a>
-                                        <a class="address-card-link text-success" style="cursor:pointer"><i class="fas fa-check"></i>
+                                        <a class="address-card-link text-danger" style="cursor:pointer"
+                                            onclick="deleteAddress(`<%= index %>`)" data-index="<%= index %>"><i
+                                                class="fas fa-trash-alt"></i> Delete</a>
+                                        <a class="address-card-link text-success" style="cursor:pointer" onclick="setAsDefault('<%= index %>')"><i
+                                                class="fas fa-check"></i>
                                             Set as Default</a>
                                     </div>
                                 </div>
@@ -137,6 +141,25 @@
 
 
             <script>
+                document.getElementById('addAddressForm').addEventListener(submit,(e) => {
+                    e.preventDefault();
+                
+                let validate = true;
+                let errorMessage = "";
+                
+                const fullName = getElementById('fullName').value
+                const phoneNumber = getElementById('phoneNumber').value
+                const email = getElementById('email').value
+                const addressLine1 = getElementById('addressLine1').value
+                const addressLine2 = getElementById('addressLine2').value
+                const city = getElementById('city').value
+                const pincode = getElementById('pincode').value
+                const state = getElementById('state')
+                const country = getElementById('country')
+                if(!fullName || fullName === 0){
+
+                }
+                })
                 //Function to add address
                 function addAddress(event) {
                     event.preventDefault()
@@ -162,56 +185,112 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     })
-                        .then(response => {
-                            if (response.ok) {
-                                // Swal.fire({
-                                //     title: 'Success!',
-                                //     text: 'Address added successfully.',
-                                //     icon: 'Success'
-                                // })
-                                
-                                alert("Address added successfully!");
-                                location.reload(); // Refresh the page to reflect changes
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message === 'Address added successfully') {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Address added successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.reload(); // Reload the page to reflect new address
+                                });
                             }
                             else {
-                                // Swal.fire({
-                                //     title: "Error!",
-                                //     text: 'Error in adding address.',
-                                //     icon: 'error'
-                                // })
-                                alert("Error! Address not added successfully!");
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    
+                                });
                             }
                         })
                         .catch(error => {
-                            console.log(`Error in adding address ${error}`)
-                        })
+                            console.error('Error adding address:', error);
+                        });
                 }
+
 
                 //function to delete address
                 function deleteAddress(index) {
                     console.log('Address index received:', index);
-                    if (confirm("Are you sure you want to delete this address ? ")) {
 
-                        const URL = `/deleteAddress/${index}`;
-                        fetch(URL, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert("Address deleted successfully!");
-                                    window.location.reload(); // Refresh the page to reflect changes
-                                } else {
-                                    alert("Failed to delete address. Please try again.");
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to delete this address?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+
+                            const URL = `/deleteAddress/${index}`;
+                            fetch(URL, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
                                 }
                             })
-                            .catch(err => {
-                                console.error("Error during address deletion:", err);
-                                // alert("An error occurred while deleting the address.");
-                            });
+                                .then(response => {
+                                    if (response.ok) {
+                                        Swal.fire({
+                                            title: 'Success!',
+                                        text: 'Address deleted successfully!',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                        })
+                                        window.location.reload(); // Refresh the page to reflect changes
+                                    } else {
+                                        Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Address deletion failed!',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                        })
+                                        ;
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error("Error during address deletion:", err);
+                                    // alert("An error occurred while deleting the address.");
+                                });
+                        }
                     }
+                    )
                 }
+
+                async function setAsDefault(index) {
+    try {
+        const response = await fetch(`/setDefaultAddress/${index}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ index })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            Swal.fire({
+                title: 'Sucess!',
+                text: 'Address set as default!',
+                icon: 'success',
+                confirmButtonText: 'OK',
+
+            })
+            // window.location.reload();
+        } else {
+            alert('Failed to set default address.');
+        }
+    } catch (error) {
+        console.error('Error setting default address:', error);
+    }
+}
+
 
             </script>

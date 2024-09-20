@@ -5,33 +5,64 @@ const categorySchema = require('../../model/categorySchema')
 const wishlistSchema = require('../../model/wishlistSchema')
 const { ObjectId } = require('mongodb')
 
-const checkout = async(req,res) => {
+const checkout = async (req, res) => {
     try {
-        const user = req.session.user
-        const category = await categorySchema.find({ isBlocked: 0 })
-        const cart = await cartSchema.findOne({ userId: new ObjectId(user) }).populate({path: 'product.productId',
-        select: 'productName productPrice'});
-        
-        const userAddress = await userSchema.findOne({ _id: user }, { address: 1, _id: 0 });
-        
-        // Default to the first address
+        const userId = req.session.user;
+        const category = await categorySchema.find({ isBlocked: 0 });
+        const cart = await cartSchema.findOne({ userId: new ObjectId(userId) }).populate({
+            path: 'product.productId',
+            select: 'productName productPrice productImage'
+        });
+
+        // Check if cart exists
+        if (!cart) {
+            return res.status(404).json({message:'Cart not found'});
+        }
+
+        const cartItems = cart.product || [];
+        const userAddress = await userSchema.findOne({ _id: userId }, { address: 1, _id: 0 });
+
         let defaultAddress = null;
         if (userAddress && userAddress.address && userAddress.address.length > 0) {
-            defaultAddress = userAddress.address[0]; 
+            defaultAddress = userAddress.address.find(addr => addr.isDefault === true);
         }
+
         // Calculate subtotal
-        const subtotal = cart.product.reduce((total, item) => total + (item.productId.productPrice * item.quantity), 0);
+        const subtotal = cartItems.reduce((total, item) => {
+            const productPrice = item.productId.productPrice || 0;
+            return total + (productPrice * item.quantity);
+        }, 0);
 
-         //delivery charge and promotion amount
-        const deliveryCharge = 0.00; // Change this value as needed
-        const promotionAmount = 0.00; // Change this value as needed
+        // Delivery charge and promotion amount
+        const deliveryCharge = 0.00; 
+        const promotionAmount = 0.00; 
 
-        res.render('user/checkOut', { title: 'Checkout', user, cart, category, userAddress, defaultAddress, subtotal, deliveryCharge, promotionAmount})
+        req.session.cart = {
+            cartItems,
+            subtotal,
+            deliveryCharge,
+            promotionAmount
+        };
+
+        req.session.address = defaultAddress || null;
+
+        res.render('user/checkOut', {
+            title: 'Checkout',
+            user: req.session.user,
+            cart,
+            cartItems,
+            category,
+            userAddress,
+            defaultAddress,
+            subtotal,
+            deliveryCharge,
+            promotionAmount
+        });
+    } catch (error) {
+        console.error(`Error in rendering checkout page: ${error}`);
+        res.status(500).json({message:'Internal Server Error'});
     }
-    catch (error) {
-        console.log(`Error in rendering checkout page, ${error}`)
-    }
-}
+};
 
 const updateDefaultAddress = async(req,res) => {
     try{
