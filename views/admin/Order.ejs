@@ -1,4 +1,4 @@
-<%-include('navbar') %>
+<%- include('navbar') %>
 <style>
     .Container {
         display: flex;
@@ -7,17 +7,12 @@
         border-radius: 10px;
     }
 
-
     .SideBar .btn {
         display: block;
-        /* Make buttons stack vertically */
         width: 150px;
         margin-bottom: 10px;
-        /* Space between buttons */
         text-align: center;
     }
-
-
 
     .SideBar {
         width: 250px;
@@ -32,12 +27,11 @@
         align-items: center;
         text-align: center;
         border-radius: 10px;
-
     }
 
     .SideBar a {
         text-decoration: none;
-        color: inherit
+        color: inherit;
     }
 
     .Customer-Page {
@@ -51,16 +45,11 @@
         flex: 1;
         margin-left: 0px;
         padding: 20px;
-        /* Arrange children side by side */
-        /* Space between sidebar and table */
-        
     }
 
     .Customer-container table {
-
         text-align: center;
         flex-direction: column;
-
     }
 
     .btn {
@@ -73,18 +62,18 @@
         border: 1px;
         border-radius: 4px;
         gap: 10px;
-        width:800px;
+        width: 800px;
         margin-top: 2%;
-
     }
 
     .Search form {
-            display: flex;
-        }
+        display: flex;
+    }
+
     .form-control {
-            width: 500px;
-            margin-left: 90px;
-        }
+        width: 500px;
+        margin-left: 90px;
+    }
 
     .searchBtn {
         flex: 2;
@@ -92,8 +81,6 @@
         color: white;
         border: 2px;
         flex-shrink: 0;
-        /* Prevent the button from shrinking */
-
     }
 
     .table {
@@ -104,14 +91,15 @@
         text-align: center;
         align-self: center;
     }
-    .btn a{
+
+    .btn a {
         text-decoration: none;
-        color:black
+        color: black;
     }
 </style>
+
 <div class="Customer-container">
     <div class="Container">
-
         <div class='SideBar'>
             <a href="/admin/home" class="btn btn-dark">Dashboard</a>
             <a href="/admin/Category" class="btn btn-dark">Category</a>
@@ -125,87 +113,139 @@
             </form>
         </div>
     </div>
-<table class="table table-hover table-bordered">
-    <thead>
-        <tr>
-            <th scope="col">Sl.No</th>
-            <th scope="col">User Name</th>
-            <th scope="col">Order ID</th>
-            <th scope="col">Product Details</th>
-            <!-- <th scope="col">Quantity</th> -->
-            <th scope="col">Status</th>
-            <th scope="col">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% orderDetails.forEach((order, index) => { %>
+    <table class="table table-hover table-bordered">
+        <thead>
             <tr>
-                <th scope="row"><%= index + 1 %></th>
-                <td><%= order.userId ? order.userId.name : "N/A" %></td> 
-                <td><%= order._id %></td>
-                <td>
-                    <% order.items.forEach(item => { %>
-                        <div>
-                            <strong><%= item.productName %></strong> 
-                            <!-- <img src="<%= item.productImage%>" alt="img" style="width: 50px; height: auto;"> Thumbnail -->
-                            <br>
-                        </div>
-                        
-                    <% }) %>
-                    <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>" 
-                        style="text-decoration: underline;"> ViewOrderDetails</a></button>
-                </td>
-                <!-- <td><%= order.items.length %></td>  -->
-                <td><%= order.status %></a></td>
-                <td>
-                    
-                    
-
-                    
-                    <br>
-                    <!-- <a href="/admin/cancelOrder/<%= order._id %>" class="cancel-order" style="color:red">CancelOrder</a> -->
-                    <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
-                        <button type="submit" class="cancel-order btn btn-outline-danger">CancelOrder</button>
-                    </form>
-                    <br>
-                    <a href="/admin/changeStatus/<%= order._id  %>" class="cancel-order" style="color:green">ChangeStatus</a>
-                </td>
+                <th scope="col">Sl.No</th>
+                <th scope="col">User Name</th>
+                <th scope="col">Order ID</th>
+                <th scope="col">Product Details</th>
+                <th scope="col">Status</th>
+                <th scope="col">Action</th>
             </tr>
-        <% }) %>
-    </tbody>
-    
-</table>
-</div>
-</div>
+        </thead>
+        <tbody>
+            <% orderDetails.forEach((order, index) => { %>
+                <tr>
+                    <th scope="row"><%= index + 1 %></th>
+                    <td><%= order.userId ? order.userId.name : "N/A" %></td> 
+                    <td><%= order._id %></td>
+                    <td>
+                        <% order.items.forEach(item => { %>
+                            <div>
+                                <strong><%= item.productName %></strong> 
+                                <br>
+                            </div>
+                        <% }) %>
+                        <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>" 
+                            style="text-decoration: underline;"> ViewOrderDetails</a></button>
+                    </td>
+                    <td><%= order.status %></td>
+                    <td>
+                        <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
+                            <button type="submit" class="cancel-order btn btn-outline-danger">CancelOrder</button>
+                        </form>
+                        <br>
+                        <a href="#" data-order-id="<%= order._id %>" class="change-status" style="color:green">ChangeStatus</a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 </div>
 
-
+<!-- Change Status Modal -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStatusModalLabel">Change Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <select id="orderStatusSelect" class="form-select">
+                    <option value="Order Placed">Order Placed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Returned">Returned</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmChangeStatus">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Handle cancel order forms
-        const cancelOrderForms = document.querySelectorAll('.cancel-order');
+document.addEventListener('DOMContentLoaded', () => {
+    // Handle cancel order forms
+    const cancelOrderForms = document.querySelectorAll('.cancel-order');
 
-        cancelOrderForms.forEach(form => {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault(); // Prevent the default form submission
+    cancelOrderForms.forEach(form => {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission
 
-                // Confirm cancellation
-                swal({
-                    title: "Are you sure?",
-                    text: "Order will be Rejected!",
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: true,
-                }).then((willCancel) => {
-                    if (willCancel) {
-                        // If confirmed, submit the form
-                        form.submit();
-                    } else {
-                        swal("Your order is safe!");
-                    }
-                });
+            // Confirm cancellation
+            swal({
+                title: "Are you sure?",
+                text: "Order will be Rejected!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((willCancel) => {
+                if (willCancel) {
+                    // If confirmed, submit the form
+                    form.submit();
+                } else {
+                    swal("Your order is safe!");
+                }
             });
         });
     });
+
+    // Change status modal functionality
+    const changeStatusLinks = document.querySelectorAll('.change-status');
+    changeStatusLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            const orderId = link.getAttribute('data-order-id');
+
+            // Set the order ID in a custom attribute or variable if needed
+            document.getElementById('confirmChangeStatus').setAttribute('data-order-id', orderId);
+
+            // Show the modal
+            const changeStatusModal = new bootstrap.Modal(document.getElementById('changeStatusModal'));
+            changeStatusModal.show();
+        });
+    });
+
+    // Confirm status change
+    document.getElementById('confirmChangeStatus').addEventListener('click', () => {
+        const orderId = document.getElementById('confirmChangeStatus').getAttribute('data-order-id');
+        const selectedStatus = document.getElementById('orderStatusSelect').value;
+
+        // Submit the status change form
+        fetch(`/admin/changeStatus/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: selectedStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to change status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
 </script>

@@ -1,0 +1,120 @@
+<%- include('./layout/header') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
+
+
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form id="addAddressForm" onsubmit="return addAddress(event)">
+                        <div class="form-group text-center">
+                            <label for="fullName" >Full Name:</label>
+                            <input type="text" class="form-control mx-auto" id="fullName" name="fullName" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="phoneNumber" >Phone Number:</label>
+                            <input type="text" class="form-control mx-auto" id="phoneNumber" name="phoneNumber" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="email" >Email ID:</label>
+                            <input type="email" class="form-control mx-auto" id="email" name="email" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="addressLine1">Address Line 1:</label>
+                            <input type="text" class="form-control mx-auto" id="addressLine1" name="addressLine1" required>
+                        </div>
+                        <div class="form-group text-center">
+                            <label for="addressLine2" >Address Line 2:</label>
+                            <input type="text" class="form-control mx-auto" id="addressLine2" name="addressLine2">
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label for="city">City:</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="pincode">PINCODE:</label>
+                                <input type="text" class="form-control" id="pincode" name="pincode" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label for="state">State:</label>
+                                <select class="form-control" id="state" name="state" required>
+                                    <option value="" disabled selected>Select your state</option>
+                                    <option value="Kerala">Kerala</option>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="country">Country:</label>
+                                <select class="form-control" id="country" name="country" required>
+                                    <option value="" disabled selected>Select your country</option>
+                                    <option value="India">India</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Add Address</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+
+
+<script>
+    //Function to add address
+    function addAddress(event) {
+                    event.preventDefault()
+
+                    // Collect data from form
+                    const form = document.getElementById('addAddressForm');
+                    const formData = new FormData(form);
+                    const data = {
+                        fullName: formData.get('fullName'),
+                        phoneNumber: formData.get('phoneNumber'),
+                        email: formData.get('email'),
+                        addressLine1: formData.get('addressLine1'),
+                        addressLine2: formData.get('addressLine2'),
+                        city: formData.get('city'),
+                        pincode: formData.get('pincode'),
+                        state: formData.get('state'),
+                        country: formData.get('country')
+                    };
+
+                    const URL = `/addAddressCheckout`;
+                    fetch(URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message === 'Address added successfully') {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Address added successfully!',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.href = `/checkout`
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error adding address:', error);
+                        });
+                }
+
+
+</script>

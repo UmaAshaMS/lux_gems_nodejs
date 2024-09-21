@@ -54,6 +54,7 @@ const checkout = async (req, res) => {
             category,
             userAddress,
             defaultAddress,
+            selectedAddress: defaultAddress,
             subtotal,
             deliveryCharge,
             promotionAmount
@@ -82,7 +83,52 @@ const updateDefaultAddress = async(req,res) => {
     }
 }
 
+const addNewAddress = async(req,res) => {
+    try{
+        const category = await categorySchema.find({ isBlocked: 0 });
+        res.render('user/addAddressCheckout' , {title:'Add new address', category, user:req.session.user})
+    }
+    catch(error){
+        console.log(`Error in rendering adding new address page in checkout, ${error}`)
+    }
+}
+const addNewAddressPost = async(req,res) => {
+    const userID = req.session.user
+    try {
+        const { fullName, phoneNumber, email, addressLine1, addressLine2, city, pincode, state, country } = req.body;
+        console.log('Form details in adding address', req.body.fullName)
+
+        const user = await userSchema.findOne({_id:userID})
+
+        const newAddress = {
+          fullName,
+          phoneNumber,
+          email,
+          addressLine1,
+          addressLine2,
+          city,
+          pincode,
+          state,
+          country,
+        };
+
+        user.address.push(newAddress)
+        // Save the address to the database
+        await user.save();
+    
+        
+        res.status(200).json({ message: 'Address added successfully'});
+        console.log('New Address added successfully')
+      } 
+      catch (error) {
+        console.log(`Failed to add address , error: ${error}`)
+        res.status(500).json({ message: 'An error occured while adding address' });
+      }
+    }
+
 module.exports = {
     checkout,
     updateDefaultAddress,
+    addNewAddress,
+    addNewAddressPost,
 }

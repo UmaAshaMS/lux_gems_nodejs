@@ -47,6 +47,7 @@ admin.delete('/deleteProduct/:id', checkAdminLogin, adminProductController.delet
 admin.get('/Orders', checkAdminLogin, adminOrderController.order )
 admin.get('/orderDetails/:orderId', checkAdminLogin, adminOrderController.orderDetails)
 admin.post('/cancelOrder/:orderId', checkAdminLogin, adminOrderController.cancelOrder)
+admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.changeStatus)
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)
 

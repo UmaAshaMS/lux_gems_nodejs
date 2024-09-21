@@ -80,7 +80,7 @@ const orderConfirmed = async(req,res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const orderId = req.params.orderId; 
+        const orderId = req.params.orderId;
 
         const order = await orderSchema.findById(orderId).populate('items.productId');
 
@@ -96,8 +96,18 @@ const cancelOrder = async (req, res) => {
         for (const item of order.items) {
             const product = await productSchema.findById(item.productId._id);
             if (product) {
-                product.stock += item.quantity; 
-                await product.save();
+                // Ensure stock and quantity are valid numbers
+                const quantity = Number(item.quantity);
+                const stock = Number(product.stock) || 0; // Default to 0 if undefined
+
+                if (!isNaN(quantity)) {
+                    product.stock = stock + quantity; 
+                    await product.save();
+                } else {
+                    console.error(`Invalid quantity for item: ${item.productId._id}`);
+                }
+            } else {
+                console.error(`Product not found: ${item.productId._id}`);
             }
         }
 
@@ -107,6 +117,7 @@ const cancelOrder = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
 
 
 

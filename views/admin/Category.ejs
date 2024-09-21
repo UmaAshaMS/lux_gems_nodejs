@@ -390,11 +390,11 @@
 
                     if (data) {
                         // if (data.success) {
-                            // Swal.fire({
-                           //     icon: 'success',
-                            //     title: 'Success',
-                            //     text:' ',
-                            // })
+                        // Swal.fire({
+                        //     icon: 'success',
+                        //     title: 'Success',
+                        //     text:' ',
+                        // })
                         // Populate modal form fields with category details
                         console.log(`data._id: ${data._id}`)
                         document.getElementById('editCategoryId').value = data._id;
@@ -448,18 +448,20 @@
         //Function to Add category 
         const addCategoryForm = document.getElementById('categoryForm')
         const categoryName = document.getElementById('categoryName')
-
+        const categoryValue = categoryName.value.trim().toLowerCase()
         addCategoryForm.addEventListener('submit', (event) => {
             event.preventDefault()
             document.getElementsByClassName('category-validation')[0].innerHTML = ''
 
 
-            if (categoryName.value.trim() === 0 || categoryName.value.length > 50 || !isNaN(categoryName.value)) {
-                document.getElementsByClassName('category-validation')[0].innerHTML = 'invalid category'
-            } 
-            
+            if (categoryValue === '' || categoryName.value.length > 50 || !isNaN(categoryValue)) {
+                document.getElementsByClassName('category-validation')[0].innerHTML = 'Invalid category';
+            }
+            else if (existingCategories.includes(categoryValue)) {
+                document.getElementsByClassName('category-validation')[0].innerHTML = 'Category already exists';
+            }
             else {
-                addCategoryForm.submit()
+                addCategoryForm.submit(); // Submit if all validations pass
             }
         })
         //Function to block the Category

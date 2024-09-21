@@ -86,7 +86,7 @@
                                                     <% } else { %>
                                                         <p>No addresses available. Please add a new address.</p>
                                                         <% } %>
-                                                            <a href="/addAddress" class="btn">Add New Address</a>
+                                                            <a href="/addAddressCheckout" class="btn">Add New Address</a>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary"
@@ -231,7 +231,8 @@
                     <button class="btn btn-black btn-lg py-3" id="placeOrderButton">Place Order</button>
                 </div>
             </div>
-
+            <!-- hidden input to store selectd address -->
+            <input type="hidden" id="selectedAddressId" name="selectedAddressId">
             <script>
 
     document.getElementById('submitPayment').addEventListener('click', function (e) {
@@ -351,6 +352,110 @@ console.log({
     paymentMethod: selectedPaymentOption,
 });
 
+document.querySelector('.btn-close').addEventListener('click', function() {
+    const modal = document.getElementById('addressModal');
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+});
+
+let editingAddressId = null;
+
+function editAddress(addressId) {
+    // Find the address details from userAddress
+    const addressToEdit = userAddress.address.find(addr => addr._id === addressId);
+    
+    // Populate the form with address details
+    document.getElementById('fullName').value = addressToEdit.fullName;
+    document.getElementById('addressLine1').value = addressToEdit.addressLine1;
+    document.getElementById('addressLine2').value = addressToEdit.addressLine2;
+    document.getElementById('city').value = addressToEdit.city;
+    document.getElementById('state').value = addressToEdit.state;
+    document.getElementById('country').value = addressToEdit.country;
+    document.getElementById('pincode').value = addressToEdit.pincode;
+    document.getElementById('phoneNumber').value = addressToEdit.phoneNumber;
+
+    // Show the form and change the button to 'Update'
+    document.getElementById('formTitle').innerText = 'Edit Address';
+    editingAddressId = addressId;
+    document.getElementById('addressForm').style.display = 'block';
+}
+
+document.getElementById('saveAddressButton').addEventListener('click', function() {
+    const addressData = {
+        fullName: document.getElementById('fullName').value,
+        addressLine1: document.getElementById('addressLine1').value,
+        addressLine2: document.getElementById('addressLine2').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        country: document.getElementById('country').value,
+        pincode: document.getElementById('pincode').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+    };
+
+    if (editingAddressId) {
+       
+        fetch(`/updateAddress/${editingAddressId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(addressData),
+        }).then(response => response.json()).then(data => {
+            // Handle success or error
+            if (data.success) {
+                // Update UI accordingly and close modal
+                Swal.fire('Updated!', 'Address updated successfully.', 'success');
+                location.reload(); // Reload to reflect changes
+            } else {
+                Swal.fire('Error!', data.message, 'error');
+            }
+        });
+    } else {
+        
+        fetch('/addAddress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(addressData),
+        }).then(response => response.json()).then(data => {
+            // Handle success or error
+            if (data.success) {
+                Swal.fire('Added!', 'Address added successfully.', 'success');
+                location.reload(); // Reload to reflect changes
+            } else {
+                Swal.fire('Error!', data.message, 'error');
+            }
+        });
+    }
+});
+
+function confirmAddressSelection() {
+    const addressRadio = document.querySelectorAll("input[name='selectedAddress']");
+    let selectedAddressOption = null;
+
+    // Find the selected address
+    for (let i = 0; i < addressRadio.length; i++) {
+        if (addressRadio[i].checked) {
+            selectedAddressOption = addressRadio[i].value;
+            break;
+        }
+    }
+
+    if (selectedAddressOption) {
+        // Store the selected address for later use
+        document.getElementById('selectedAddressId').value = selectedAddressOption;
+
+        // Close the modal
+        const modal = document.getElementById('addressModal');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+    } else {
+        alert('Please select an address.');
+    }
+}
 
 </script>
 

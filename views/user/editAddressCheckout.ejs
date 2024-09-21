@@ -1,0 +1,81 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6"> <!-- Adjust the width here -->
+            <form action='/editAddress/<%= index %>' method='POST' id="editAddressForm"
+                onsubmit="return editAddress(event)">
+                <!-- First Four Fields Centered -->
+                <div class="form-group text-center">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" class="form-control mx-auto " id="fullName" name="fullName"
+                        value="<%=address.fullName%>">
+                </div>
+                <div class="form-group text-center">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="text" class="form-control mx-auto" id="phoneNumber" name="phoneNumber"
+                        value="<%= address.phoneNumber  %>">
+                </div>
+                <div class="form-group text-center">
+                    <label for="email">Email ID:</label>
+                    <input type="email" class="form-control mx-auto" id="email" name="email"
+                        value="<%= address.email  %>">
+                </div>
+                <div class="form-group text-center">
+                    <label for="addressLine1">Address Line 1:</label>
+                    <input type="text" class="form-control mx-auto" id="addressLine1" name="addressLine1"
+                        value="<%=address.addressLine1  %>">
+                </div>
+
+                <!-- Last Two Rows Centered Below -->
+                <div class="form-group text-center">
+                    <label for="addressLine2">Address Line 2:</label>
+                    <input type="text" class="form-control mx-auto" id="addressLine2" name="addressLine2"
+                        value="<%=address.addressLine2  %>">
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="city">City:</label>
+                        <input type="text" class="form-control text-center" id="city" name="city"
+                            value="<%=address.city  %>">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="pincode">PINCODE:</label>
+                        <input type="text" class="form-control text-center" id="pincode" name="pincode"
+                            value="<%=address.pincode  %>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="state">State:</label>
+                        <select class="form-control" id="state" name="state">
+                            <option value="" disabled>Select your state</option>
+                            <% const states=["Kerala", "Tamil Nadu" , "Karnataka" ]; %>
+                                <% states.forEach(state=> { %>
+                                    <option value="<%= state %>" <%=address.state===state ? 'selected' : ''
+                                        %> >
+                                        <%= state %>
+                                    </option>
+                                    <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="country">Country:</label>
+                        <select class="form-control" id="country" name="country">
+                            <option value="" disabled>Select your country</option>
+                            <% const country=["India" ]; %>
+                                <% country.forEach(country => { %>
+                                    <option value="<%= country %>" <%=address.country === country ? 'selected' : ''
+                                        %> >
+                                        <%= country %>
+                                    </option>
+                                    <% }) %>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group text-center mt-4">
+                    <button type="submit" class="btn btn-primary">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 const userSchema = require('../../model/userSchema')
 const categorySchema = require('../../model/categorySchema')
 const orderSchema = require('../../model/orderSchema')
+const bcrypt = require('bcrypt')
 
 
 const profile = async(req, res) => {
@@ -183,25 +184,57 @@ const orderHistory = async(req,res) => {
 const editProfile = async(req,res) => {
     try{
         const category = await categorySchema.find();
-        const user = req.session.user
+        const userId = req.session.user
+        const user = await userSchema.findById(userId, {address:0})
 
-        let defaultAddress = null;
-        // Check if the user has any addresses and if any of them is marked as default
-        if (user && user.address && user.address.length > 0) {
-            defaultAddress = userData.address.find(addr => addr.isDefault === true);
-        }
-        res.render('user/editProfile',{title:'Edit User Profile', category, user, address:defaultAddress})
+        res.render('user/editProfile',{title:'Edit User Profile', category, user})
     }
     catch(error){
         console.log(`Error in rendering user profile edit page, ${error}`)
     }
 }
 
+const editProfilePost = async(req,res) => {
+    try{
+        const userId = req.session.user
+        const {fullName, phoneNumber, currentPassword, confirmPassword, newPassword} = req.body
+        console.log('----------------------------------',req.body)
+
+        const user = await userSchema.findById(userId, {address:0})
+
+        const isPasswordValid = await bcrypt.compare(currentPassword.trim(), user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: 'Current password is incorrect' });
+        }
+
+
+        // Check if new passwords match
+        if (newPassword !== confirmPassword) {
+            // res.status(400).send('New passwords do not match')
+            return redirect('editProfile');
+        }
+
+        user.name = fullName;
+        user.phoneNumber = phoneNumber;
+
+        if (newPassword) {
+            user.password = await bcrypt.hash(newPassword, 10); 
+        }
+
+        await user.save()
+        
+        res.redirect('profile')
+    }
+    catch(error){
+        console.log(`Error in saving edited profile info,${error}`)
+    }
+}
 
 
 module.exports = {
     profile,
     editProfile,
+    editProfilePost,
     address,
     addAddress,
     deleteAddress,
