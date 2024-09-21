@@ -42,6 +42,7 @@ user.get('/home', checkUserLogin, userHomeControl.home);
 
 // User Profile
 user.get('/profile', checkUserLogin, userProfileControl.profile);
+user.get('/editProfile', checkUserLogin, userProfileControl.editProfile)
 user.get('/address', checkUserLogin, userProfileControl.address);
 user.post('/addAddress', checkUserLogin, userProfileControl.addAddress);
 user.delete('/deleteAddress/:index', checkUserLogin, userProfileControl.deleteAddress);
@@ -69,6 +70,7 @@ user.get('/checkout', checkUserLogin, checkoutController.checkout)
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
 user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfirmed)
+user.post('/cancelOrder/:orderId', checkUserLogin, orderController.cancelOrder)
 
 // Logout
 user.post('/logout', userLoginControl.logout);

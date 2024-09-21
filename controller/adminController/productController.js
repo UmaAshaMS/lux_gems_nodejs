@@ -202,16 +202,15 @@ const editProduct = async (req, res) => {
     }
 }
 
-
 const editProductPost = async (req, res) => {
     console.log('Edit product form submitted');
     try {
         console.log('Request body:', req.body);
 
-        // Extract deletedImages from request body
+        
         const deletedImages = JSON.parse(req.body.deletedImages || '[]');
 
-        // Handle image deletion from filesystem
+        
         deletedImages.forEach(imagePath => {
             const absolutePath = path.resolve(__dirname, '../../uploads', imagePath); 
             if (fs.existsSync(absolutePath)) {
@@ -222,7 +221,6 @@ const editProductPost = async (req, res) => {
             }
         });
 
-        // Initialize an array to hold the image filenames
         let newProductImages = [];
         if (req.files && req.files.productImage) {
             // Map through uploaded files and get their filenames
@@ -233,6 +231,13 @@ const editProductPost = async (req, res) => {
         // Extract other form data
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body;
         const productId = req.params.id;
+
+        // Fetch the category using productCategory from the form
+        const category = await categorySchema.findById(productCategory);
+        if (!category) {
+            req.flash('error', 'Category not found.');
+            return res.redirect(`/admin/editProduct/${req.params.id}`);
+        }
 
         // Find the product by its ID
         const product = await productSchema.findById(productId);
@@ -245,18 +250,18 @@ const editProductPost = async (req, res) => {
         // Prepare the updated image list
         const updatedImages = [
             ...product.productImage.filter(img => !deletedImages.includes(img)), // Keep existing images not marked for deletion
-            ...newProductImages // Add new images
+            ...newProductImages 
         ];
 
         // Prepare the update data
         const updateData = {
             productName,
-            productCategory : category._id,
+            productCategory: category._id, 
             productPrice,
             stock,
             productDescription,
             productDiscount,
-            productImage: updatedImages // Update the image list
+            productImage: updatedImages 
         };
 
         // Update the product in the database
@@ -274,6 +279,8 @@ const editProductPost = async (req, res) => {
         res.redirect(`/admin/editProduct/${req.params.id}`);
     }
 };
+
+
 const deleteImage = (req, res) => {
     const imageName = decodeURIComponent(req.params.imageName); // Decode image name
     const absolutePath = path.resolve(__dirname, '../../uploads', imageName);

@@ -185,13 +185,18 @@ const updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
         }
 
-        // // Find the product to check stock
-        // const product = await productSchema.findById(productId);
+        // Find the product to check stock
+        const product = await productSchema.findById(productId);
 
-        // if (!product) {
-        //     return res.status(404).json({ success: false, message: 'Product not found' });
-        // }
+        if (!product || product.isActive === 0) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
 
+        // Check if the product is blocked
+        if (!product.isActive) {
+            return res.status(400).json({ success: false, message: 'Insufficient Stock (Product is blocked).' });
+        }
+        
         // Calculate new quantity
         const newQuantity = item.quantity + change;
 

@@ -28,7 +28,8 @@ const placeOrder = async (req, res) => {
                 productId: item.productId._id,
                 productName: item.productId.productName,
                 productPrice: item.productId.productPrice,
-                productImage: item.productId.productImage[0]
+                productImage: item.productId.productImage[0],
+                quantity : item.quantity
             })),
             paymentMethod: paymentMethod,
             totalAmount: cart.subtotal + cart.deliveryCharge - cart.promotionAmount
@@ -77,11 +78,44 @@ const orderConfirmed = async(req,res) => {
     }
 }
 
+const cancelOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId; 
+
+        const order = await orderSchema.findById(orderId).populate('items.productId');
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Update order status 
+        order.status = 'Cancelled';
+        await order.save();
+
+        // Update stock for each product
+        for (const item of order.items) {
+            const product = await productSchema.findById(item.productId._id);
+            if (product) {
+                product.stock += item.quantity; 
+                await product.save();
+            }
+        }
+
+        res.json({ message: 'Order canceled successfully' });
+    } catch (error) {
+        console.error(`Error canceling order: ${error}`);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+
+
 
 
 
 module.exports = {
     placeOrder,
     orderConfirmed,
+    cancelOrder 
 
 }

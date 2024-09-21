@@ -29,7 +29,10 @@ const schema = new mongoose.Schema(
             },
             productImage : {
                 type : String
-            }
+            },
+            quantity : {
+                type : Number
+            },
         }
     ],
     paymentMethod: {
@@ -37,7 +40,7 @@ const schema = new mongoose.Schema(
     },
     status: {
         type: String, 
-        default: 'Pending'
+        default: 'Order Placed'
     },
     orderDate: { 
         type: Date, 
@@ -45,7 +48,8 @@ const schema = new mongoose.Schema(
     },
     totalAmount: {
         type: Number, 
-    }
-})
+    },
+    
+}, { timestamps: true })
 
 module.exports = mongoose.model('order', schema)

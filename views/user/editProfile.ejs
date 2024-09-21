@@ -1,27 +1,9 @@
-<%-include('./layout/header')%>
-<%-include('./layout/navbar')%>
-<%-include('./layout/category_navbar') %>
+<%- include('./layout/header') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
 
-<h4>Your Account</h4>
-<div class="userProfileConatiner">
-    
-    <!-- Sidebar -->
-    <div class="userProfile">
-        <form action="/orderHistory" method="GET"><button>Your Orders
-            <p>Track, Return, Cancel and Buy Again</p>
-        </button></form>
-        <form action="/editProfile" method="GET"><button>Login and Security
-            <p>Edit Login, name, mobile number, and Password </p>
-        </button></form>
-        <form action="/address" method="GET"><button>Your Address
-            <p>Edit Address and Add multiple Addresses.</p>
-        </button></form>
-        <form action="/Wallet" method="GET"><button>Wallet
-            <p>Add money to your balance.</p>
-        </button></form>
-    </div>
 
-    <!-- Form Section -->
+        <!-- Form Section -->
     <div class="form-container">
         <h2>User Information</h2>
         <form>
@@ -67,5 +49,3 @@
                 </input>
             </div>
         </form>
-    </div>
-</div>

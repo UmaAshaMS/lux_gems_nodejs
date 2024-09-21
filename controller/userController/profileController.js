@@ -1,5 +1,6 @@
 const userSchema = require('../../model/userSchema')
 const categorySchema = require('../../model/categorySchema')
+const orderSchema = require('../../model/orderSchema')
 
 
 const profile = async(req, res) => {
@@ -169,12 +170,30 @@ const setDefaultAddress = async(req,res) => {
 const orderHistory = async(req,res) => {
     try{
         const category = await categorySchema.find();
+        const orders = await orderSchema.find();
         const user = req.session.user
 
-        res.render('user/orderHistory', {title:'Order History' , category, user})
+        res.render('user/orderHistory', {title:'Order History' , category, user, order : orders})
     }
     catch(error){
         console.log(`Error in rendering order history page, ${error}`)
+    }
+}
+
+const editProfile = async(req,res) => {
+    try{
+        const category = await categorySchema.find();
+        const user = req.session.user
+
+        let defaultAddress = null;
+        // Check if the user has any addresses and if any of them is marked as default
+        if (user && user.address && user.address.length > 0) {
+            defaultAddress = userData.address.find(addr => addr.isDefault === true);
+        }
+        res.render('user/editProfile',{title:'Edit User Profile', category, user, address:defaultAddress})
+    }
+    catch(error){
+        console.log(`Error in rendering user profile edit page, ${error}`)
     }
 }
 
@@ -182,6 +201,7 @@ const orderHistory = async(req,res) => {
 
 module.exports = {
     profile,
+    editProfile,
     address,
     addAddress,
     deleteAddress,

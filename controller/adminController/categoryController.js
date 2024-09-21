@@ -2,7 +2,6 @@ const categorySchema = require('../../model/categorySchema')
 const productSchema = require('../../model/productSchema')
 const mongoose = require('mongoose')
 
-
 const category = async (req, res) => {
     try {
 
@@ -29,8 +28,6 @@ const getCategoryDetails = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 };
-
-
 
 const addCategory = async (req, res) => {
     try {

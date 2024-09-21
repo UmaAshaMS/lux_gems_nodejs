@@ -1,40 +1,71 @@
 <%- include('./layout/header') %>
-    <%- include('./layout/navbar') %>
-        <%- include('./layout/category_navbar') %>
+<%- include('./layout/navbar') %>
+<%- include('./layout/category_navbar') %>
 
-            <div>
-                <h4>Order Confirmation</h4>
-                <p>Thank you for your order! Your order has been successfully placed.</p>
+<div class="order-confirmation-container">
+    <div class="order-confirmation-content">
+        <h4>Order Confirmation</h4>
+        <p>Thank you for your order! Your order has been successfully placed.</p>
 
-                <h4>Order Summary:</h4>
-                <p>Order ID: <%= order._id %>
-                </p>
-                <p>Total Amount: $<%= order.totalAmount %>
-                </p>
+        <h4>Order Summary:</h4>
+        <p>Order ID: <%= order._id %></p>
+        <p>Total Amount: Rs<%= order.totalAmount %></p>
 
-                <h5>Items Ordered:</h5>
-                <ul>
-                    <% order.items.forEach(item=> { %>
-                        <li>
-                            <%= item.name %> - <%= item.quantity %> x Rs<%= item.price %>
-                        </li>
-                        <% }) %>
-                </ul>
+        <h5>Items Ordered:</h5>
+        <ul>
+            <% order.items.forEach(item => { %>
+                <li>
+                    <%= item.productName %> - <%= item.quantity %> Rs<%= item.productPrice %>
+                </li>
+            <% }) %>
+        </ul>
 
-                <h5>Delivery Address:</h5>
-                <p><strong>
-                        <%= order.address.fullName %>
-                    </strong></p>
-                <p>
-                    <%= order.address.addressLine1 %>, <%= order.address.addressLine2 %>
-                </p>
-                <p>
-                    <%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %>
-                </p>
-                <p>PINCODE: <%= order.address.pincode %>
-                </p>
-                <p>Phone Number: <%= order.address.phoneNumber %>
-                </p>
+        <h5>Delivery Address:</h5>
+        <p><strong><%= order.address.fullName %></strong></p>
+        <p><%= order.address.addressLine1 %>, <%= order.address.addressLine2 %></p>
+        <p><%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %></p>
+        <p>PINCODE: <%= order.address.pincode %></p>
+        <p>Phone Number: <%= order.address.phoneNumber %></p>
 
-                <a href="/all-products" class="btn btn-primary">Continue Shopping</a>
-            </div>
+        <a href="/all-products" class="btn btn-primary">Continue Shopping</a>
+    </div>
+</div>
+
+<style>
+    .order-confirmation-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* Make sure the div takes the full viewport height */
+        padding: 20px;
+        background-color: #f9f9f9; /* Optional: Light background to distinguish */
+    }
+
+    .order-confirmation-content {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for better appearance */
+        max-width: 600px;
+        width: 100%; /* Ensures responsiveness */
+        text-align: center; /* Center-align text */
+    }
+
+    .order-confirmation-content h4, .order-confirmation-content h5 {
+        margin-bottom: 20px;
+    }
+
+    .order-confirmation-content ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .order-confirmation-content li {
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        display: inline-block;
+        margin-top: 20px;
+    }
+</style>

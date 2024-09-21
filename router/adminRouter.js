@@ -8,6 +8,7 @@ const adminLoginControl = require('../controller/adminController/loginController
 const adminUsercontrol = require('../controller/adminController/userController')
 const adminCategoryControl = require('../controller/adminController/categoryController')
 const adminProductController = require('../controller/adminController/productController')
+const adminOrderController = require('../controller/adminController/orderController')
 
 //Admin Login
 admin.get('/adminLogin', adminLoginControl.adminLogin)
@@ -42,7 +43,9 @@ admin.put('/blockProduct/:id', checkAdminLogin, adminProductController.blockProd
 admin.put('/unblockProduct/:id', checkAdminLogin, adminProductController.unblockProduct)
 admin.delete('/deleteProduct/:id', checkAdminLogin, adminProductController.deleteProduct)
 
-
+//order management
+admin.get('/Orders', checkAdminLogin, adminOrderController.order )
+admin.get('/orderDetails/:orderId', checkAdminLogin, adminOrderController.orderDetails)
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)
 

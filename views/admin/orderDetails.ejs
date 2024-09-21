@@ -1,0 +1,33 @@
+<%-include('navbar')%>
+
+<h4>Order Summary:</h4>
+<p>Order ID: <%= order._id %></p>
+<p>Total Amount: $<%= order.totalAmount %>
+                </p>
+
+                <h5>Items Ordered:</h5>
+                <ul>
+                    <% order.items.forEach(item=> { %>
+                        <li>
+                            <%= item.name %> - <%= item.quantity %> x Rs<%= item.price %>
+                        </li>
+                        <% }) %>
+                </ul>
+
+                <h5>Delivery Address:</h5>
+                <p><strong>
+                        <%= order.address.fullName %>
+                    </strong></p>
+                <p>
+                    <%= order.address.addressLine1 %>, <%= order.address.addressLine2 %>
+                </p>
+                <p>
+                    <%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %>
+                </p>
+                <p>PINCODE: <%= order.address.pincode %>
+                </p>
+                <p>Phone Number: <%= order.address.phoneNumber %>
+                </p>
+
+                <a href="/admin/Orders">Back to Orders</a>
+            </div>

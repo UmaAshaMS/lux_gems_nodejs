@@ -1,6 +1,155 @@
 <%- include('./layout/header') %>
-    <%- include('./layout/navbar') %>
-        <%- include('./layout/category_navbar') %>
+<%- include('./layout/navbar') %>
+<%- include('./layout/category_navbar') %>
 
-        <h4>Order History</h4>
-        
+<h4>Order History</h4>
+
+<style>
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    .Orders {
+        max-width: 800px;
+        margin: 0 auto; /* Center the container */
+        padding: 20px;
+    }
+
+    .order-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 10px 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex; /* Use flexbox for layout */
+        align-items: center; /* Center items vertically */
+    }
+
+    .order-image {
+        flex-shrink: 0; /* Prevent the image from shrinking */
+        margin-right: 20px; /* Space between image and text */
+    }
+
+    .order-card img {
+        border-radius: 4px;
+        max-width: 100px; /* Set a max width for the image */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    .order-details {
+        flex-grow: 1; /* Allow details to take up remaining space */
+        color: #555; /* Slightly softer text color */
+    }
+
+    .order-details p, .order-details h4 {
+        margin: 5px 0; /* Space between paragraphs */
+    }
+
+    .Orders a {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 15px;
+        background-color: black;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .Orders a:hover {
+        background-color: #caaf7a;
+    }
+
+    .order-status {
+        font-weight: bold;
+        color: #007bff; /* Blue color for status */
+    }
+
+    .cancel-order {
+        margin-top: 5px;
+        font-size: 0.9em;
+        color: #dc3545; /* Red color for cancel order */
+    }
+</style>
+
+<div class="Orders">
+    <% if (order.length === 0) { %>
+        <p>You have no previous orders.</p>
+    <% } else { %>
+        <% order.forEach(order => { %>
+            <div class="order-card">
+                <div class="order-image">
+                    <img src="<%= order.items[0].productImage %>" alt="Product Image">
+                </div>
+                <div class="order-details">
+                    <p><strong>Order ID:</strong> <%= order._id %></p>
+                    <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
+                    <p><strong>Total Amount:</strong> Rs<%= order.totalAmount.toFixed(2) %></p>
+                    <p><strong>Payment Method:</strong> Cash On Delivery</p>
+                    <h4>Items:</h4>
+                    <ul>
+                        <% order.items.forEach(item => { %>
+                            <li>
+                                <strong><%= item.productName %></strong> - Rs<%= item.productPrice %>
+                            </li>
+                        <% }) %>
+                    </ul>
+                    <p class="order-status"><strong>Status:</strong> <%= order.status %></p> 
+                    <a href="/orderConfirmed/<%= order._id %>">View Details</a>
+                    <form action="/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
+                        <a <button type="submit" class="cancel-order">Cancel Order</button></a>
+                    </form>
+                    <!-- <a href="/cancelOrder/<%= order._id %>">View Details</a> -->
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+    <a href="/all-products">Continue Shopping</a>
+</div>
+
+
+<script>
+    document.querySelectorAll('.cancel-order').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const actionUrl = form.action;
+
+            // SweetAlert confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won’t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, cancel it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(actionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Cancelled!', 'Your order has been canceled.', 'success').then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error!', 'Failed to cancel the order. Please try again.', 'error');
+                    });
+                }
+            });
+        });
+    });
+
+</script>
