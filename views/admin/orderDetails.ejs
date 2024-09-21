@@ -1,15 +1,40 @@
 <%-include('navbar')%>
 
+<style>
+    .order-summary-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh; /* Makes sure the content is vertically centered in full viewport height */
+}
+
+.order-summary-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.order-summary-container a {
+    margin-top: 20px;
+    text-decoration: none;
+    color: blue;
+}
+
+</style>
+
+
+<div class="order-summary-container">
 <h4>Order Summary:</h4>
 <p>Order ID: <%= order._id %></p>
-<p>Total Amount: $<%= order.totalAmount %>
+<p>Total Amount: Rs<%= order.totalAmount %>
                 </p>
 
                 <h5>Items Ordered:</h5>
                 <ul>
                     <% order.items.forEach(item=> { %>
                         <li>
-                            <%= item.name %> - <%= item.quantity %> x Rs<%= item.price %>
+                            <%= item.productName %> - <%= item.quantity %>  Rs<%= item.productPrice %>
                         </li>
                         <% }) %>
                 </ul>
@@ -31,3 +56,5 @@
 
                 <a href="/admin/Orders">Back to Orders</a>
             </div>
+
+        </div>

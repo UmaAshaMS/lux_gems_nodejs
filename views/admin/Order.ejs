@@ -104,6 +104,10 @@
         text-align: center;
         align-self: center;
     }
+    .btn a{
+        text-decoration: none;
+        color:black
+    }
 </style>
 <div class="Customer-container">
     <div class="Container">
@@ -128,7 +132,7 @@
             <th scope="col">User Name</th>
             <th scope="col">Order ID</th>
             <th scope="col">Product Details</th>
-            <th scope="col">Quantity</th>
+            <!-- <th scope="col">Quantity</th> -->
             <th scope="col">Status</th>
             <th scope="col">Action</th>
         </tr>
@@ -143,19 +147,28 @@
                     <% order.items.forEach(item => { %>
                         <div>
                             <strong><%= item.productName %></strong> 
-                            <img src="<%= item.productImage%>" alt="img" style="width: 50px; height: auto;"> <!-- Thumbnail -->
+                            <!-- <img src="<%= item.productImage%>" alt="img" style="width: 50px; height: auto;"> Thumbnail -->
+                            <br>
                         </div>
+                        
                     <% }) %>
+                    <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>" 
+                        style="text-decoration: underline;"> ViewOrderDetails</a></button>
                 </td>
-                <td><%= order.items.length %></td> 
-                <td><%= order.status %></td>
+                <!-- <td><%= order.items.length %></td>  -->
+                <td><%= order.status %></a></td>
                 <td>
                     
-                    <a href="/admin/orderDetails/<%= order._id %>">OrderDetails</a>
+                    
 
                     
                     <br>
-                    <a href="#" class="cancel-order" style="color:red">CancelOrder</a>
+                    <!-- <a href="/admin/cancelOrder/<%= order._id %>" class="cancel-order" style="color:red">CancelOrder</a> -->
+                    <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="cancel-order btn btn-outline-danger">CancelOrder</button>
+                    </form>
+                    <br>
+                    <a href="/admin/changeStatus/<%= order._id  %>" class="cancel-order" style="color:green">ChangeStatus</a>
                 </td>
             </tr>
         <% }) %>
@@ -165,3 +178,34 @@
 </div>
 </div>
 </div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle cancel order forms
+        const cancelOrderForms = document.querySelectorAll('.cancel-order');
+
+        cancelOrderForms.forEach(form => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Confirm cancellation
+                swal({
+                    title: "Are you sure?",
+                    text: "Order will be Rejected!",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willCancel) => {
+                    if (willCancel) {
+                        // If confirmed, submit the form
+                        form.submit();
+                    } else {
+                        swal("Your order is safe!");
+                    }
+                });
+            });
+        });
+    });
+</script>

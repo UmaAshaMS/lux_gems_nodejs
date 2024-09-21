@@ -1,4 +1,5 @@
 const orderSchema = require('../../model/orderSchema')
+const productSchema = require('../../model/productSchema')
 
 const order = async(req,res) => {
     try{
@@ -24,7 +25,48 @@ const orderDetails = async(req,res) => {
     }
 }
 
+const cancelOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        
+        // Fetch the order
+        const order = await orderSchema.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+    
+        for (const item of order.items) {
+            const product = await productSchema.findById(order.productId);
+            if (product) {
+              
+                product.stock -= item.quantity;
+                
+                
+                if (product.stock < 0) {
+                    product.stock = 0;
+                }
+                
+                
+                await product.save();
+            }
+        }
+        
+        // Update the order status to 'Canceled'
+        order.status = 'Rejected';
+        await order.save();
+        
+        
+        // res.status(200).json({ message: 'Order canceled and stock updated' });
+        res.redirect('/admin/Orders')
+    } catch (error) {
+        console.log(`Error canceling order, ${error}`);
+        res.status(500).json({ message: 'Error canceling order' });
+    }
+}
+
+
 module.exports ={
     order,
-    orderDetails
+    orderDetails,
+    cancelOrder,
 }
