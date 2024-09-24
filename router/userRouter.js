@@ -12,6 +12,7 @@ const userProfileControl = require('../controller/userController/profileControll
 const cartController = require('../controller/userController/cartController');
 const checkoutController = require('../controller/userController/checkoutController')
 const orderController = require('../controller/userController/orderController')
+const wishlistcontroller = require('../controller/userController/wishlistController')
 
 // Serve static files from the 'uploads' directory
 user.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -62,9 +63,13 @@ user.get('/product-category/:id', checkUserLogin, userProductControl.productCate
 
 // Cart
 user.get('/cart', checkUserLogin, cartController.cart);
-user.post('/cart/:productId', checkUserLogin, cartController.addToCart);
+user.post('/cart/add/:productId', checkUserLogin, cartController.addToCart);
 user.post('/cart/remove/:productId', checkUserLogin, cartController.removeFromCart);
 user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuantity);
+
+//Wishlist
+user.get('/wishlist', checkUserLogin, wishlistcontroller.wishlist)
+user.post('/wishlist/add/:productId', checkUserLogin, wishlistcontroller.addToWishlist)
 
 //Checkout
 user.get('/checkout', checkUserLogin, checkoutController.checkout)

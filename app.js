@@ -75,7 +75,7 @@ app.use('/admin', admin)
 mongoDBconnection()
 
 app.get('/', (req, res) => {
-    res.redirect('user/home')
+    res.redirect('home')
 })
 
 app.get('*',(req,res) => {

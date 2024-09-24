@@ -84,53 +84,101 @@
                 <div class="password-container">
                 <input type="password" id="confirmPassword" name="confirmPassword"  autocomplete="new-password">
                 <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
-                    c:\Users\Uma\AppData\Local\Packages\Microsoft.ScreenSketch_8wekyb3d8bbwe\TempState\Recordings\20240921-1326-25.6565227.mp4<i class="fas fa-eye" id="toggleCurrentPassword"></i></button>
                 </div>
             </div>
             <button class="btn" type="submit"> Save Changes</button>
         </form>
         
 
-        <script>
-            const form = document.querySelector('form');
-        
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Prevent default form submission
-        
-                const formData = new FormData(form);
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
-        
-                const data = await response.json();
-        
-                if (response.ok) {
-                    // Success
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: data.message,
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.href = 'profile'; // Redirect to profile after confirmation
-                    });
-                } else {
-                    // Error
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.message,
-                        confirmButtonText: 'Try Again'
-                    });
-                }
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM fully loaded and parsed');
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        alert('Form is being validated!');
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+        let isValid = true;
+        let errorMessage = '';
+
+        // Validate Full Name
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!fullName || !nameRegex.test(fullName)) {
+            isValid = false;
+            errorMessage += 'Full Name must only contain letters.\n';
+        }
+
+        // Validate phone Number
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+            isValid = false;
+            errorMessage += 'Phone number must be 10 digits.\n';
+        }
+
+        if (newPassword) {
+            if (newPassword.length < 6) {
+                isValid = false;
+                errorMessage += 'New Password must be at least 6 characters long.\n';
+            }
+            if (newPassword !== confirmPassword) {
+                isValid = false;
+                errorMessage += 'New Password and Confirm Password do not match.\n';
+            }
+        }
+        console.log(`Validating: Full Name = ${fullName}, Phone = ${phoneNumber}, New Password = ${newPassword}, Confirm Password = ${confirmPassword}`);
+        console.log(`Is form valid? ${isValid}`);
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error!',
+                text: errorMessage,
+                confirmButtonText: 'Try Again'
             });
+            return; // Stop form submission
+        }
 
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
 
-            function togglePassword(passwordFieldId) {
+        const data = await response.json();
+
+        if (response.ok) {
+            // Success
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: data.message,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'profile'; // Redirect to profile after confirmation
+            });
+        } else {
+            // Error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonText: 'Try Again'
+            });
+        }
+    });
+});
+
+// Move togglePassword function outside
+function togglePassword(passwordFieldId) {
     const passwordField = document.getElementById(passwordFieldId);
     const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordField.setAttribute('type', type);
 }
-
-        </script>
+             
+</script>

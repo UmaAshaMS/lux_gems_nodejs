@@ -128,7 +128,7 @@
 
                     // Function to add product to the cart
                     function addToCart(productId) {
-                        const URL = `/cart/${productId}`;
+                        const URL = `/cart/add/${productId}`;
 
                         fetch(URL, {
                             method: 'POST',
@@ -167,7 +167,7 @@
 
                     //fucntion add to Wishlist
                     function addToWishlist(productId) {
-                        const URL = `/wishlist/${productId}`;
+                        const URL = `/wishlist/add/${productId}`;
 
                         fetch(URL, {
                             method: 'POST',
@@ -175,20 +175,16 @@
                         })
                             .then(response => response.json().then(data => ({ data, status: response.status })))
                             .then(({ data, status }) => {
-                                // Check if response was successful (status 200)
                                 if (status === 200) {
                                     Swal.fire({
                                         title: 'Success',
                                         icon: 'success',
-                                        text: data.message,  // Success message from server
+                                        text: data.message,  
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        // Redirect to the same page after confirmation
                                         window.location.href = `/productDetails/${productId}`;
-                                        
                                     });
                                 } else {
-                                    // If the request failed, show an error message
                                     Swal.fire({
                                         title: 'Error',
                                         icon: 'error',
@@ -198,7 +194,6 @@
                                 }
                             })
                             .catch((error) => {
-                                // Catch any other errors in the fetch process
                                 console.error('Error adding product to wishlist:', error);
                             });
                     }

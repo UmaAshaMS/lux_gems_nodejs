@@ -1,27 +1,16 @@
 <body>
-
-
-
-
     <style>
         .Container {
-
-
             border-radius: 10px;
             display: flex;
-            /* Arrange children side by side */
             gap: 50px;
-            /* Space between sidebar and table */
             padding: 20px;
-
         }
 
         .SideBar .btn {
             display: block;
-            /* Make buttons stack vertically */
             width: 150px;
             margin-bottom: 10px;
-            /* Space between buttons */
             text-align: center;
         }
 
@@ -37,9 +26,6 @@
             align-items: center;
             text-align: center;
             border-radius: 10px;
-
-
-
         }
 
         .SideBar a {
@@ -109,13 +95,10 @@
         .AddCategory:focus,
         .AddCategory:active {
             background-color: #b49569;
-            /* Slightly darker shade on interaction */
             color: black;
-            /* Keep the text color black */
             outline: none;
-            /* Remove outline */
             box-shadow: none;
-            /* Remove any shadow applied by Bootstrap */
+          
         }
 
 
@@ -251,13 +234,13 @@
     </div>
     <div class="Container">
         <div class='SideBar'>
-            <button class="btn btn-dark"> <a href="/admin/home">Dashboard</a></button>
-            <button class="btn btn-dark"> <a href="/admin/Category">Category</a></button>
-            <button class="btn btn-dark"><a href="/admin/Products">Products</a></button>
-            <button class="btn btn-dark"><a href="/admin/Customers">Customers</a></button>
-            <button class="btn btn-dark"><a href="/admin/Orders">Orders</a></button>
-            <button class="btn btn-dark">Coupons</button>
-            <button class="btn btn-dark">Banner</button>
+            <a href="/admin/home"><button class="btn btn-dark">  Dashboard</button></a>
+            <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
+            <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+            <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+            <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+            <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+            <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
             <form action="/admin/logout" method="POST">
                 <button type="submit" class="btn btn-dark">Logout</button>
             </form>

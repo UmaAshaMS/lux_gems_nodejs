@@ -9,8 +9,8 @@ const profile = async(req, res) => {
         const userID = req.session.user; // Get user ID from session
         const category = await categorySchema.find(); // Get categories
 
-        // Find the user and fetch only the addresses array
-        const userData = await userSchema.findOne({_id: userID}, {address: 1, _id: 0});
+        // Find the user
+        const userData = await userSchema.findOne({_id: userID}, {_id: 0});
 
         let defaultAddress = null;
 
@@ -22,8 +22,9 @@ const profile = async(req, res) => {
         res.render('user/profile', {
             title: 'User Profile',
             category,
-            address: defaultAddress, // Pass the default address to the view
-            user: req.session.user // Pass the user session
+            address: defaultAddress, 
+            user: req.session.user,
+            userData
         });
     } catch (error) {
         console.log(`Error in loading profile page: ${error}`);
@@ -198,13 +199,14 @@ const editProfilePost = async(req,res) => {
     try{
         const userId = req.session.user
         const {fullName, phoneNumber, currentPassword, confirmPassword, newPassword} = req.body
-        console.log('----------------------------------',req.body)
 
         const user = await userSchema.findById(userId, {address:0})
 
-        const isPasswordValid = await bcrypt.compare(currentPassword.trim(), user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ message: 'Current password is incorrect' });
+        if(newPassword){
+            const isPasswordValid = await bcrypt.compare(currentPassword.trim(), user.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({ message: 'Current password is incorrect' });
+            }
         }
 
 

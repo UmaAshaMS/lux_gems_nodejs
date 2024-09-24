@@ -50,8 +50,7 @@
             flex: 1;
             margin-left: 0px;
             padding: 20px;
-            /* Arrange children side by side */
-            /* Space between sidebar and table */
+            
             
         }
 
@@ -102,6 +101,7 @@
             border: black;
             text-align: center;
             align-self: center;
+            align-self: flex-start;
         }
     </style>
     <div class="Customer-Page">
@@ -130,25 +130,23 @@
         </nav>
         <div class="Customer-container">
             <div class="Container">
-
                 <div class='SideBar'>
-                    <a href="/admin/home" class="btn btn-dark">Dashboard</a>
-                    <a href="/admin/Category" class="btn btn-dark">Category</a>
-                    <a href="/admin/Products" class="btn btn-dark">Products</a>
-                    <a href="/admin/Customers" class="btn btn-dark">Customers</a>
-                    <a href="/admin/Orders" class="btn btn-dark">Orders</a>
-                    <button class="btn btn-dark">Coupons</button>
-                    <button class="btn btn-dark">Banner</button>
+                    <a href="/admin/home"><button class="btn btn-dark">  Dashboard</button></a>
+                    <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
+                    <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+                    <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+                    <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+                    <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+                    <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
                     <form action="/admin/logout" method="POST">
                         <button type="submit" class="btn btn-dark">Logout</button>
                     </form>
                 </div>
-            </div>
 
 
-            <table class="table table-hover table-bordered">
-                <thead>
-                    <tr>
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
                         <th scope="col">Sl.No</th>
                         <th scope="col">UserID</th>
                         <th scope="col">Name</th>
@@ -156,9 +154,9 @@
                         <th scope="col">Phone Number</th>
                         <th scope="col">Status</th>
                         <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <% userDetails.forEach((user,index)=> { %>
 
 
@@ -204,10 +202,10 @@
                         </tr>
 
                         <% }) %>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
     </div>
     <script>
         function blockUser(userId) {

@@ -49,6 +49,10 @@ const schema = new mongoose.Schema(
     totalAmount: {
         type: Number, 
     },
+    isArchived : {
+        type:Boolean,
+        default : false
+    }
     
 }, { timestamps: true })
 

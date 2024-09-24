@@ -2,8 +2,6 @@
 <%- include('./layout/navbar') %>
 <%- include('./layout/category_navbar') %>
 
-<h4>Order History</h4>
-
 <style>
     h1 {
         text-align: center;
@@ -12,7 +10,7 @@
 
     .Orders {
         max-width: 800px;
-        margin: 0 auto; /* Center the container */
+        margin: 0 auto; 
         padding: 20px;
     }
 
@@ -22,28 +20,29 @@
         padding: 20px;
         margin: 10px 0;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        display: flex; /* Use flexbox for layout */
-        align-items: center; /* Center items vertically */
+        display: flex; 
+        align-items: center; 
     }
 
     .order-image {
-        flex-shrink: 0; /* Prevent the image from shrinking */
-        margin-right: 20px; /* Space between image and text */
+        flex-shrink: 0;
+        margin-right: 20px; 
     }
 
     .order-card img {
         border-radius: 4px;
-        max-width: 100px; /* Set a max width for the image */
-        height: auto; /* Maintain aspect ratio */
+        max-width: 100px; 
+        height: auto; 
+        cursor: pointer;
     }
 
     .order-details {
-        flex-grow: 1; /* Allow details to take up remaining space */
-        color: #555; /* Slightly softer text color */
+        flex-grow: 1; 
+        color: #555;
     }
 
     .order-details p, .order-details h4 {
-        margin: 5px 0; /* Space between paragraphs */
+        margin: 5px 0; 
     }
 
     .Orders a {
@@ -63,15 +62,27 @@
 
     .order-status {
         font-weight: bold;
-        color: #007bff; /* Blue color for status */
+        color: #007bff; 
     }
 
     .cancel-order {
         margin-top: 5px;
         font-size: 0.9em;
-        color: #dc3545; /* Red color for cancel order */
+        color: #dc3545; 
     }
+   
 </style>
+<div class="breadcrumbs mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/profile" style="text-decoration:none">Your Account</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Your Orders</li>
+    </ol>
+</div>
+<h4>Order History</h4>
+
+
 
 <div class="Orders">
     <% if (order.length === 0) { %>
@@ -80,7 +91,7 @@
         <% order.forEach(order => { %>
             <div class="order-card">
                 <div class="order-image">
-                    <img src="<%= order.items[0].productImage %>" alt="Product Image">
+                    <img src="<%= order.items[0].productImage %>" alt="Product Image" class="productImage" data-product-id="<%= order.items[0].productId %>">
                 </div>
                 <div class="order-details">
                     <p><strong>Order ID:</strong> <%= order._id %></p>
@@ -100,7 +111,7 @@
                     <form action="/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
                         <a <button type="submit" class="cancel-order">Cancel Order</button></a>
                     </form>
-                    <!-- <a href="/cancelOrder/<%= order._id %>">View Details</a> -->
+                    <!-- <a class= 'link' href="/archiveOrder/<%= order._id %>">Archive</a> -->
                 </div>
             </div>
         <% }) %>
@@ -110,6 +121,13 @@
 
 
 <script>
+    
+    document.querySelectorAll('.productImage').forEach(function(image) {
+    image.addEventListener('click', function(){
+        const productId = this.getAttribute('data-product-id')
+        window.location.href = '/productDetails/' + productId 
+    })
+})
     document.querySelectorAll('.cancel-order').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();

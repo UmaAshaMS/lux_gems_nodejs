@@ -27,15 +27,15 @@
         <form>
             <div class="form-group full">
                 <label for="fullName">Full Name:</label>
-                <input type="text" id="fullName" name="fullName" value="<%= address ? address.fullName : '' %>">
+                <input type="text" id="fullName" name="name" value="<%= userData ? userData.name : '' %>">
             </div>
             <div class="form-group half">
                 <label for="phoneNumber">Phone Number:</label>
-                <input type="text" id="phoneNumber" name="phoneNumber" value="<%= address? address.phoneNumber : ''%>">
+                <input type="text" id="phoneNumber" name="phoneNumber" value="<%= userData ? userData.phoneNumber : ''%>">
             </div>
             <div class="form-group half">
                 <label for="email">Email ID:</label>
-                <input type="email" id="email" name="email" value="<%= address? address.email : '' %> ">
+                <input type="email" id="email" name="email" value="<%= userData ? userData.email : '' %> ">
             </div>
             <div class="clearfix"></div>
             <div class="form-group full">

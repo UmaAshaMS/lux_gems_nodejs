@@ -203,7 +203,6 @@ const editProduct = async (req, res) => {
 }
 
 const editProductPost = async (req, res) => {
-    console.log('Edit product form submitted');
     try {
         console.log('Request body:', req.body);
 
@@ -226,7 +225,7 @@ const editProductPost = async (req, res) => {
             // Map through uploaded files and get their filenames
             newProductImages = req.files.productImage.map(file => file.filename);
         }
-        console.log(newProductImages);
+
 
         // Extract other form data
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body;
@@ -270,12 +269,10 @@ const editProductPost = async (req, res) => {
         if (!updatedProduct) {
             throw new Error('Failed to update the product.');
         }
-        console.log('Updated product:', updatedProduct);
         req.flash('success', 'Product updated successfully.');
         res.redirect('/admin/Products');
     } catch (err) {
         console.error(`Error in submitting edit product form: ${err}`);
-        req.flash('error', 'An error occurred while updating the product.');
         res.redirect(`/admin/editProduct/${req.params.id}`);
     }
 };
