@@ -70,6 +70,8 @@ user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuanti
 //Wishlist
 user.get('/wishlist', checkUserLogin, wishlistcontroller.wishlist)
 user.post('/wishlist/add/:productId', checkUserLogin, wishlistcontroller.addToWishlist)
+user.delete('/wishlist/delete/:productId',checkUserLogin, wishlistcontroller.deleteFromWishlist)
+user.post('/wishlist/addToCart/:productId',checkUserLogin, wishlistcontroller.addToCart)
 
 //Checkout
 user.get('/checkout', checkUserLogin, checkoutController.checkout)

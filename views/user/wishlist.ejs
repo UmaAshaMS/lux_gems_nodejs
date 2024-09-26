@@ -132,30 +132,129 @@
         font-size: 1.5rem;
         color: #888;
     }
+    .addToCart{
+        color:black;
+        border : none;
+        text-decoration: underline;
+        background-color: white;
+        padding-bottom: 1.2%;
+    }
 
 </style>
 
 <div class="cart-container">
     <h1>Your Wishlist</h1>
 
-    <% if (wishlist && wishlist.product.length > 0) { %>
+    <% if (wishlist && wishlist.product && wishlist.product.length > 0) { %>
         <% wishlist.product.forEach(item => { %>
             <div class="cart-item">
-                <img src="<%= item.productImage[0].replace(/\\/g, '/') %>" alt="Product Image">
+                <% if (item.productId.productImage && item.productId.productImage.length > 0) { %>
+                    <img src="<%= item.productId.productImage[0].replace(/\\/g, '/') %>" alt="Product Image">
+                <% } %>
                 <div class="cart-item-info">
                     <h4><%= item.productId.productName %></h4>
-                    <p><i class="fas fa-rupee-sign"></i> <%= item.productPrice.toFixed(2) %></p>
+                    <p><i class="fas fa-rupee-sign"></i> <%= item.price.toFixed(2) %></p>
                 </div>
                
                 <div class="cart-item-actions">
-                    <button onclick="removeFromCart('<%= item.productId._id %>')">
+                    <button onclick="removeFromWishlist('<%= item.productId._id %>')">
                         <i class="fas fa-trash-alt"></i> 
                     </button>
-
                 </div>
+
+                <button  class="addToCart" onclick="addToCart('<%= item.productId._id %>')">
+                    Add to Cart
+                  </button>
             </div>
         <% }) %>
     <% } else { %>
         <div class="empty-cart">Your wishlist is empty.</div>
     <% } %>
 </div>
+
+
+<script>
+    async function removeFromWishlist(productId) {
+    const confirmation = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This product will be removed from wishlist!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirmation.isConfirmed) {
+        try {
+            const response = await fetch(`/wishlist/delete/${productId}`, {
+                method: 'DELETE',
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed from wishlist!',
+                    text: result.message,
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: result.message,
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to remove the product. Please try again.',
+            });
+        }
+    }
+}
+
+
+async function addToCart(productId) {
+            try {
+                const response = await fetch(`/cart/add/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', 
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                    icon: 'success',
+                    title: 'Product added to Cart!',
+                    text: result.message,
+                }).then(() => {
+                    window.location.reload(); 
+                });
+
+                } else {
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: result.message,
+                });
+                }
+            } catch (error) {
+                console.error('Error adding product to cart:', error);
+                Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to add product to the cart. Please try again.',
+            });
+            }
+        }
+
+</script>

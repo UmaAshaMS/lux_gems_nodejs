@@ -98,13 +98,6 @@ const addToCart = async (req, res) => {
         // Save the updated cart
         await cart.save();
 
-        // // Reduce the product stock
-        // await productSchema.updateOne(
-        //     { _id: new ObjectId(productId) },
-        //     { $inc: { stock: -1 } }
-        // );
-
-        // Respond with a success message
         res.status(200).json({ message: 'Product added to cart successfully.' });
     } catch (error) {
         console.error(`Error in adding product to cart: ${error}`);
@@ -112,14 +105,13 @@ const addToCart = async (req, res) => {
     }
 };
 
-
 const removeFromCart = async (req, res) => {
     try {
         const user = req.session.user || null;
         const productId = req.params.productId
 
         if (!user) {
-            return res.status(401).json({ message: 'User not authenticated. Please log in to add items to your cart.' });
+            return res.status(401).json({ message: 'User not authenticated. Please log in to remove items from your cart.' });
         }
 
         // Validate the productId
@@ -137,22 +129,8 @@ const removeFromCart = async (req, res) => {
         if (productIndex === -1) {
             return res.status(404).json({ message: 'Product not found in cart' });
         }
-        // Get the product quantity from the cart
-        const productQuantity = cart.product[productIndex].quantity;
 
-        // // Update the product's stock by adding back the removed quantity
-        // const product = await productSchema.findById(productId);
-        // if (!product) {
-        //     return res.status(404).json({ message: 'Product not found' });
-        // }
-
-        // // Update the stock
-        // product.stock += productQuantity;
-        // await product.save();
-
-        // Remove the product from the cart
-        cart.product.splice(productIndex, 1); // Remove the product from the cart array
-
+        cart.product.splice(productIndex, 1); 
         // Save the updated cart
         await cart.save();
 
