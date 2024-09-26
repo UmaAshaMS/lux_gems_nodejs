@@ -9,6 +9,7 @@ const adminUsercontrol = require('../controller/adminController/userController')
 const adminCategoryControl = require('../controller/adminController/categoryController')
 const adminProductController = require('../controller/adminController/productController')
 const adminOrderController = require('../controller/adminController/orderController')
+const adminCouponController = require('../controller/adminController/couponcontroller')
 
 //Admin Login
 admin.get('/adminLogin', adminLoginControl.adminLogin)
@@ -48,6 +49,12 @@ admin.get('/Orders', checkAdminLogin, adminOrderController.order )
 admin.get('/orderDetails/:orderId', checkAdminLogin, adminOrderController.orderDetails)
 admin.post('/cancelOrder/:orderId', checkAdminLogin, adminOrderController.cancelOrder)
 admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.changeStatus)
+
+//Coupon Management
+admin.get('/Coupons', checkAdminLogin, adminCouponController.coupon)
+admin.post('/addCoupon', checkAdminLogin, adminCouponController.addCoupon)
+admin.delete('/deleteCoupon/:id', checkAdminLogin, adminCouponController.deleteCoupon)
+
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)
 
