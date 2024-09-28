@@ -1,0 +1,552 @@
+<style>
+    .Container {
+        border-radius: 10px;
+        display: flex;
+        gap: 50px;
+        padding: 20px;
+    }
+
+    .SideBar .btn {
+        display: block;
+        width: 150px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .SideBar {
+        width: 250px;
+        margin: 20px;
+        background-color: #caaf7a;
+        color: white;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .SideBar a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .Category-container {
+        display: flex;
+        flex: 2;
+        justify-content: center;
+    }
+
+    .btn {
+        width: 100px;
+    }
+
+    .italianno-regular {
+        font-family: "Italianno", cursive;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 50px;
+        color: #caaf7a;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: column;
+        font-size: 42px;
+        align-items: center;
+        margin-left: 85px;
+    }
+
+    .Search form {
+        display: flex;
+    }
+
+    .form-control {
+        width: 500px;
+    }
+
+    .searchBtn {
+        flex: 2;
+        width: 10px;
+        color: white;
+        border: 2px;
+    }
+
+    .AddCoupon {
+        background-color: #caaf7a;
+        color: black;
+        font-weight: 700;
+        width: 200px;
+        align-items: end;
+        align-self: flex-end;
+        margin-right: 0%;
+        transition: background-color 0.3s ease;
+        margin-top: 0%;
+        margin-right: 0%;
+        justify-content: center;
+    }
+
+    .AddCoupon:hover,
+    .AddCoupon:focus,
+    .AddCoupon:active {
+        background-color: #b49569;
+        color: black;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .table {
+        margin-top: 0%;
+        width: 900px;
+        text-align: center;
+    }
+</style>
+
+
+<nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Offers<span>.</span></a>
+        <div class="collapse navbar-collapse d-flex flex-grow-1 justify-content-between align-items-center"
+            id="navbars">
+            <div class='Search'>
+                <div class="searchProducts">
+                    <form method="GET" action="/admin/Offers" class="mb-4">
+                        <input type="text" name="searchQuery" placeholder="Search Offers" class="form-control"
+                            value="<%= searchQuery %>">
+                        <button type="submit" class="btn btn-white mt-2 searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <form>
+                <button type="button" class="btn AddCoupon" data-bs-toggle="modal" data-bs-target="#offerModal"
+                    style="margin-right: 0%;">Add New Offer
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Add Offer Modal -->
+<div id="offerModal" class="modal" tabindex="-1" aria-labelledby="addOfferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addOfferModalLabel">Add New Offer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="offerForm">
+            <!-- Offer Title -->
+            <div class="mb-3">
+              <label for="offerTitle" class="form-label">Offer Title</label>
+              <input type="text" class="form-control" id="offerTitle" name="offerTitle" placeholder="Enter offer title" required>
+            </div>
+  
+            <!-- Offer Type -->
+            <div class="mb-3">
+              <label for="offerType" class="form-label">Offer Type</label>
+              <select class="form-select" id="offerType" name="offerType" onchange="toggleReferenceDropdown()" required>
+                <option value="" disabled selected>Select offer type</option>
+                <option value="product">Product</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+
+            <div class="mb-3" id="referenceSelection" style="display: none;">
+                <label for="referenceId" class="form-label" id="referenceLabel">Select Product or Category</label>
+                <select class="form-select" id="referenceId" name="referenceId" required>
+                    <option value="" disabled selected>Select an option</option>
+                </select>
+            </div>
+  
+            
+  
+            <!-- Discount Percentage -->
+            <div class="mb-3">
+              <label for="discountPercent" class="form-label">Discount Percentage</label>
+              <input type="number" class="form-control" id="discountPercent" name="discountPercent" min="0" max="100" placeholder="Enter discount percentage" required>
+            </div>
+  
+            
+          </form>
+        </div>
+  
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="submitOffer()">Save Offer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="dataContainer" 
+  data-products='<%= JSON.stringify(products) %>' 
+  data-categories='<%= JSON.stringify(category) %>'>
+</div>
+
+
+<div class="Container">
+    <div class='SideBar'>
+        <a href="/admin/home"><button class="btn btn-dark">Dashboard</button></a>
+        <a href="/admin/Category"><button class="btn btn-dark">Category</button></a>
+        <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+        <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+        <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+        <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+        <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
+        <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+        <form action="/admin/logout" method="POST">
+            <button type="submit" class="btn btn-dark">Logout</button>
+        </form>
+    </div>
+
+    <div class="Offercontainer">
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Sl.No</th>
+                    <th scope="col">Offer Title</th>
+                    <th scope="col">Offer Type</th>
+                    <th scope="col">Discount Percentage</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% offers.forEach((offers, index)=> { %>
+                <tr>
+                    <th scope="row">
+                        <%= index+1%>
+                    </th>
+                    <td>
+                        <%= offers.offerTitle %>
+                    </td>
+                    <td>
+                        <%= offers.offerType %>
+                    </td>
+                    <td>
+                        <%= offers.discountPercent %>
+                    </td>
+                    <td>
+                        <% if (offers.isActive) { %>
+                            Active
+                            <% } else { %>
+                                Inactive
+                                <% } %>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-center align-items-center">
+
+                            <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#editOfferModal"  > 
+                                Edit
+                                </button>
+                            <button class="btn btn-dark me-2" onclick="deleteOffer('<%= offers._id %>')">
+                                Delete
+                                </button> 
+                        </div>
+                    </td>
+
+                </tr>
+            
+            </tbody>
+            <% }) %>
+        </table>
+
+<!-- Edit Offer Modal -->
+<div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="editOfferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="offerForm">
+                    <div class="mb-3">
+                        <label for="offerTitle" class="form-label">Offer Title</label>
+                        <input type="text" class="form-control" id="offerTitle" value="<%=offers.offerTitle  %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offerType" class="form-label">Offer Type</label>
+                        <input type="text" class="form-control" id="offerType" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="referenceId" class="form-label">Reference ID</label>
+                        <input type="text" class="form-control" id="referenceId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="discountPercent" class="form-label">Discount Percent</label>
+                        <input type="number" class="form-control" id="discountPercent" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" form="offerForm">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+  
+
+<script>
+    function toggleReferenceDropdown() {
+        const offerType = document.getElementById('offerType').value;
+        const referenceIdSelect = document.getElementById('referenceId');
+        const referenceLabel = document.getElementById('referenceLabel');
+        const referenceSelection = document.getElementById('referenceSelection');
+                        
+        // Clear previous options
+        referenceIdSelect.innerHTML = '<option value="" disabled selected>Select an option</option>';
+                
+        // Get data from the data attributes
+        const dataContainer = document.getElementById('dataContainer');
+        const products = JSON.parse(dataContainer.dataset.products);
+        const categories = JSON.parse(dataContainer.dataset.categories);
+                
+        // Show dropdown based on selected offerType
+        if (offerType === 'product') {
+            referenceLabel.textContent = 'Select Product';
+            products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product._id;
+            option.textContent = product.productName;
+            referenceIdSelect.appendChild(option);
+        });
+        referenceSelection.style.display = 'block';
+                
+        } else if (offerType === 'category') {
+        referenceLabel.textContent = 'Select Category';
+        categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat._id;
+        option.textContent = cat.name;
+        referenceIdSelect.appendChild(option);
+        });
+        referenceSelection.style.display = 'block';
+                
+        } else {
+        referenceSelection.style.display = 'none';
+    }
+}
+
+
+async function submitOffer() {
+    const offerTitle = document.getElementById('offerTitle').value;
+    const offerType = document.getElementById('offerType').value;
+    const referenceId = document.getElementById('referenceId').value;
+    const discountPercent = document.getElementById('discountPercent').value;
+
+    // Validate the required fields
+    if (!offerTitle || !offerType || (offerType !== 'none' && !referenceId) || !discountPercent) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please fill in all required fields.',
+            showConfirmButton: true
+        });
+        return;
+    }
+
+    // Create a data object to hold the form data
+    const offerData = {
+        offerTitle: offerTitle,
+        offerType: offerType,
+        referenceId: referenceId,
+        discountPercent: discountPercent
+    };
+
+    try {
+        // Send the data to the server using fetch API
+        const response = await fetch('/admin/addOffer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(offerData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                showConfirmButton: true
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                showConfirmButton: true
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'An error occurred. Please try again later.',
+            showConfirmButton: true
+        });
+    }
+}
+
+
+async function deleteOffer(offerId) {
+    const confirmation = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This action cannot be undone!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirmation.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/deleteOffer/${offerId}`, {
+                method: 'DELETE',
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Offer Deleted!',
+                    text: result.message,
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: result.message,
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to delete the coupon. Please try again.',
+            });
+        }
+    }
+}
+
+async function updateOffer(offerId) {
+    try {
+        // Fetch the offer details from the server
+        const response = await fetch(`/admin/getOffer/${offerId}`);
+        const offer = await response.json();
+
+        if (!response.ok) {
+            throw new Error(offer.message);
+        }
+
+        // Populate the form fields with offer details
+        document.getElementById('offerTitle').value = offer.offerTitle;
+        document.getElementById('offerType').value = offer.offerType;
+        document.getElementById('referenceId').value = offer.referenceId;
+        document.getElementById('discountPercent').value = offer.discountPercent;
+
+        // Change the form submission behavior to update the offer
+        document.getElementById('offerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await updateOfferDetails(offerId);
+        };
+
+        // Show the modal
+        const editOfferModal = new bootstrap.Modal(document.getElementById('editOfferModal'));
+        editOfferModal.show();
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: error.message,
+            showConfirmButton: true
+        });
+    }
+}
+
+async function updateOfferDetails(offerId) {
+    const offerTitle = document.getElementById('offerTitle').value;
+    const offerType = document.getElementById('offerType').value;
+    const referenceId = document.getElementById('referenceId').value;
+    const discountPercent = document.getElementById('discountPercent').value;
+
+    // Validate the required fields
+    if (!offerTitle || !offerType || !referenceId || !discountPercent) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Missing Information',
+            text: 'Please fill in all required fields.',
+            showConfirmButton: true
+        });
+        return;
+    }
+
+    // Send the update request to the server
+    try {
+        const response = await fetch(`/admin/editOffer/${offerId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                offerTitle,
+                offerType,
+                referenceId,
+                discountPercent
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                showConfirmButton: true
+            }).then(() => {
+                window.location.reload(); // Refresh the page after success
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: result.message,
+                showConfirmButton: true
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'An error occurred. Please try again later.',
+            showConfirmButton: true
+        });
+    }
+}
+
+
+
+
+
+</script>
+                
+   
+        
