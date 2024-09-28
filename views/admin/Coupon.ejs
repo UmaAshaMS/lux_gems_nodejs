@@ -339,11 +339,11 @@
 
         const data = {
             couponCode: formData.get('couponCode'),
-            couponDiscount: formData.get('couponDiscount'),
+            couponDiscount: parseFloat(formData.get('couponDiscount')),
             discountType: formData.get('discountType'),
-            minimumAmount: formData.get('minimumAmount'),
+            minimumAmount: parseFloat(formData.get('minimumAmount')),
             expiryDate: formData.get('expiryDate'),
-            usageLimit: formData.get('usageLimit')
+            usageLimit:parseFloat(formData.get('usageLimit'))
         };
 
         try {
@@ -375,6 +375,7 @@
                 });
             }
         } catch (error) {
+            console.log(error)
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',

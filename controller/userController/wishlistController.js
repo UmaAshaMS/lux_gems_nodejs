@@ -120,6 +120,7 @@ const addToCart = async(req,res) => {
         if (!product) {
             return res.status(400).json({ message: 'Product is out of stock or not available.' });
         }
+        const maxQuantity = 5;
 
         let cart = await cartSchema.findOne({ userId: new ObjectId(user) });
 
@@ -143,7 +144,13 @@ const addToCart = async(req,res) => {
             const existingCartItem = cart.items.find(item => item.productId.equals(wishlistItem.productId));
 
             if (existingCartItem) {
-                existingCartItem.quantity += 1; 
+                if (existingCartItem.quantity + 1 > maxQuantity) {
+                    return res.status(400).json({ 
+                        message: `You can only add a maximum of ${maxQuantity} items to the cart.` 
+                    });
+                } else {
+                    existingCartItem.quantity += 1;
+                }
             } else {
                 cart.items.push(newCartItem);
             }

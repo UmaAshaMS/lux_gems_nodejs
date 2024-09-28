@@ -5,67 +5,102 @@
 <div class="order-confirmation-container">
     <div class="order-confirmation-content">
         <h4>Order Confirmation</h4>
-        <p>Thank you for your order! Your order has been successfully placed.</p>
+        <p class="confirmation-message">Thank you for your order! Your order has been successfully placed.</p>
 
         <h4>Order Summary:</h4>
-        <p>Order ID: <%= order._id %></p>
-        <p>Total Amount: Rs<%= order.totalAmount %></p>
+        <p><strong>Order ID:</strong> <%= order._id %></p>
+        <p><strong>Total Amount:</strong> Rs <%= order.totalAmount %></p>
 
         <h5>Items Ordered:</h5>
         <ul>
             <% order.items.forEach(item => { %>
                 <li>
-                    <%= item.productName %> - <%= item.quantity %> Rs<%= item.productPrice %>
+                    <strong><%= item.productName %></strong> - <%= item.quantity %> x Rs<%= item.productPrice %>
                 </li>
             <% }) %>
         </ul>
 
         <h5>Delivery Address:</h5>
-        <p><strong><%= order.address.fullName %></strong></p>
-        <p><%= order.address.addressLine1 %>, <%= order.address.addressLine2 %></p>
-        <p><%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %></p>
-        <p>PINCODE: <%= order.address.pincode %></p>
-        <p>Phone Number: <%= order.address.phoneNumber %></p>
+        <div class="address">
+            <p><strong><%= order.address.fullName %></strong></p>
+            <p><%= order.address.addressLine1 %>, <%= order.address.addressLine2 %></p>
+            <p><%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %></p>
+            <p><strong>PINCODE:</strong> <%= order.address.pincode %></p>
+            <p><strong>Phone Number:</strong> <%= order.address.phoneNumber %></p>
+        </div>
 
         <a href="/all-products" class="btn btn-primary">Continue Shopping</a>
     </div>
 </div>
 
 <style>
+    body {
+        font-family: Arial, sans-serif; 
+        background-color: #f4f4f4; 
+        margin: 0;
+        padding: 0;
+    }
+
     .order-confirmation-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh; /* Make sure the div takes the full viewport height */
+        min-height: 100vh; 
         padding: 20px;
-        background-color: #f9f9f9; /* Optional: Light background to distinguish */
     }
 
     .order-confirmation-content {
-        background-color: #fff;
+        background-color: #ffffff;
         padding: 30px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for better appearance */
-        max-width: 600px;
-        width: 100%; /* Ensures responsiveness */
-        text-align: center; /* Center-align text */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+        max-width: 500px; 
+        width: 100%; 
+        text-align: left; 
+        border: 1px solid #e0e0e0;
     }
 
-    .order-confirmation-content h4, .order-confirmation-content h5 {
-        margin-bottom: 20px;
+    .confirmation-message {
+        color: #4CAF50; 
+        font-weight: bold;
+    }
+
+    .order-confirmation-content h4,
+    .order-confirmation-content h5 {
+        margin-bottom: 15px;
+        color: #333; 
     }
 
     .order-confirmation-content ul {
-        list-style: none;
+        list-style-type: none; 
         padding: 0;
+        margin: 0;
     }
 
     .order-confirmation-content li {
         margin-bottom: 10px;
+        padding: 5px; 
+        border-bottom: 1px solid #f0f0f0; 
+    }
+
+    .address p {
+        margin: 5px 0; 
+        line-height: 1.5; 
     }
 
     .btn {
         display: inline-block;
         margin-top: 20px;
+        padding: 10px 20px; 
+        background-color: #007BFF; 
+        color: #ffffff;
+        border: none;
+        border-radius: 5px; 
+        text-decoration: none; 
+        transition: background-color 0.3s; 
+    }
+
+    .btn:hover {
+        background-color: #0056b3; 
     }
 </style>

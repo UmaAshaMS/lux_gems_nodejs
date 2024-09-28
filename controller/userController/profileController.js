@@ -1,6 +1,7 @@
 const userSchema = require('../../model/userSchema')
 const categorySchema = require('../../model/categorySchema')
 const orderSchema = require('../../model/orderSchema')
+const couponSchema = require('../../model/couponSchema')
 const bcrypt = require('bcrypt')
 
 
@@ -232,6 +233,20 @@ const editProfilePost = async(req,res) => {
     }
 }
 
+const rewards = async(req,res) => {
+    try{
+        const user = req.session.user
+        const category = await categorySchema.find()
+        const coupons = await couponSchema.find()
+
+
+        res.render('user/Rewards',{title:'Rewards',user, category, coupons})
+    }
+    catch(error){
+        console.log(`Error in rendering rewards page, ${error}`)
+    }
+}
+
 
 module.exports = {
     profile,
@@ -244,4 +259,5 @@ module.exports = {
     editAddressPost,
     setDefaultAddress,
     orderHistory,
+    rewards,
 }

@@ -140,6 +140,7 @@ const removeFromCart = async (req, res) => {
     }
     catch (error) {
         console.log(`Error in removing product from cart, ${error}`)
+        res.status(500).json({ message: 'Internal server error' });
     }
 }
 

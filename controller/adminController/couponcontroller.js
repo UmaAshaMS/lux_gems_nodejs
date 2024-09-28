@@ -14,8 +14,12 @@ const coupon = async(req,res) => {
 const addCoupon = async(req,res) => {
     try{
         const {couponCode, couponDiscount, discountType, minimumAmount, expiryDate, usageLimit  } = req.body
+        console.log('======================================',typeof(minimumAmount))
+        console.log('Request body', req.body)
+        console.log('MA============', minimumAmount)
 
-        if(!couponCode || !couponDiscount || !expiryDate){
+
+        if(!couponCode || !couponDiscount || !expiryDate || minimumAmount < 0 || minimumAmount == null || isNaN(minimumAmount)){
            return res.status(400).json({message:'All feilds are required.'})
         }
         const isExists = await couponSchema.findOne({couponCode:couponCode})
@@ -25,14 +29,22 @@ const addCoupon = async(req,res) => {
         }
         console.log("Coupon existence check:", isExists);
 
+        const parsedMinimumAmount = parseFloat(minimumAmount);
+        if (isNaN(parsedMinimumAmount) || parsedMinimumAmount < 0) {
+            return res.status(400).json({ message: 'Minimum amount must be a valid non-negative number.' });
+        }
+        console.log('Parsed Minimum Amount:', parsedMinimumAmount);
+
         const newCoupon = new couponSchema({
             couponCode,
             discountType,
             discount:couponDiscount,
-            minimumAmount,
+            minimumAmount : parsedMinimumAmount,
             expiryDate,
             usageLimit
         })
+
+        console.log('===============================NC',newCoupon)
 
         await newCoupon.save()
         res.status(200).json({message:'New coupon added successfully!'})

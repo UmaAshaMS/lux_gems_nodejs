@@ -17,7 +17,7 @@
                                     <p class="card-text"><%= defaultAddress.city %>, <%= defaultAddress.state %>,<%=defaultAddress.country %></p>
                                     <p class="card-text">PINCODE : <%= defaultAddress.pincode %></p>
                                     <p class="card-text">Phone Number : <%= defaultAddress.phoneNumber %></p>
-                                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#addressModal">Change Address</button>
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>
                                     
                                     <% } else if(selectedAddress){ %>
                                     <!-- Display selected address if available -->
@@ -79,7 +79,7 @@
                                                     <!-- Edit Button -->
                                                     <button class=" ms-3" onclick="editAddress('<%= address._id %>')"><i
                                                             class="fas fa-edit"></i></button>
-                                                    <button class=" ms-3" onclick="editAddress('<%= address._id %>')"><i
+                                                    <button class=" ms-3" onclick="deleteAddress('<%= address._id %>')"><i
                                                             class="fas fa-trash-alt"></i></button>
                                                 </div>
                                                 <% }); %>
@@ -89,7 +89,7 @@
                                                             <a href="/addAddressCheckout" class="btn">Add New Address</a>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
+                                        <button type="button" class=" btn btn-secondary"
                                             data-bs-dismiss="modal">Close</button>
                                         <button type="button" class="btn btn-primary"
                                             onclick="confirmAddressSelection()">Confirm</button>
@@ -105,8 +105,9 @@
                                 <h5 class="card-title">Apply Coupon</h5>
                                 <div class="input-group mb-3">
                                     <input type="text" class="form-control" placeholder="Enter Coupon Code">
-                                    <button class="btn btn-outline-secondary" type="button">Apply</button>
+                                    <button class="btn btn-outline-secondary" type="button" id="applyCouponBtn"> Apply</button>
                                 </div>
+                                <div id="couponFeedback"></div>
                             </div>
                         </div>
 
@@ -163,14 +164,6 @@
                                 
 
                                 <!-- Payment Options -->
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption"
-                                        value="0">
-                                    <label class="form-check-label" for="walletOption">
-                                        <strong>Wallet</strong> (Balance: Rs 50.00)
-                                    </label>
-                                </div>
-
 
 
                                 <div class="form-check mb-3">
@@ -197,11 +190,19 @@
                                         <input type="text" class="form-control mb-2" placeholder="CVV">
                                     </div>
                                 </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption"
+                                        value="0">
+                                    <label class="form-check-label" for="walletOption">
+                                        <strong>Wallet</strong> (Balance: Rs 00.00)
+                                    </label>
+                                </div>
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
                                         value="1">
                                     <label class="form-check-label" for="upiOption">
-                                        <strong>UPI</strong>
+                                        <strong>UPI (via RazorPay)</strong>
                                     </label>
                                     <div class="mt-2">
                                         <input type="text" class="form-control" placeholder="Enter UPI ID">
@@ -233,7 +234,10 @@
             </div>
             <!-- hidden input to store selectd address -->
             <input type="hidden" id="selectedAddressId" name="selectedAddressId">
-            <script>
+
+
+
+<script>
 
     document.getElementById('submitPayment').addEventListener('click', function (e) {
     e.preventDefault(); // Prevent form submission
@@ -444,9 +448,25 @@ function confirmAddressSelection() {
         }
     }
 
+    // If an address is selected
     if (selectedAddressOption) {
-        // Store the selected address for later use
+        // Update the hidden input or the relevant element with the selected address ID
         document.getElementById('selectedAddressId').value = selectedAddressOption;
+
+        // Display the selected address on the page
+        const selectedAddress = userAddress.find(addr => addr._id.toString() === selectedAddressOption.toString());
+        const addressSection = document.querySelector('.card-body');
+
+        // Clear previous address display
+        addressSection.innerHTML = `
+            <h5 class="card-title">Delivery Address</h5>
+            <p class="card-text"><strong>${selectedAddress.fullName}</strong></p>
+            <p class="card-text">${selectedAddress.addressLine1}, ${selectedAddress.addressLine2}</p>
+            <p class="card-text">${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}</p>
+            <p class="card-text">PINCODE: ${selectedAddress.pincode}</p>
+            <p class="card-text">Phone Number: ${selectedAddress.phoneNumber}</p>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>
+        `;
 
         // Close the modal
         const modal = document.getElementById('addressModal');
@@ -456,6 +476,33 @@ function confirmAddressSelection() {
         alert('Please select an address.');
     }
 }
+
+//Function to apply coupon
+document.getElementById('applyCouponBtn').addEventListener('click', async function() {
+        const couponCode = document.getElementById('couponCode').value;
+
+        try {
+            const response = await fetch('/applyCoupon', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ couponCode }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update the promotion amount in the UI
+                document.getElementById('couponFeedback').innerText = `Coupon applied! Discount: Rs ${data.discount.toFixed(2)}`;
+                // Optionally, you can update the total here
+            } else {
+                document.getElementById('couponFeedback').innerText = data.message;
+            }
+        } catch (error) {
+            console.error('Error applying coupon:', error);
+        }
+    });
 
 </script>
 

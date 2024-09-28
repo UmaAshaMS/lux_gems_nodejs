@@ -53,6 +53,8 @@ user.get('/editAddress/:index', checkUserLogin, userProfileControl.editAddress);
 user.post('/editAddress/:index',checkUserLogin, userProfileControl.editAddressPost);
 user.put('/setDefaultAddress/:index', checkUserLogin, userProfileControl.setDefaultAddress)
 
+user.get('/rewards', checkUserLogin, userProfileControl.rewards)
+
 
 user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
 
@@ -72,6 +74,10 @@ user.get('/wishlist', checkUserLogin, wishlistcontroller.wishlist)
 user.post('/wishlist/add/:productId', checkUserLogin, wishlistcontroller.addToWishlist)
 user.delete('/wishlist/delete/:productId',checkUserLogin, wishlistcontroller.deleteFromWishlist)
 user.post('/wishlist/addToCart/:productId',checkUserLogin, wishlistcontroller.addToCart)
+
+//Coupon
+
+user.post('/applyCoupon', checkUserLogin, checkoutController.applyCoupon)
 
 //Checkout
 user.get('/checkout', checkUserLogin, checkoutController.checkout)
