@@ -3,8 +3,8 @@
         <%- include('./layout/category_navbar') %>
 
             <div class="container my-5">
-                <!-- <form method="POST" action="/submitPayment"> -->
-                <h2 class="mb-4">Checkout</h2>
+                <form id="checkoutForm" onsubmit="submitCheckout(event)">
+                <h2 class = "mb-4"> Checkout </h2>
                 <div class="row">
                     <div class="col-md-6">
                         <!-- Address Section -->
@@ -34,6 +34,8 @@
                                     <% } %>
                             </div>
                         </div>
+<!-- //hidden modal to show the selected Address -->
+<input type="hidden" name="selectedAddress" id="selectedAddress" value="<%= defaultAddress ? defaultAddress._id : '' %>">
 
 
                         <!-- The Modal -->
@@ -50,9 +52,11 @@
                                             <% userAddress.address.forEach((address)=> { %>
                                                 <div class="address-item d-flex align-items-start mb-3">
                                                     <!-- Checkbox for Address Selection -->
-                                                    <input type="radio" name="selectedAddress"
-                                                        id="modalAddress<%= address._id %>" value="<%= address._id %>"
-                                                        class="me-2">
+
+                                                        <input type="radio" name="address" onclick="updateSelectedAddress('<%= address._id %>')" 
+                                                        id="modalAddress<%= address._id %>" value="<%= address._id %>" class="me-2" 
+                                                        <%= address._id.toString() === (defaultAddress ? defaultAddress._id.toString() : '') ? 'checked' : '' %>>
+
 
                                                     <!-- Address Details -->
                                                     <label for="modalAddress<%= address._id %>" class="w-100">
@@ -156,19 +160,13 @@
                         </div>
                     </div>
 
-                    <!-- Right Side: Payment Method -->
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Payment Options</h5>
-                                
-
                                 <!-- Payment Options -->
-
-
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod"
-                                        id="debitCardOption">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="debitCardOption">
                                     <label class="form-check-label" for="debitCardOption">
                                         <strong>Debit Card</strong>
                                     </label>
@@ -179,8 +177,7 @@
                                     </div>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod"
-                                        id="creditCardOption">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption">
                                     <label class="form-check-label" for="creditCardOption">
                                         <strong>Credit Card</strong>
                                     </label>
@@ -190,17 +187,15 @@
                                         <input type="text" class="form-control mb-2" placeholder="CVV">
                                     </div>
                                 </div>
-
+                    
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption"
-                                        value="0">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption" value="wallet">
                                     <label class="form-check-label" for="walletOption">
                                         <strong>Wallet</strong> (Balance: Rs 00.00)
                                     </label>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
-                                        value="1">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption" value="upi">
                                     <label class="form-check-label" for="upiOption">
                                         <strong>UPI (via RazorPay)</strong>
                                     </label>
@@ -209,300 +204,219 @@
                                     </div>
                                 </div>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption"
-                                        value="2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption" value="cod">
                                     <label class="form-check-label" for="codOption">
                                         <strong>Cash on Delivery (COD)</strong>
                                     </label>
                                     <p class="mb-0">Pay when your order is delivered.</p>
                                 </div>
-
+                    
                                 <!-- Use this Payment Method Button -->
-                                <div class="text-start">
+                                <!-- <div class="text-start">
                                     <button class="btn mt-3" id="submitPayment">Use this Payment Method</button>
-                                </div>
-                                </form>
+                                </div> -->
                             </div>
                         </div>
                     </div>
-                </div>
+                    
 
                 <!-- Place Order Button -->
                 <div class="form-group text-center mt-5">
                     <button class="btn btn-black btn-lg py-3" id="placeOrderButton">Place Order</button>
                 </div>
             </div>
-            <!-- hidden input to store selectd address -->
-            <input type="hidden" id="selectedAddressId" name="selectedAddressId">
+            
 
 
 
 <script>
 
-    document.getElementById('submitPayment').addEventListener('click', function (e) {
-    e.preventDefault(); // Prevent form submission
-    const paymentMethodSelected = document.querySelector('input[name="paymentMethod"]:checked');
+// Function to select address from multiple addresses
+function updateSelectedAddress(addressId) {
+    document.getElementById('selectedAddress').value = addressId;
+}
 
-    if (!paymentMethodSelected) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please select a payment method before proceeding.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    } else {
-        // Proceed with form submission
-        document.getElementById('paymentForm').submit();
-    }
-});
+function confirmAddressSelection() {
+    // Get the selected address ID
+    const selectedAddressId = document.getElementById('selectedAddress').value;
 
-document.getElementById('placeOrderButton').addEventListener('click', function(e) {
-    e.preventDefault(); // Prevent default form submission
-    placeOrderButton();
-});
-
-function placeOrderButton() {
-    console.log("Place order button clicked");
-    const addressRadio = document.querySelectorAll("input[name='selectedAddress']");
-    const paymentOptions = document.querySelectorAll("input[name='paymentMethod']");
-    
-    let selectedAddressOption = null;
-    let selectedPaymentOption = null;
-    const defaultAddressId = '<%= defaultAddress ? defaultAddress._id : "null" %>';
-
-    // Check if any address is selected
-    for (let i = 0; i < addressRadio.length; i++) {
-        if (addressRadio[i].checked) {
-            selectedAddressOption = addressRadio[i].value;
-            break;
-        }
-    }
-
-    // Use default address if no address is selected
-    if (!selectedAddressOption) {
-        if (defaultAddressId === "null") {
-            alert('Please select or add a delivery address.');
-            return;
-        } else {
-            selectedAddressOption = defaultAddressId;
-        }
-    }
-
-    // Check if a payment method is selected
-    for (let i = 0; i < paymentOptions.length; i++) {
-        if (paymentOptions[i].checked) {
-            selectedPaymentOption = paymentOptions[i].value;
-            break;
-        }
-    }
-
-    // If no payment method is selected, stop the process
-    if (!selectedPaymentOption) {
-        alert('Please select a payment method.');
+    if (!selectedAddressId) {
+        alert('Please select an address.');
         return;
     }
 
-    // Prepare order data
-    const URL = `/placeOrder`;
+    const addressLabel = document.querySelector(`label[for="modalAddress${selectedAddressId}"]`);
+    const cardBody = document.querySelector('.card-body');
     
-    // Send the order details to the server
-    fetch(URL, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-        addressId: selectedAddressOption,
-        paymentMethod: selectedPaymentOption,
-    })
-})
-
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const orderId = data.orderId;
-            // Redirect to success page or display order confirmation
-            Swal.fire({
-                title: 'Order Placed!',
-                text: 'Your order has been successfully placed.',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = `/orderConfirmed/${orderId}`; // Redirect
-            });
-        } else {
-            // Show error message
-            Swal.fire({
-                title: 'Error',
-                text: 'There was an issue placing your order. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            title: 'Error',
-            text: 'An unexpected error occurred. Please try again later.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    });
-}
-
-console.log({
-    addressId: selectedAddressOption,
-    paymentMethod: selectedPaymentOption,
-});
-
-document.querySelector('.btn-close').addEventListener('click', function() {
-    const modal = document.getElementById('addressModal');
-    const modalInstance = bootstrap.Modal.getInstance(modal);
+    cardBody.innerHTML = addressLabel.innerHTML + `<button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>`;
+    
+    const modalElement = document.getElementById('addressModal');
+    const modalInstance = bootstrap.Modal.getInstance(modalElement); 
     if (modalInstance) {
-        modalInstance.hide();
+        modalInstance.hide(); 
     }
-});
-
-let editingAddressId = null;
-
-function editAddress(addressId) {
-    // Find the address details from userAddress
-    const addressToEdit = userAddress.address.find(addr => addr._id === addressId);
-    
-    // Populate the form with address details
-    document.getElementById('fullName').value = addressToEdit.fullName;
-    document.getElementById('addressLine1').value = addressToEdit.addressLine1;
-    document.getElementById('addressLine2').value = addressToEdit.addressLine2;
-    document.getElementById('city').value = addressToEdit.city;
-    document.getElementById('state').value = addressToEdit.state;
-    document.getElementById('country').value = addressToEdit.country;
-    document.getElementById('pincode').value = addressToEdit.pincode;
-    document.getElementById('phoneNumber').value = addressToEdit.phoneNumber;
-
-    // Show the form and change the button to 'Update'
-    document.getElementById('formTitle').innerText = 'Edit Address';
-    editingAddressId = addressId;
-    document.getElementById('addressForm').style.display = 'block';
 }
 
-document.getElementById('saveAddressButton').addEventListener('click', function() {
-    const addressData = {
-        fullName: document.getElementById('fullName').value,
-        addressLine1: document.getElementById('addressLine1').value,
-        addressLine2: document.getElementById('addressLine2').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        country: document.getElementById('country').value,
-        pincode: document.getElementById('pincode').value,
-        phoneNumber: document.getElementById('phoneNumber').value,
+// //Function to apply coupon
+// document.getElementById('applyCouponBtn').addEventListener('click', async function() {
+//         const couponCode = document.getElementById('couponCode').value;
+
+//         try {
+//             const response = await fetch('/applyCoupon', {
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                 },
+//                 body: JSON.stringify({ couponCode }),
+//             });
+
+//             const data = await response.json();
+
+//             if (response.ok) {
+//                 document.getElementById('couponFeedback').innerText = `Coupon applied! Discount: Rs ${data.discount.toFixed(2)}`;
+//             } else {
+//                 document.getElementById('couponFeedback').innerText = data.message;
+//             }
+//         } catch (error) {
+//             console.error('Error applying coupon:', error);
+//         }
+//     });
+
+
+function confirmCheckout() {
+    const selectedAddressId = document.getElementById('selectedAddress').value;
+
+    // Assuming you have the default address stored in your frontend
+    const defaultAddress = {
+        fullName: '<%= defaultAddress.fullName %>',
+        addressLine1: '<%= defaultAddress.addressLine1 %>',
+        addressLine2: '<%= defaultAddress.addressLine2 %>',
+        city: '<%= defaultAddress.city %>',
+        state: '<%= defaultAddress.state %>',
+        country: '<%= defaultAddress.country %>',
+        pincode: '<%= defaultAddress.pincode %>',
+        phoneNumber: '<%= defaultAddress.phoneNumber %>'
     };
 
-    if (editingAddressId) {
-       
-        fetch(`/updateAddress/${editingAddressId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(addressData),
-        }).then(response => response.json()).then(data => {
-            // Handle success or error
-            if (data.success) {
-                // Update UI accordingly and close modal
-                Swal.fire('Updated!', 'Address updated successfully.', 'success');
-                location.reload(); // Reload to reflect changes
-            } else {
-                Swal.fire('Error!', data.message, 'error');
-            }
-        });
+    let addressToSend;
+
+    if (selectedAddressId) {
+        // Fetch the selected address details
+        const selectedAddress = userAddress.address.find(addr => addr._id.toString() === selectedAddressId);
+
+        // Structure the address to send to the server
+        addressToSend = {
+            fullName: selectedAddress.fullName,
+            addressLine1: selectedAddress.addressLine1,
+            addressLine2: selectedAddress.addressLine2,
+            city: selectedAddress.city,
+            state: selectedAddress.state,
+            country: selectedAddress.country,
+            pincode: selectedAddress.pincode,
+            phoneNumber: selectedAddress.phoneNumber
+        };
     } else {
-        
-        fetch('/addAddress', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(addressData),
-        }).then(response => response.json()).then(data => {
-            // Handle success or error
-            if (data.success) {
-                Swal.fire('Added!', 'Address added successfully.', 'success');
-                location.reload(); // Reload to reflect changes
-            } else {
-                Swal.fire('Error!', data.message, 'error');
-            }
-        });
+        // Use the default address
+        addressToSend = {
+            fullName: defaultAddress.fullName,
+            addressLine1: defaultAddress.addressLine1,
+            addressLine2: defaultAddress.addressLine2,
+            city: defaultAddress.city,
+            state: defaultAddress.state,
+            country: defaultAddress.country,
+            pincode: defaultAddress.pincode,
+            phoneNumber: defaultAddress.phoneNumber
+        };
     }
-});
 
-function confirmAddressSelection() {
-    const addressRadio = document.querySelectorAll("input[name='selectedAddress']");
-    let selectedAddressOption = null;
 
-    // Find the selected address
-    for (let i = 0; i < addressRadio.length; i++) {
-        if (addressRadio[i].checked) {
-            selectedAddressOption = addressRadio[i].value;
+    // ********************************PAYMENT data to be send to the server****************************************
+    // Create an object to hold payment information
+    let paymentInfo = {
+        method: null,
+        details: null
+    };
+
+    // Get all payment method radio buttons
+    const paymentOptions = document.getElementsByName('paymentMethod');
+    let selectedOption = null;
+
+    // Loop through the options to find the selected one
+    for (let i = 0; i < paymentOptions.length; i++) {
+        if (paymentOptions[i].checked) {
+            selectedOption = paymentOptions[i].value;
+            paymentInfo.method = selectedOption; // Save the selected payment method
             break;
         }
     }
 
-    // If an address is selected
-    if (selectedAddressOption) {
-        // Update the hidden input or the relevant element with the selected address ID
-        document.getElementById('selectedAddressId').value = selectedAddressOption;
-
-        // Display the selected address on the page
-        const selectedAddress = userAddress.find(addr => addr._id.toString() === selectedAddressOption.toString());
-        const addressSection = document.querySelector('.card-body');
-
-        // Clear previous address display
-        addressSection.innerHTML = `
-            <h5 class="card-title">Delivery Address</h5>
-            <p class="card-text"><strong>${selectedAddress.fullName}</strong></p>
-            <p class="card-text">${selectedAddress.addressLine1}, ${selectedAddress.addressLine2}</p>
-            <p class="card-text">${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}</p>
-            <p class="card-text">PINCODE: ${selectedAddress.pincode}</p>
-            <p class="card-text">Phone Number: ${selectedAddress.phoneNumber}</p>
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>
-        `;
-
-        // Close the modal
-        const modal = document.getElementById('addressModal');
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        modalInstance.hide();
-    } else {
-        alert('Please select an address.');
+    // Check if an option is selected
+    if (!selectedOption) {
+        alert('Please select a payment method.');
+        return; 
     }
+
+    const orderamount = 0
+
+    // Check for COD restrictions
+    if (selectedOption === 'cod' && orderAmount > 1000) {
+        alert('Cash on Delivery is not available for orders above ₹1000.');
+        return; 
+    }
+
+    // Perform actions based on the selected payment method
+    switch (selectedOption) {
+        case 'wallet':
+            // Handle wallet payment logic
+            console.log('Wallet selected. Proceeding with wallet payment...');
+            paymentInfo.details = { balance: 0 }; // Example: Add details as needed
+            break;
+        case 'upi':
+            const upiId = document.querySelector('#upiOption + .mt-2 input').value;
+            // Handle UPI payment logic
+            console.log('UPI selected. UPI ID:', upiId);
+            paymentInfo.details = { upiId: upiId }; // Save UPI ID
+            break;
+        case 'cod':
+            // Handle Cash on Delivery logic
+            console.log('Cash on Delivery selected. Proceeding with COD...');
+            paymentInfo.details = {}; 
+            break;
+        default:
+            console.log('Unknown payment method selected.');
+    }
+
+    // Log the paymentInfo object to verify
+    console.log('Payment Info:', paymentInfo);
+
+   
+    const couponCode = document.getElementById('couponCode').value;
+
+    // Combine everything into one object
+    const checkoutData = {
+        address: addressToSend,
+        paymentInfo: paymentInfo,
+        couponCode: couponCode
+    };
+
+    // Send to server
+    fetch('/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(checkoutData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle response data
+        console.log(data);
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
 
-//Function to apply coupon
-document.getElementById('applyCouponBtn').addEventListener('click', async function() {
-        const couponCode = document.getElementById('couponCode').value;
-
-        try {
-            const response = await fetch('/applyCoupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ couponCode }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Update the promotion amount in the UI
-                document.getElementById('couponFeedback').innerText = `Coupon applied! Discount: Rs ${data.discount.toFixed(2)}`;
-                // Optionally, you can update the total here
-            } else {
-                document.getElementById('couponFeedback').innerText = data.message;
-            }
-        } catch (error) {
-            console.error('Error applying coupon:', error);
-        }
-    });
 
 </script>
 

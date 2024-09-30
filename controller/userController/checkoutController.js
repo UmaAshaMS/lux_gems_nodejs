@@ -72,6 +72,14 @@ const checkout = async (req, res) => {
             defaultAddress = userAddress.address.find(addr => addr.isDefault === true);
         }
 
+        if (req.body.selectedAddress) {
+            req.session.address = userAddress.address.find(addr => addr._id.toString() === req.body.selectedAddress);
+        } else if (defaultAddress) {
+            req.session.address = defaultAddress;
+        }
+
+        
+
         // Calculate subtotal
         const subtotal = cartItems.reduce((total, item) => {
             const productPrice = item.productId.productPrice || 0;
@@ -91,6 +99,11 @@ const checkout = async (req, res) => {
             };
         }
 
+    //     // Check the payment method
+    // if (paymentInfo.method === 'cod' && orderAmount > 1000) {
+    //     return res.status(400).json({ message: 'Cash on Delivery is not available for orders above ₹1000.' });
+    // }
+
         // Update session cart
         req.session.cart.cartItems = cartItems;
         req.session.cart.subtotal = subtotal;
@@ -109,7 +122,7 @@ const checkout = async (req, res) => {
             category,
             userAddress,
             defaultAddress,
-            selectedAddress: defaultAddress,
+            selectedAddress: req.session.address,
             subtotal,
             deliveryCharge,
             promotionAmount 
