@@ -128,9 +128,11 @@
                                         <a class="address-card-link text-danger" style="cursor:pointer"
                                             onclick="deleteAddress(`<%= index %>`)" data-index="<%= index %>"><i
                                                 class="fas fa-trash-alt"></i> Delete</a>
+                                                <% if(!address.isDefault) {%>
                                         <a class="address-card-link text-success" style="cursor:pointer" onclick="setAsDefault('<%= index %>')"><i
                                                 class="fas fa-check"></i>
                                             Set as Default</a>
+                                            <% } %>
                                     </div>
                                 </div>
                             </div>
@@ -264,7 +266,7 @@
                     )
                 }
 
-                async function setAsDefault(index) {
+async function setAsDefault(index) {
     try {
         const response = await fetch(`/setDefaultAddress/${index}`, {
             method: 'PUT',
