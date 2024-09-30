@@ -1,0 +1,38 @@
+<%- include('./layout/header') %>
+<%- include('./layout/navbar') %>
+<%- include('./layout/category_navbar') %>
+
+<style>
+.card-container {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    /* height: 100vh; */
+}
+
+.card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #caaf7a;
+    max-width: 400px; /* Optional: to set a max-width for the card */
+}
+
+</style>
+
+<div class="breadcrumbs mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/profile" style="text-decoration:none">Your Account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Your Wallet</li>
+    </ol>
+</div>
+<h4>My Wallet</h4>
+
+
+<div class="card-container">
+    <div class="card p-4 text-center">
+        Your Available balance is Rs: <strong><%= wallet.balance %></strong>
+    </div>
+</div>

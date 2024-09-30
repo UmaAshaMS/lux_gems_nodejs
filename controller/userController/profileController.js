@@ -2,6 +2,7 @@ const userSchema = require('../../model/userSchema')
 const categorySchema = require('../../model/categorySchema')
 const orderSchema = require('../../model/orderSchema')
 const couponSchema = require('../../model/couponSchema')
+const walletSchema = require('../../model/walletSchema')
 const bcrypt = require('bcrypt')
 
 
@@ -247,6 +248,19 @@ const rewards = async(req,res) => {
     }
 }
 
+const wallet = async(req,res) => {
+    try{
+        const user = req.session.user
+        const category = await categorySchema.find()
+        const wallet = await walletSchema.find() 
+        res.render('user/Wallet',{title:'Wallet',user, category, wallet})
+
+    }
+    catch(error){
+        console.log(`Error in rendering wallet page, ${error}`)
+    }
+}
+
 
 module.exports = {
     profile,
@@ -260,4 +274,5 @@ module.exports = {
     setDefaultAddress,
     orderHistory,
     rewards,
+    wallet
 }

@@ -54,6 +54,7 @@ user.post('/editAddress/:index',checkUserLogin, userProfileControl.editAddressPo
 user.put('/setDefaultAddress/:index', checkUserLogin, userProfileControl.setDefaultAddress)
 
 user.get('/rewards', checkUserLogin, userProfileControl.rewards)
+user.get('/wallet', checkUserLogin, userProfileControl.wallet)
 
 
 user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
