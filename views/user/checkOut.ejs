@@ -1,12 +1,12 @@
 <%- include('./layout/header') %>
-    <%- include('./layout/navbar') %>
-        <%- include('./layout/category_navbar') %>
+<%- include('./layout/navbar') %>
+<%- include('./layout/category_navbar') %>
 
-            <div class="container my-5">
-                <form id="checkoutForm" onsubmit="submitCheckout(event)">
-                <h2 class = "mb-4"> Checkout </h2>
-                <div class="row">
-                    <div class="col-md-6">
+<div class="container my-5">
+    <form id="checkoutForm" onsubmit="submitCheckout(event)">
+        <h2 class = "mb-4"> Checkout </h2>
+            <div class="row">
+                <div class="col-md-6">
                         <!-- Address Section -->
                         <div class="card mb-4">
                             <div class="card-body">
@@ -219,16 +219,11 @@
                         </div>
                     </div>
                     
-
                 <!-- Place Order Button -->
                 <div class="form-group text-center mt-5">
                     <button class="btn btn-black btn-lg py-3" id="placeOrderButton">Place Order</button>
                 </div>
             </div>
-            
-
-
-
 <script>
 
 // Function to select address from multiple addresses
@@ -281,6 +276,37 @@ function confirmAddressSelection() {
 //             console.error('Error applying coupon:', error);
 //         }
 //     });
+document.getElementById('applyCouponBtn').addEventListener('click', function () {
+    const couponCode = document.getElementById('couponCodeInput').value;
+
+    if (couponCode) {
+    // Send the coupon code to the server
+    fetch('/apply-coupon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ couponCode: couponCode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Display the promotion amount and success message
+            document.getElementById('couponFeedback').innerHTML = `Discount applied: ${data.discountAmount}`;
+        } else {
+            // Display an error message if the coupon is invalid
+            document.getElementById('couponFeedback').innerHTML = 'Invalid coupon code';
+        }
+    })
+    .catch(error => {
+        document.getElementById('couponFeedback').innerHTML = 'Error applying coupon';
+    });
+} else {
+    document.getElementById('couponFeedback').innerHTML = 'Please enter a coupon code';
+}
+});
+
+
 
 
 function confirmCheckout() {
@@ -329,6 +355,14 @@ function confirmCheckout() {
         };
     }
 
+    const couponCode = document.getElementById('couponCode').value;
+
+    // Combine everything into one object
+    const checkoutData = {
+        address: addressToSend,
+        paymentInfo: paymentInfo,
+        // couponCode: couponCode
+    }
 
     // ********************************PAYMENT data to be send to the server****************************************
     // Create an object to hold payment information
@@ -358,11 +392,11 @@ function confirmCheckout() {
 
     const orderamount = 0
 
-    // Check for COD restrictions
-    if (selectedOption === 'cod' && orderAmount > 1000) {
-        alert('Cash on Delivery is not available for orders above ₹1000.');
-        return; 
-    }
+    // // Check for COD restrictions
+    // if (selectedOption === 'cod' && orderAmount > 1000) {
+    //     alert('Cash on Delivery is not available for orders above ₹1000.');
+    //     return; 
+    // }
 
     // Perform actions based on the selected payment method
     switch (selectedOption) {
@@ -378,35 +412,20 @@ function confirmCheckout() {
             paymentInfo.details = { upiId: upiId }; // Save UPI ID
             break;
         case 'cod':
-            // Handle Cash on Delivery logic
             console.log('Cash on Delivery selected. Proceeding with COD...');
-            paymentInfo.details = {}; 
-            break;
-        default:
-            console.log('Unknown payment method selected.');
-    }
-
-    // Log the paymentInfo object to verify
-    console.log('Payment Info:', paymentInfo);
-
-   
-    const couponCode = document.getElementById('couponCode').value;
-
-    // Combine everything into one object
-    const checkoutData = {
-        address: addressToSend,
-        paymentInfo: paymentInfo,
-        couponCode: couponCode
-    };
-
-    // Send to server
-    fetch('/checkout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(checkoutData),
-    })
+            if (orderAmount > 1000) {
+            alert('Cash on Delivery is not available for orders above ₹1000.');
+            return; 
+            }
+            
+            // Send to server
+            fetch('/placeOrder', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(checkoutData),
+        })
     .then(response => response.json())
     .then(data => {
         // Handle response data
@@ -415,8 +434,15 @@ function confirmCheckout() {
     .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
     });
-}
+            paymentInfo.details = {};
+            break;
+        default:
+            console.log('Unknown payment method selected.');
+    }
 
+    // Log the paymentInfo object to verify
+    console.log('Payment Info:', paymentInfo);
+}
 
 </script>
 
