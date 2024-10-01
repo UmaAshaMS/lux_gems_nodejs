@@ -13,7 +13,7 @@ const schema =  new mongoose.Schema ({
     expiryDate : {
         type: Date
     },
-    mininumAmount : {
+    minimumAmount : {
         type : Number
     },
     usageLimit : {
