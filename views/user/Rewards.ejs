@@ -84,11 +84,11 @@
         <% coupons.forEach(coupon => { %>
             <!-- Reward Card -->
             <div class="reward-card">
-                <h2 class="reward-title"><%= coupon.couponCode %></h2>
-                <% if(coupon.discountType === 'percent') { %>
-                    <p class="reward-description">Coupon offers <%= coupon.discount %>% for all orders above Rs : <%= coupon.minimumAmount %>.
+                <h2 class="reward-title"><strong><%= coupon.couponCode %></strong></h2>
+                <% if(coupon.discountType === 'Percentage') { %>
+                    <p class="reward-description"> Coupon offers <%= coupon.discount %> % for all orders above Rs : <%= coupon.minimumAmount %>.
                        <br> <%=coupon.usageLimit %> time usage Only.
-                        </coupon>  %>
+                    
                     </p>
                 <% } else { %>
                     <p class="reward-description">Coupon offers a discount of Rs: <%= coupon.discount %> for all orders above <%= coupon.minimumAmount %> Rs.
