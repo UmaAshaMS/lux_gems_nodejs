@@ -2,16 +2,17 @@ const userSchema = require('../../model/userSchema')
 const cartSchema = require('../../model/cartSchema')
 const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
-const wishlistSchema = require('../../model/wishlistSchema')
 const couponSchema = require('../../model/couponSchema')
 const { ObjectId } = require('mongodb')
 
 
-const applyCoupon = async(req,res) => {
+const applyCoupon = async (req, res) => {
     const { couponCode } = req.body;
+    console.log('------------------coupon code', req.body);
 
     try {
-        const coupon = await couponSchema.findOne({ code: couponCode });
+        const coupon = await couponSchema.findOne({ couponCode: couponCode });
+        console.log('Coupon Found:', coupon);
 
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid coupon code.' });
@@ -22,34 +23,51 @@ const applyCoupon = async(req,res) => {
 
         // Get current subtotal from session
         const subtotal = req.session.cart.subtotal || 0;
-        let promotionAmount = 0;
+        let promotionAmount = req.session.cart.promotionAmount || 0; // Initialize promotion amount from session
+        let totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount; // Calculate initial total
 
         // Check if the subtotal meets the minimum amount required for the coupon
         if (coupon.minimumAmount && subtotal < coupon.minimumAmount) {
             return res.status(400).json({ message: `Minimum amount of ₹${coupon.minimumAmount} is required to apply this coupon.` });
         }
 
-        // Calculate promotion amount based on discount type
-        if (discountType === 'percent') {
+        // Calculate potential promotion amount based on discount type
+        let newPromotionAmount = 0;
+        if (discountType === 'Percentage') {
             // Calculate percentage discount
-            promotionAmount = (subtotal * discount) / 100; // discount is in %
-        } else if (discountType === 'rs') {
+            newPromotionAmount = (subtotal * discount) / 100; 
+        } else if (discountType === 'Fixed Amount') {
             // Use fixed amount discount
-            promotionAmount = discount; // discount is in Rs
+            newPromotionAmount = discount; 
         }
 
-        // Store the calculated promotion amount in session
+        console.log('-------------New Promotion Amount:', newPromotionAmount);
+
+        // Check if applying this coupon keeps the total above zero
+        const potentialTotalAmount = totalAmount - newPromotionAmount;
+
+        if (potentialTotalAmount < 0) {
+            return res.status(400).json({ message: 'Applying this coupon will result in a total below zero.' });
+        }
+
+        // Add new promotion amount to the total promotion amount
+        promotionAmount += newPromotionAmount;
+
+        // Store the updated promotion amount in session
         req.session.cart.promotionAmount = promotionAmount;
 
-        // Optionally, you could also recalculate the total amount here if needed
-        const totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount;
+        // Recalculate the total amount here after applying the coupon
+        totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount;
 
         // Send the discount amount back to the client
         res.json({ discount: promotionAmount, totalAmount });
     } catch (error) {
         console.error('Error applying coupon:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
 }
-}
+
+
 const checkout = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -78,16 +96,17 @@ const checkout = async (req, res) => {
             req.session.address = defaultAddress;
         }
 
-        
-
         // Calculate subtotal
         const subtotal = cartItems.reduce((total, item) => {
             const productPrice = item.productId.productPrice || 0;
             return total + (productPrice * item.quantity);
         }, 0);
 
-        // Delivery charge
-        const deliveryCharge = 0.00; 
+
+        let deliveryCharge = 100.00; // Default delivery charge is ₹100
+        if (subtotal > 4000) {
+            deliveryCharge = 0.00; // Free delivery for orders over ₹4000
+        }
 
         // Initialize req.session.cart if it doesn't exist
         if (!req.session.cart) {
@@ -113,6 +132,8 @@ const checkout = async (req, res) => {
         const promotionAmount = req.session.cart.promotionAmount || 0.00; 
 
         req.session.address = defaultAddress || null;
+
+        console.log('------------Session:',req.session)
 
         res.render('user/checkOut', {
             title: 'Checkout',

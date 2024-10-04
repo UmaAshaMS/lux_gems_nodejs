@@ -108,12 +108,33 @@
                             <div class="card-body">
                                 <h5 class="card-title">Apply Coupon</h5>
                                 <div class="input-group mb-3">
-                                    <input type="text" class="form-control" placeholder="Enter Coupon Code">
+                                    <input type="text" class="form-control" id="couponCode" placeholder="Enter Coupon Code">
                                     <button class="btn btn-outline-secondary" type="button" id="applyCouponBtn"> Apply</button>
+                                    <!-- View Coupons Button -->
+                                    <!-- <a href="#" id="viewCouponsLink" class="link-primary">View Coupons</a> -->
                                 </div>
                                 <div id="couponFeedback"></div>
                             </div>
                         </div>
+                        
+                        <!-- Modal for displaying coupons -->
+                        <div class="modal fade" id="couponsModal" tabindex="-1" aria-labelledby="couponsModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="couponsModalLabel">Available Coupons</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body" id="couponsList">
+                                        <!-- Coupons will be displayed here -->
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
 
                         <!-- Order Summary Section -->
                         <div class="card mb-4">
@@ -139,15 +160,19 @@
                                                 <li class="list-group-item">
                                                     <strong>Delivery Charge: </strong> Rs <%= deliveryCharge.toFixed(2)
                                                         %>
+                                                        <% if (deliveryCharge === 0) { %>
+                                                            <span class="text-success">(Free delivery for orders above ₹4000)</span>
+                                                        <% } else { %>
+                                                            <span class="text-warning">(Delivery charge applies for orders below ₹4000)</span>
+                                                        <% } %>
                                                 </li>
                                                 <li class="list-group-item">
-                                                    <strong>Promotion Applied : </strong> Rs <%=
-                                                        promotionAmount.toFixed(2) %>
+                                                    <strong>Promotion Applied : </strong> Rs <span id="promotionAmount"><%= promotionAmount.toFixed(2) %></span>
                                                 </li>
                                                 <li class="list-group-item">
                                                     <h4 style="color:rgb(139, 12, 12)"><strong>Order Total : </strong>
-                                                        Rs <%= (subtotal + deliveryCharge - promotionAmount).toFixed(2)
-                                                            %>
+                                                        Rs <span id="OrderTotal"></span><%= (subtotal + deliveryCharge - promotionAmount).toFixed(2)
+                                                            %></span>
                                                     </h4>
                                                 </li>
 
@@ -252,62 +277,50 @@ function confirmAddressSelection() {
     }
 }
 
-// //Function to apply coupon
-// document.getElementById('applyCouponBtn').addEventListener('click', async function() {
-//         const couponCode = document.getElementById('couponCode').value;
+document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+    const couponCode = document.getElementById('couponCode').value;
+    const couponFeedback = document.getElementById('couponFeedback');
 
-//         try {
-//             const response = await fetch('/applyCoupon', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify({ couponCode }),
-//             });
+    try {
+        // Make a POST request to apply the coupon
+        const response = await fetch('/applyCoupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ couponCode }),
+        });
 
-//             const data = await response.json();
+        const result = await response.json();
 
-//             if (response.ok) {
-//                 document.getElementById('couponFeedback').innerText = `Coupon applied! Discount: Rs ${data.discount.toFixed(2)}`;
-//             } else {
-//                 document.getElementById('couponFeedback').innerText = data.message;
-//             }
-//         } catch (error) {
-//             console.error('Error applying coupon:', error);
-//         }
-//     });
-document.getElementById('applyCouponBtn').addEventListener('click', function () {
-    const couponCode = document.getElementById('couponCodeInput').value;
+        if (response.ok) {
+            // Update the feedback message on successful coupon application
+            couponFeedback.innerHTML = `<span class="text-success">Coupon applied successfully! Discount: ₹${result.discount.toFixed(2)}</span>`;
+            updateOrderSummary(result.totalAmount, result.discount);
 
-    if (couponCode) {
-    // Send the coupon code to the server
-    fetch('/apply-coupon', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ couponCode: couponCode })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Display the promotion amount and success message
-            document.getElementById('couponFeedback').innerHTML = `Discount applied: ${data.discountAmount}`;
         } else {
-            // Display an error message if the coupon is invalid
-            document.getElementById('couponFeedback').innerHTML = 'Invalid coupon code';
+            // Show error message if the coupon application failed
+            couponFeedback.innerHTML = `<span class="text-danger">${result.message}</span>`;
         }
-    })
-    .catch(error => {
-        document.getElementById('couponFeedback').innerHTML = 'Error applying coupon';
-    });
-} else {
-    document.getElementById('couponFeedback').innerHTML = 'Please enter a coupon code';
-}
+    } catch (error) {
+        couponFeedback.innerHTML = `<span class="text-danger">Error applying coupon. Please try again.${error}.</span>`;
+        console.error('Error applying coupon:', error);
+    }
 });
 
+function updateOrderSummary(totalAmount, discount) {
+    // Update the promotion amount
+    const promotionAmountElement = document.getElementById('promotionAmount');
+    if (promotionAmountElement) {
+        promotionAmountElement.innerHTML = ` ${discount.toFixed(2)}`;
+    }
 
-
+    // Update the order total
+    const orderTotalElement = document.getElementById('OrderTotal');;
+    if (orderTotalElement) {
+        orderTotalElement.innerHTML = ` ${totalAmount.toFixed(2)}`;
+    }
+}
 
 function confirmCheckout() {
     const selectedAddressId = document.getElementById('selectedAddress').value;
