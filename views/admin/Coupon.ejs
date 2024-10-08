@@ -140,33 +140,46 @@
 
                 <form id="couponForm" action="/admin/addCoupon" method="POST">
                     <div class="mb-3">
+                        <div class="col-12">
                         <label for="couponCode" class="form-label">Coupon Code</label>
-                        <input type="text" class="form-control" id="couponCode" name="couponCode" required minlength="5"
+                        <input type="text" class="form-control w-100" id="couponCode" name="couponCode" required minlength="5"
                             maxlength="10" pattern="[A-Za-z0-9]+"
                             title="Coupon code should be alphanumeric and between 5 to 10 characters.">
+                        </div>
 
+                        <div class="col-12">
                         <label for="discountType" class="form-label">Discount Type</label>
-                        <select class="form-control" id="discountType" name="discountType" required>
+                        <select class="form-control w-100" id="discountType" name="discountType" required>
                             <option value="Percentage">Percentage (%)</option>
                             <option value="Fixed Amount">Fixed Amount (Rs)</option>
                         </select>
+                        </div>
 
+                        <div class="col-12">
                         <label for="couponDiscount" class="form-label">Coupon Discount</label>
-                        <input type="number" class="form-control" id="couponDiscount" name="couponDiscount" required
+                        <input type="number" class="form-control w-100" id="couponDiscount" name="couponDiscount" required
                             min="1" max="10000" title="Discount should be between 1 and 10000.">
+                        </div>
 
+                        <div class="col-12">
                         <label for="minimumAmount" class="form-label">Minimum Purchase Amount</label>
-                        <input type="number" class="form-control" id="minimumAmount" name="minimumAmount" required
+                        <input type="number" class="form-control w-100" id="minimumAmount" name="minimumAmount" required
                             min="0" step="0.01" title="Minimum amount should be a positive number.">
 
+                        </div>
+
+                        <div class="col-12">
                         <label for="expiryDate" class="form-label">Expiration Date</label>
-                        <input type="date" class="form-control" id="expiryDate" name="expiryDate" required
+                        <input type="date" class="form-control w-100" id="expiryDate" name="expiryDate" required
                             min="<%= new Date().toISOString().split('T')[0] %>"
                             title="Expiration date should be in the future.">
+                        </div>
 
+                        <div class="col-12">
                         <label for="usageLimit" class="form-label">Usage Limit</label>
-                        <input type="number" class="form-control" id="usageLimit" name="usageLimit" required min="1"
+                        <input type="number" class="form-control w-100" id="usageLimit" name="usageLimit" required min="1"
                             title="Usage limit should be a positive number.">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -179,6 +192,71 @@
         </div>
     </div>
 </div>
+<!-- Edit Coupon Modal -->
+<div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="couponModalLabel">Edit Coupon</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form id="couponForm" action="/admin/editCoupon/:id" method="POST">
+                    <div class="mb-3">
+                        <div class="col-12">
+                        <label for="couponCode" class="form-label">Coupon Code</label>
+                        <input type="text" class="form-control w-100" id="couponCode" name="couponCode" value="<%=couponDetails.couponCode  %>" required minlength="5"
+                            maxlength="10" pattern="[A-Za-z0-9]+"
+                            title="Coupon code should be alphanumeric and between 5 to 10 characters.">
+                        </div>
+
+                        <div class="col-12">
+                        <label for="discountType" class="form-label">Discount Type</label>
+                        <select class="form-control w-100" id="discountType" name="discountType" value="<%=couponDetails.discountType %>"required>
+                            <option value="Percentage">Percentage (%)</option>
+                            <option value="Fixed Amount">Fixed Amount (Rs)</option>
+                        </select>
+                        </div>
+
+                        <div class="col-12">
+                        <label for="couponDiscount" class="form-label">Coupon Discount</label>
+                        <input type="number" class="form-control w-100" id="couponDiscount" name="couponDiscount" value="<%=couponDetails.discount  %>"required
+                            min="1" max="10000" title="Discount should be between 1 and 10000.">
+                        </div>
+
+                        <div class="col-12">
+                        <label for="minimumAmount" class="form-label">Minimum Purchase Amount</label>
+                        <input type="number" class="form-control w-100" id="minimumAmount" name="minimumAmount" value="<%=couponDetails.minimumAmount %> "required
+                            min="0" step="0.01" title="Minimum amount should be a positive number.">
+
+                        </div>
+
+                        <div class="col-12">
+                        <label for="expiryDate" class="form-label">Expiration Date</label>
+                        <input type="date" class="form-control w-100" id="expiryDate" name="expiryDate" value="<%=couponDetails.expiryDate%>"required
+                            min="<%= new Date().toISOString().split('T')[0] %>"
+                            title="Expiration date should be in the future.">
+                        </div>
+
+                        <div class="col-12">
+                        <label for="usageLimit" class="form-label">Usage Limit</label>
+                        <input type="number" class="form-control w-100" id="usageLimit" name="usageLimit" value="<%=couponDetails.usageLimit  %>" required min="1"
+                            title="Usage limit should be a positive number.">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" form="couponForm"
+                    onclick="submitEditCouponForm()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div class="Container">
     <div class='SideBar'>
@@ -233,7 +311,9 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center align-items-center">
-                                <button class="btn btn-secondary me-2" onclick="editCoupon('<%= coupon._id %>')">
+                                <button class="btn btn-secondary me-2" 
+                                data-bs-toggle="modal"  data-bs-target="#editCouponModal"
+                                onclick="editCoupon('<%= coupon._id %>')">
                                 Edit
                             </button> 
                                 <% if(coupon.isActive){ %>
@@ -432,5 +512,8 @@
         }
     }
 }
+
+
+
 
 </script>

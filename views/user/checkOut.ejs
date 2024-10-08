@@ -246,9 +246,10 @@
                     
                 <!-- Place Order Button -->
                 <div class="form-group text-center mt-5">
-                    <button class="btn btn-black btn-lg py-3" id="placeOrderButton">Place Order</button>
+                    <button class="btn btn-black btn-lg py-3" id="placeOrderButton" onclick="confirmCheckout()">Place Order</button>
                 </div>
             </div>
+            </form>
 <script>
 
 // Function to select address from multiple addresses
@@ -322,8 +323,15 @@ function updateOrderSummary(totalAmount, discount) {
     }
 }
 
-function confirmCheckout() {
+function confirmCheckout(event) {
+    if (event) {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
+    }
+    console.log('confirmCheckout function triggered-----------------------------------------------------');
+
     const selectedAddressId = document.getElementById('selectedAddress').value;
+    console.log('Selected Address IDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD:', selectedAddressId);
+
 
     // Assuming you have the default address stored in your frontend
     const defaultAddress = {
@@ -340,7 +348,7 @@ function confirmCheckout() {
     let addressToSend;
 
     if (selectedAddressId) {
-        // Fetch the selected address details
+        // Fetch the selected address details from `userAddress`
         const selectedAddress = userAddress.address.find(addr => addr._id.toString() === selectedAddressId);
 
         // Structure the address to send to the server
@@ -356,28 +364,16 @@ function confirmCheckout() {
         };
     } else {
         // Use the default address
-        addressToSend = {
-            fullName: defaultAddress.fullName,
-            addressLine1: defaultAddress.addressLine1,
-            addressLine2: defaultAddress.addressLine2,
-            city: defaultAddress.city,
-            state: defaultAddress.state,
-            country: defaultAddress.country,
-            pincode: defaultAddress.pincode,
-            phoneNumber: defaultAddress.phoneNumber
-        };
+        addressToSend = defaultAddress;
     }
 
-    const couponCode = document.getElementById('couponCode').value;
+    const couponCode = document.getElementById('couponCode') ? document.getElementById('couponCode').value : null;
 
-    // Combine everything into one object
-    const checkoutData = {
-        address: addressToSend,
-        paymentInfo: paymentInfo,
-        // couponCode: couponCode
-    }
+    // Define the order amount (fetch from your frontend or server)
 
-    // ********************************PAYMENT data to be send to the server****************************************
+    const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+
+
     // Create an object to hold payment information
     let paymentInfo = {
         method: null,
@@ -397,58 +393,109 @@ function confirmCheckout() {
         }
     }
 
-    // Check if an option is selected
+    // Check if a payment method is selected
     if (!selectedOption) {
         alert('Please select a payment method.');
-        return; 
+        return;
     }
 
-    const orderamount = 0
+    // Check for COD restrictions
+    if (selectedOption === 'cod' && orderTotal > 1000) {
+        alert('Cash on Delivery is not available for orders above ₹1000.');
+        return;
+    }
 
-    // // Check for COD restrictions
-    // if (selectedOption === 'cod' && orderAmount > 1000) {
-    //     alert('Cash on Delivery is not available for orders above ₹1000.');
-    //     return; 
-    // }
+    // Create the checkout data object
+    const checkoutData = {
+        address: addressToSend,
+        paymentInfo: paymentInfo,
+        // couponCode: couponCode
+    };
+    console.log('CHECKOUT DATAAAAAAAAAAAAAAAAAAAAAAA',checkoutData)
 
     // Perform actions based on the selected payment method
     switch (selectedOption) {
         case 'wallet':
             // Handle wallet payment logic
             console.log('Wallet selected. Proceeding with wallet payment...');
-            paymentInfo.details = { balance: 0 }; // Example: Add details as needed
-            break;
-        case 'upi':
-            const upiId = document.querySelector('#upiOption + .mt-2 input').value;
-            // Handle UPI payment logic
-            console.log('UPI selected. UPI ID:', upiId);
-            paymentInfo.details = { upiId: upiId }; // Save UPI ID
-            break;
-        case 'cod':
-            console.log('Cash on Delivery selected. Proceeding with COD...');
-            if (orderAmount > 1000) {
-            alert('Cash on Delivery is not available for orders above ₹1000.');
-            return; 
-            }
-            
-            // Send to server
+            paymentInfo.details = { balance: 0 }; 
+
             fetch('/placeOrder', {
                 method: 'POST',
                 headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(checkoutData),
-        })
-    .then(response => response.json())
-    .then(data => {
-        // Handle response data
-        console.log(data);
-    })
-    .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-    });
-            paymentInfo.details = {};
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ checkoutData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/orderConfirmation';
+                } else if (data.error) {
+                    swal.fire({
+                        icon: 'warning',
+                        title: 'Error',
+                        text: data.error,
+                    });
+                }
+            })
+            .catch(err => {
+                console.log(`Error during wallet payment: ${err}`);
+            });
             break;
+
+        case 'upi':
+            const upiId = document.querySelector('#upiOption + .mt-2 input').value;
+            if (!upiId) {
+                alert('Please enter a UPI ID.');
+                return;
+            }
+            paymentInfo.details = { upiId: upiId }; // Save UPI ID
+
+            // Proceed with UPI payment
+            console.log('UPI selected. UPI ID:', upiId);
+            fetch('/placeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(checkoutData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/orderConfirmation';
+                } else {
+                    console.error('Error processing UPI payment:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error with the UPI payment:', error);
+            });
+            break;
+
+        case 'cod':
+            console.log('Cash on Delivery selected. Proceeding with COD...');
+            fetch('/placeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(checkoutData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/orderConfirmation';
+                } else {
+                    console.error('Error with COD:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with COD fetch operation:', error);
+            });
+            break;
+
         default:
             console.log('Unknown payment method selected.');
     }
@@ -456,6 +503,7 @@ function confirmCheckout() {
     // Log the paymentInfo object to verify
     console.log('Payment Info:', paymentInfo);
 }
+
 
 </script>
 

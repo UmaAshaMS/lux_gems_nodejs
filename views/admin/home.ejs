@@ -135,7 +135,190 @@
             </form>
         </div>
         <div class="AdminDashboard">
-            <img src="../../public/assets/adminGraph.webp">
+          
+
+    <!-- Canvas element where the chart will be rendered -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h5>Monthly sales report</h5>
+                <canvas id="lineChartDaily" class="py-5"></canvas>
+            </div>
+            <div class="col-md-12">
+                <h5>Yearly sales report</h5>
+                <canvas id="barChartMonthly" class="py-5"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h5>Payment methods</h5>
+                <canvas id="polarAreaChartMonthly" class="py-5" style="height: 100px;"></canvas>
+            </div>
+
+        </div>
+
+
+    </div>
+    
+
+        <!-- Script to render the chart -->
+        <script>
+
+            // array 
+
+            const dailySale = "<%= dailySalesArray %>"
+            const dailySaleArray = dailySale.split(',')
+
+            const dailyArray = "<%= dailyArray %>"
+            const dailyArrayConvert = dailyArray.split(',')
+
+            const monthlySale = "<%= monthlySalesArray %>"
+            const monthlySalesArray = monthlySale.split(',')
+
+            const paymentMethodChart = '<%= paymentMethodChart %>'
+            const paymentMethodChartArray = paymentMethodChart.split(',')
+
+
+
+            // Ensure the script runs after the DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Get the context of the canvas element we want to select
+                var ctx = document.getElementById('lineChartDaily').getContext('2d');
+
+                // Create a new Chart object
+                var myLineChart = new Chart(ctx, {
+                    type: 'line', // Specify the chart type
+                    data: {
+                        labels: dailyArrayConvert,
+                        datasets: [{
+                            label: 'Monthly Sale Report', // Name the dataset
+                            fill: true, // fill under the line
+                            borderColor: 'red', // Line color
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)', // Fill color under the line
+                            data: dailySaleArray // Data points
+                        }]
+                    },
+                    options: {
+                        responsive: true, // Make the chart responsive
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Days'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Sales'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get the context of the canvas element we want to select
+                var ctx = document.getElementById('barChartMonthly').getContext('2d');
+
+                // Create a new Chart object
+                var myLineChart = new Chart(ctx, {
+                    type: 'bar', // Specify the chart type
+                    data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                        datasets: [{
+                            label: `Yearly Sale Report ${new Date().getFullYear()}`, // Name the dataset
+                            fill: true, // fill under the line
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(255, 159, 64, 0.2)',
+                                'rgba(255, 205, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(201, 203, 207, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(201, 203, 207, 0.2)',
+                                'rgba(75, 192, 192, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgb(255, 99, 132)',
+                                'rgb(255, 159, 64)',
+                                'rgb(255, 205, 86)',
+                                'rgb(75, 192, 192)',
+                                'rgb(54, 162, 235)',
+                                'rgb(153, 102, 255)',
+                                'rgb(201, 203, 207)',
+                                'rgb(75, 192, 192)',
+                                'rgb(54, 162, 235)',
+                                'rgb(153, 102, 255)',
+                                'rgb(201, 203, 207)',
+                                'rgb(75, 192, 192)'
+                            ],
+                            data: monthlySalesArray // Data points
+                        }]
+                    },
+                    options: {
+                        responsive: true, // Make the chart responsive
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Months'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Sales'
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+
+
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get the context of the canvas element we want to select
+                var ctx = document.getElementById('polarAreaChartMonthly').getContext('2d');
+
+                // Create a new Chart object
+                var myLineChart = new Chart(ctx, {
+                    type: 'polarArea', // Specify the chart type
+                    data: {
+                        labels: ['Cash On Delivery', 'Razor Pay', 'Wallet'],
+                        
+                        datasets: [{
+                            label: `Number of payments`, // Name the dataset
+                            fill: true, // fill under the line
+                            data: paymentMethodChartArray, // Data points
+                            backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(75, 192, 192)',
+                            'rgb(54, 162, 235)'
+                        ],
+
+                        }]
+                    },
+
+                });
+            });
+
+
+
+
+        </script>
         </div>
     </div>
 

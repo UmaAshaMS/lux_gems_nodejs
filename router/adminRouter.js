@@ -5,6 +5,7 @@ const upload = require('../middleware/multer')
 
 
 const adminLoginControl = require('../controller/adminController/loginController')
+const adminDashboardControl = require('../controller/adminController/dashboardController')
 const adminUsercontrol = require('../controller/adminController/userController')
 const adminCategoryControl = require('../controller/adminController/categoryController')
 const adminProductController = require('../controller/adminController/productController')
@@ -15,7 +16,9 @@ const adminOfferController = require('../controller/adminController/offerControl
 //Admin Login
 admin.get('/adminLogin', adminLoginControl.adminLogin)
 admin.post('/adminLogin', adminLoginControl.adminLoginPost)
-admin.get('/home', checkAdminLogin, adminLoginControl.home)
+
+//Dashboard
+admin.get('/home', checkAdminLogin, adminDashboardControl.home)
 
 
 //User Management
@@ -37,7 +40,7 @@ admin.delete('/deleteCategory/:id', checkAdminLogin, adminCategoryControl.delete
 //Product Management
 admin.get('/Products', checkAdminLogin, adminProductController.getproduct)
 admin.get('/addProduct', checkAdminLogin, adminProductController.addProduct)
-admin.post('/addProduct', upload.array('productImage', 4), adminProductController.addProductPost)
+admin.post('/addProduct', upload.array('productImage', 4),checkAdminLogin, adminProductController.addProductPost)
 admin.get('/editProduct/:id', checkAdminLogin, adminProductController.editProduct)
 admin.post('/editProduct/:id', upload.array('productImage', 4), checkAdminLogin, adminProductController.editProductPost)
 admin.post('/admin/deleteImage/:imageName' , checkAdminLogin, adminProductController.deleteImage)
@@ -53,8 +56,13 @@ admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.chang
 
 //Coupon Management
 admin.get('/Coupons', checkAdminLogin, adminCouponController.coupon)
+admin.get('/getCoupon/:id', checkAdminLogin , adminCouponController.couponID)
 admin.post('/addCoupon', checkAdminLogin, adminCouponController.addCoupon)
 admin.delete('/deleteCoupon/:id', checkAdminLogin, adminCouponController.deleteCoupon)
+admin.post('/editCoupon/:id',checkAdminLogin, adminCouponController.editCoupon)
+admin.put('/blockCoupon/:id', checkAdminLogin, adminCouponController.blockCoupon)
+admin.put('/unblockCoupon/:id',checkAdminLogin, adminCouponController.unblockCoupon)
+
 
 //Offer management
 admin.get('/Offers', checkAdminLogin, adminOfferController.offers)

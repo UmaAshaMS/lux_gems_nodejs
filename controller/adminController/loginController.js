@@ -1,6 +1,5 @@
 const dotenv = require('dotenv').config()
 
-
 const adminLogin = (req, res) => {
     try {
         if (req.session.admin) {
@@ -40,16 +39,6 @@ const adminLoginPost = async (req, res) => {
     }
 }
 
-const home = (req, res) => {
-
-    try {
-        res.setHeader('Cache-Control', 'no-store'); // Prevent caching
-        res.render('admin/home', { title: 'Home' })
-    }
-    catch (err) {
-        console.log(`Error in rendering admin home page ${err}`)
-    }
-}
 
 // Handle admin logout
 const logout = (req, res) => {
@@ -80,6 +69,5 @@ const logout = (req, res) => {
 module.exports = {
     adminLogin,
     adminLoginPost,
-    home,
     logout
 }

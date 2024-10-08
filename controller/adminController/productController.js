@@ -269,7 +269,6 @@ const editProductPost = async (req, res) => {
         if (!updatedProduct) {
             throw new Error('Failed to update the product.');
         }
-        req.flash('success', 'Product updated successfully.');
         res.redirect('/admin/Products');
     } catch (err) {
         console.error(`Error in submitting edit product form: ${err}`);
