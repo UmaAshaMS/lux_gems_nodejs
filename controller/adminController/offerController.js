@@ -8,12 +8,12 @@ const mongoose = require('mongoose');
 
 const offers = async(req,res) => {
     try{
-        const offers = await offerSchema.find()
-        const products =await productSchema.find({isActive:true})
+        const offers = await offerSchema.find().populate({path: 'referenceId'})
+        const products = await productSchema.find({isActive:true})
         const category = await categorySchema.find({isBlocked:false})
 
         const searchQuery = req.query.searchQuery || ''
-        res.render('admin/Offers', {title:'Offers', offers,searchQuery, products, category})
+        res.render('admin/Offers', {title:'Offers', offers, searchQuery, products, category})
     }
     catch(error){
         console.log(`Error in rendering offer page, ${error}`)
@@ -54,7 +54,7 @@ const addOfferPost = async (req, res) => {
             const newOffer = new offerSchema({
                 offerTitle,
                 offerType,
-                referenceId: category._id, // Use the ObjectId from the category
+                referenceId: category._id,
                 discountPercent,
             });
             await newOffer.save();

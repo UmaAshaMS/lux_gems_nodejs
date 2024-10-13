@@ -85,10 +85,10 @@
 
 
 <div class="Orders">
-    <% if (order.length === 0) { %>
+    <% if (orders.length === 0) { %>
         <p>You have no previous orders.</p>
     <% } else { %>
-        <% order.forEach(order => { %>
+        <% orders.forEach(order => { %>
             <div class="order-card">
                 <div class="order-image">
                     <img src="<%= order.items[0].productImage %>" alt="Product Image" class="productImage" data-product-id="<%= order.items[0].productId %>">
@@ -96,8 +96,8 @@
                 <div class="order-details">
                     <p><strong>Order ID:</strong> <%= order._id %></p>
                     <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
-                    <p><strong>Total Amount:</strong> Rs<%= order.totalAmount.toFixed(2) %></p>
-                    <p><strong>Payment Method:</strong> Cash On Delivery</p>
+                    <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
+                    <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
                     <h4>Items:</h4>
                     <ul>
                         <% order.items.forEach(item => { %>
@@ -108,9 +108,22 @@
                     </ul>
                     <p class="order-status"><strong>Status:</strong> <%= order.status %></p> 
                     <a href="/orderConfirmed/<%= order._id %>">View Details</a>
+                    <% if(order.status !== 'Cancelled' && order.status !== 'Delivered'){ %>
                     <form action="/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
                         <a <button type="submit" class="cancel-order">Cancel Order</button></a>
                     </form>
+                    <% } %>
+                    <% if(order.status === 'Delivered' ) { %>
+                        <p>Delivered On: <%= order.expectedDeliveryDate %> </p>
+                        <% if (order.returnWindowClosed) { %>
+                            <span>Return window closed on: <%= order.formattedReturnDate %></span>
+                        <% } else { %>
+                        <form action="/returnOrder/<%= order._id %>" method="POST" style="display:inline;">
+                            <a <button type="submit" class="return-order">Return Order</button></a>
+                            <span>Return window open till <%= order.formattedReturnDate %></span>
+                        </form>
+                        <% } %>
+                        <% } %>
                     <!-- <a class= 'link' href="/archiveOrder/<%= order._id %>">Archive</a> -->
                 </div>
             </div>

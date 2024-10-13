@@ -38,9 +38,6 @@ const addProduct = async (req, res) => {
 
 //add product form submission
 const addProductPost = async (req, res) => {
-    console.log('post called')
-    console.log('Image details', req.files); // Check if files are being processed
-    console.log('Request body', req.body)
     req.body.productCategory = new ObjectId(req.body.productCategory)
 
     try {
@@ -204,12 +201,8 @@ const editProduct = async (req, res) => {
 
 const editProductPost = async (req, res) => {
     try {
-        console.log('Request body:', req.body);
-
-        
         const deletedImages = JSON.parse(req.body.deletedImages || '[]');
 
-        
         deletedImages.forEach(imagePath => {
             const absolutePath = path.resolve(__dirname, '../../uploads', imagePath); 
             if (fs.existsSync(absolutePath)) {

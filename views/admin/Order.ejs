@@ -96,6 +96,106 @@
         text-decoration: none;
         color: black;
     }
+
+     /* Improved table styling */
+     table.table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 22px 22px ;
+        font-size: 16px;
+        font-family: Arial, sans-serif;
+    }
+
+    table.table th, table.table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+    }
+
+    table.table thead th {
+        background-color: #f2f2f2;
+        color: #333;
+        font-weight: bold;
+    }
+
+    table.table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    table.table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    table.table tbody tr td {
+        padding: 15px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .btn {
+        padding: 8px 8px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-outline-none a {
+        color: #010101;
+        text-decoration: underline;
+        font-weight: lighter;
+    }
+
+    .btn-outline-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #c82333;
+    }
+
+    .change-status {
+        text-decoration: underline;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* Center table on the page */
+    .Customer-container {
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+    }
+    .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px 0;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #727578;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    border: 1px solid #727578;
+    cursor: pointer;
+}
+
+.pagination button:hover {
+    background-color: #c9cdd0;
+    border-color: #c9cdd0;
+}
+
+.pagination .active {
+    background-color: #e2dcdc;
+    border-color: #e2dcdc;
+    cursor: default;
+}
+
 </style>
 
 <div class="Customer-container">
@@ -139,15 +239,15 @@
                             </div>
                         <% }) %>
                         <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>" 
-                            style="text-decoration: underline;"> ViewOrderDetails</a></button>
+                            style="text-decoration: underline;"> View Order Details</a></button>
                     </td>
                     <td><%= order.status %></td>
                     <td>
                         <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
-                            <button type="submit" class="cancel-order btn btn-outline-danger">CancelOrder</button>
+                            <button type="submit" class="cancel-order btn btn-outline-danger">Cancel Order</button>
                         </form>
                         <br>
-                        <a href="#" data-order-id="<%= order._id %>" class="change-status" style="color:green">ChangeStatus</a>
+                        <a href="#" data-order-id="<%= order._id %>" class="change-status" style="color:green">Change Status</a>
                     </td>
                 </tr>
             <% }) %>
@@ -180,6 +280,29 @@
     </div>
 </div>
 
+<div class="pagination">
+    <% if (hasPreviousPage) { %>
+        <form action="/admin/orders" method="get" style="display:inline;">
+            <input type="hidden" name="page" value="<%= previousPage %>">
+            <button type="submit" class="btn">Previous</button>
+        </form>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <form action="/admin/orders" method="get" style="display:inline;">
+            <input type="hidden" name="page" value="<%= i %>">
+            <button type="submit" class="btn <%= i === currentPage ? 'active' : '' %>"><%= i %></button>
+        </form>
+    <% } %>
+
+    <% if (hasNextPage) { %>
+        <form action="/admin/orders" method="get" style="display:inline;">
+            <input type="hidden" name="page" value="<%= nextPage %>">
+            <button type="submit" class="btn">Next</button>
+        </form>
+    <% } %>
+</div>
+<%- include('footer')%>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // Handle cancel order forms

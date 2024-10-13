@@ -36,6 +36,10 @@
                                 <p><strong>Discount : </strong>
                                     <%= product.productDiscount %>% OFF
                                 </p>
+                                <p><strong>Offer Price : </strong> 
+                                <%= product.productPrice - (product.productDiscount/100) * product.productPrice  %>
+                                </p>
+
                                 <% } %>
                                     <% if (product.stock) { %>
                                         <p style="color: red;">

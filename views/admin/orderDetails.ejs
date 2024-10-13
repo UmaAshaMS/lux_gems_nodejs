@@ -1,60 +1,123 @@
-<%-include('navbar')%>
+<%- include('navbar') %>
 
 <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+        background-color: #f9f9f9; /* Soft background color */
+        margin: 0;
+        padding: 0;
+    }
+
     .order-summary-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    min-height: 100vh; /* Makes sure the content is vertically centered in full viewport height */
-}
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        min-height: 100vh; /* Center content vertically */
+        padding: 20px;
+    }
 
-.order-summary-container ul {
-    list-style: none;
-    padding: 0;
-}
+    .order-summary {
+        background: #ffffff; /* White background for the summary card */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        padding: 30px;
+        width: 100%;
+        max-width: 700px; /* Limit the width for better readability */
+        margin: 20px;
+    }
 
-.order-summary-container a {
-    margin-top: 20px;
-    text-decoration: none;
-    color: blue;
-}
+    h4 {
+        font-size: 28px; /* Larger heading */
+        margin-bottom: 15px;
+        color: #333; /* Darker color for better contrast */
+    }
 
+    h5 {
+        font-size: 20px; /* Consistent subheading size */
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #555; /* Slightly lighter color */
+    }
+
+    p {
+        font-size: 16px; /* Consistent paragraph size */
+        margin: 5px 0; /* Add vertical spacing */
+        color: #666; /* Soft color for text */
+    }
+
+    .order-summary-container ul {
+        list-style: none;
+        padding: 0;
+        margin: 0; /* Remove default margin */
+    }
+
+    .order-summary-container li {
+        background-color: #f0f0f0; /* Light background for items */
+        padding: 10px; /* Padding for list items */
+        margin: 8px 0; /* Spacing between items */
+        border-radius: 5px; /* Rounded corners for list items */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for list items */
+    }
+
+    .order-summary-container a {
+        margin-top: 25px;
+        text-decoration: none;
+        color: #007bff; /* Bootstrap primary color for links */
+        font-weight: bold; /* Make links stand out */
+        border: 2px solid #ffffff; /* Button-like border */
+        padding: 10px 20px; /* Padding for the button */
+        border-radius: 5px; /* Rounded corners */
+        transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transitions */
+    }
+
+    .order-summary-container a:hover {
+        background-color: #ffffff; /* Background color on hover */
+        color: #170790; /* Text color on hover */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+        .order-summary {
+            width: 90%; /* Make the card full-width on small screens */
+        }
+
+        h4 {
+            font-size: 24px; /* Adjust heading size for smaller screens */
+        }
+
+        h5 {
+            font-size: 18px; /* Adjust subheading size for smaller screens */
+        }
+    }
 </style>
 
-
 <div class="order-summary-container">
-<h4>Order Summary:</h4>
-<p>Order ID: <%= order._id %></p>
-<p>Total Amount: Rs<%= order.totalAmount %>
-                </p>
+    <div class="order-summary">
+        <h4>Order Summary</h4>
+        <p><strong>Order ID:</strong> <%= order._id %></p>
+        <p><strong>Total Amount:</strong> Rs <%= order.totalAmount %></p>
 
-                <h5>Items Ordered:</h5>
-                <ul>
-                    <% order.items.forEach(item=> { %>
-                        <li>
-                            <%= item.productName %> - <%= item.quantity %>  Rs<%= item.productPrice %>
-                        </li>
-                        <% }) %>
-                </ul>
+        <h5>Items Ordered</h5>
+        <ul>
+            <% order.items.forEach(item => { %>
+                <li>
+                    <strong>Product ID:</strong> <%= item.productId %><br>
+                    <strong><%= item.productName %></strong> - <%= item.quantity %> x Rs <%= item.productPrice %>
+                </li>
+            <% }) %>
+        </ul>
 
-                <h5>Delivery Address:</h5>
-                <p><strong>
-                        <%= order.address.fullName %>
-                    </strong></p>
-                <p>
-                    <%= order.address.addressLine1 %>, <%= order.address.addressLine2 %>
-                </p>
-                <p>
-                    <%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %>
-                </p>
-                <p>PINCODE: <%= order.address.pincode %>
-                </p>
-                <p>Phone Number: <%= order.address.phoneNumber %>
-                </p>
+        <h5>Order Status : <%= order.status  %></h5>
 
-                <a href="/admin/Orders">Back to Orders</a>
-            </div>
+        <h5>Delivery Address</h5>
+        <p><strong><%= order.address.fullName %></strong></p>
+        <p><%= order.address.addressLine1 %>, <%= order.address.addressLine2 %></p>
+        <p><%= order.address.city %>, <%= order.address.state %>, <%= order.address.country %></p>
+        <p><strong>PINCODE:</strong> <%= order.address.pincode %></p>
+        <p><strong>Phone Number:</strong> <%= order.address.phoneNumber %></p>
 
-        </div>
+        <a href="/admin/Orders">Back to Orders</a>
+    </div>
+</div>

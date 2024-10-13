@@ -131,6 +131,10 @@
                     font-size: 1.5rem;
                     color: #888;
                 }
+                
+                .strikethrough {
+                    text-decoration: line-through;
+                }
             </style>
 
             <body>
@@ -146,9 +150,14 @@
                                     <h4>
                                         <%= item.productId.productName %>
                                     </h4>
-                                    <p><i class="fas fa-rupee-sign"></i>
+                                    <p class="strikethrough"><i class="fas fa-rupee-sign"></i>
                                         <%= item.productId.productPrice.toFixed(2) %>
                                     </p>
+                                    <p>
+                                        <i class="fas fa-rupee-sign"></i> 
+                                        <%= (item.productId.productPrice - (item.productId.productPrice * (item.productId.productDiscount / 100))).toFixed(2) %>
+                                    </p>
+                                    
                                 </div>
                                 <div class="cart-item-quantity">
                                     <button onclick="updateQuantity('<%= item.productId._id %>', -1)">-</button>

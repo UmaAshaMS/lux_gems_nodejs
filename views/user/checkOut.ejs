@@ -1,511 +1,434 @@
 <%- include('./layout/header') %>
-<%- include('./layout/navbar') %>
-<%- include('./layout/category_navbar') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
 
-<div class="container my-5">
-    <form id="checkoutForm" onsubmit="submitCheckout(event)">
-        <h2 class = "mb-4"> Checkout </h2>
-            <div class="row">
-                <div class="col-md-6">
-                        <!-- Address Section -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Delivery Address</h5>
-                                <% if (defaultAddress) { %>
-                                    <p class="card-text"><strong><%= defaultAddress.fullName %></strong></p>
-                                    <p class="card-text"><%= defaultAddress.addressLine1 %>, <%= defaultAddress.addressLine2 %></p>
-                                    <p class="card-text"><%= defaultAddress.city %>, <%= defaultAddress.state %>,<%=defaultAddress.country %></p>
-                                    <p class="card-text">PINCODE : <%= defaultAddress.pincode %></p>
-                                    <p class="card-text">Phone Number : <%= defaultAddress.phoneNumber %></p>
-                                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>
-                                    
-                                    <% } else if(selectedAddress){ %>
-                                    <!-- Display selected address if available -->
-                                    <% const selectedAddr=userAddress.find(addr=> addr._id.toString() === selectedAddress.toString()); %>
-                                    <p class="card-text"><strong><%= selectedAddr.fullName %></strong></p>
-                                    <p class="card-text"><%= selectedAddr.addressLine1 %>, <%= selectedAddr.addressLine2 %></p>
-                                    <p class="card-text"><%= selectedAddr.city %>, <%= selectedAddr.state %>, <%=selectedAddr.country %></p>
-                                    <p class="card-text">PINCODE: <%= selectedAddr.pincode %></p>
-                                    <p class="card-text">Phone Number: <%= selectedAddr.phoneNumber %></p>
-                                    
-                                    <% } else { %>
-                                    <p class="card-text">No default address available. Please add one.</p>
-                                    <a href="/addAddress" class="btn btn-primary">Add Address</a>
-                                    <% } %>
-                            </div>
-                        </div>
-<!-- //hidden modal to show the selected Address -->
-<input type="hidden" name="selectedAddress" id="selectedAddress" value="<%= defaultAddress ? defaultAddress._id : '' %>">
-
-
-                        <!-- The Modal -->
-                        <div id="addressModal" class="modal" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Select Delivery Address</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
-                                            <% userAddress.address.forEach((address)=> { %>
-                                                <div class="address-item d-flex align-items-start mb-3">
-                                                    <!-- Checkbox for Address Selection -->
-
-                                                        <input type="radio" name="address" onclick="updateSelectedAddress('<%= address._id %>')" 
-                                                        id="modalAddress<%= address._id %>" value="<%= address._id %>" class="me-2" 
-                                                        <%= address._id.toString() === (defaultAddress ? defaultAddress._id.toString() : '') ? 'checked' : '' %>>
-
-
-                                                    <!-- Address Details -->
-                                                    <label for="modalAddress<%= address._id %>" class="w-100">
-                                                        <div>
-                                                            <p class="mb-1">
-                                                                <strong>
-                                                                    <%= address.fullName %>
-                                                                </strong>
-                                                            </p>
-                                                            <p class="mb-1">
-                                                                <%= address.addressLine1 %>, <%= address.addressLine2 %>
-                                                            </p>
-                                                            <p class="mb-1">
-                                                                <%= address.city %>, <%= address.state %>, <%=
-                                                                            address.country %>
-                                                            </p>
-                                                            <p class="mb-1">PINCODE: <%= address.pincode %>
-                                                            </p>
-                                                            <p>Phone Number: <%= address.phoneNumber %>
-                                                            </p>
-                                                        </div>
-                                                    </label>
-
-                                                    <!-- Edit Button -->
-                                                    <button class=" ms-3" onclick="editAddress('<%= address._id %>')"><i
-                                                            class="fas fa-edit"></i></button>
-                                                    <button class=" ms-3" onclick="deleteAddress('<%= address._id %>')"><i
-                                                            class="fas fa-trash-alt"></i></button>
-                                                </div>
-                                                <% }); %>
-                                                    <% } else { %>
-                                                        <p>No addresses available. Please add a new address.</p>
-                                                        <% } %>
-                                                            <a href="/addAddressCheckout" class="btn">Add New Address</a>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class=" btn btn-secondary"
-                                            data-bs-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary"
-                                            onclick="confirmAddressSelection()">Confirm</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- Coupon Section -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Apply Coupon</h5>
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control" id="couponCode" placeholder="Enter Coupon Code">
-                                    <button class="btn btn-outline-secondary" type="button" id="applyCouponBtn"> Apply</button>
-                                    <!-- View Coupons Button -->
-                                    <!-- <a href="#" id="viewCouponsLink" class="link-primary">View Coupons</a> -->
-                                </div>
-                                <div id="couponFeedback"></div>
-                            </div>
-                        </div>
-                        
-                        <!-- Modal for displaying coupons -->
-                        <div class="modal fade" id="couponsModal" tabindex="-1" aria-labelledby="couponsModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="couponsModalLabel">Available Coupons</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body" id="couponsList">
-                                        <!-- Coupons will be displayed here -->
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-
-                        <!-- Order Summary Section -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Order Summary</h5>
-                                <ul class="list-group list-group-flush">
-                                    <% if (cart && cart.product && cart.product.length> 0) { %>
-                                        <% cart.product.forEach(productItem=> { %>
-                                            <li class="list-group-item">
-                                                <%= productItem.productId.productName %>:
-                                                    Rs <%= productItem.productId.productPrice %> x <%=
-                                                            productItem.quantity %> =
-                                                            Rs <%= productItem.productId.productPrice *
-                                                                productItem.quantity %>
-                                            </li>
-                                            <% }); %>
-
-                                                <li class="list-group-item">
-                                                    <strong>Total: Rs <%= cart.product.reduce((total, item)=> total +
-                                                            (item.productId.productPrice * item.quantity), 0)
-                                                            %></strong>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <strong>Delivery Charge: </strong> Rs <%= deliveryCharge.toFixed(2)
-                                                        %>
-                                                        <% if (deliveryCharge === 0) { %>
-                                                            <span class="text-success">(Free delivery for orders above ₹4000)</span>
-                                                        <% } else { %>
-                                                            <span class="text-warning">(Delivery charge applies for orders below ₹4000)</span>
-                                                        <% } %>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <strong>Promotion Applied : </strong> Rs <span id="promotionAmount"><%= promotionAmount.toFixed(2) %></span>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <h4 style="color:rgb(139, 12, 12)"><strong>Order Total : </strong>
-                                                        Rs <span id="OrderTotal"></span><%= (subtotal + deliveryCharge - promotionAmount).toFixed(2)
-                                                            %></span>
-                                                    </h4>
-                                                </li>
-
+            <div class="container my-5">
+                <form id="checkoutForm" onsubmit="submitCheckout(event)">
+                    <h2 class="mb-4">Checkout</h2>
+                    <div class="row">
+                        <!-- Left Section: Address, Coupon, Payment -->
+                        <div class="col-md-6">
+                            <!-- Address Section -->
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Delivery Address</h5>
+                                    <% if (defaultAddress) { %>
+                                        <p class="card-text"><strong>
+                                                <%= defaultAddress.fullName %>
+                                            </strong></p>
+                                        <p class="card-text">
+                                            <%= defaultAddress.addressLine1 %>, <%= defaultAddress.addressLine2 %>
+                                        </p>
+                                        <p class="card-text">
+                                            <%= defaultAddress.city %>, <%= defaultAddress.state %>, <%=
+                                                        defaultAddress.country %>
+                                        </p>
+                                        <p class="card-text">PINCODE: <%= defaultAddress.pincode %>
+                                        </p>
+                                        <p class="card-text">Phone Number: <%= defaultAddress.phoneNumber %>
+                                        </p>
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                            data-bs-target="#addressModal">Change Address</button>
+                                        <% } else if (selectedAddress) { %>
+                                            <% const selectedAddr=userAddress.find(addr=> addr._id.toString() ===
+                                                selectedAddress.toString()); %>
+                                                <p class="card-text"><strong>
+                                                        <%= selectedAddr.fullName %>
+                                                    </strong></p>
+                                                <p class="card-text">
+                                                    <%= selectedAddr.addressLine1 %>, <%= selectedAddr.addressLine2 %>
+                                                </p>
+                                                <p class="card-text">
+                                                    <%= selectedAddr.city %>, <%= selectedAddr.state %>, <%=
+                                                                selectedAddr.country %>
+                                                </p>
+                                                <p class="card-text">PINCODE: <%= selectedAddr.pincode %>
+                                                </p>
+                                                <p class="card-text">Phone Number: <%= selectedAddr.phoneNumber %>
+                                                </p>
                                                 <% } else { %>
-                                                    <li class="list-group-item">Your cart is empty.</li>
+                                                    <p class="card-text">No default address available. Please add one.
+                                                    </p>
+                                                    <a href="/addAddress" class="btn btn-primary">Add Address</a>
                                                     <% } %>
-                                </ul>
+                                </div>
+                            </div>
 
+                            <!-- Coupon Section -->
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Apply Coupon</h5>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="couponCode"
+                                            placeholder="Enter Coupon Code">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            id="applyCouponBtn">Apply</button>
+                                    </div>
+                                    <div id="couponFeedback"></div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Section -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Payment Options</h5>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
+                                            id="walletOption" value="2">
+                                        <label class="form-check-label" for="walletOption">
+                                            <strong>Wallet</strong> (Balance: Rs 00.00)
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
+                                            value="1">
+                                        <label class="form-check-label" for="upiOption">
+                                            <strong>UPI (via RazorPay)</strong>
+                                        </label>
+                                        <div class="mt-2">
+                                            <input type="text" class="form-control" placeholder="Enter UPI ID">
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="codOption"
+                                            value="0">
+                                        <label class="form-check-label" for="codOption">
+                                            <strong>Cash on Delivery (COD)</strong>
+                                        </label>
+                                        <p class="mb-0">Pay when your order is delivered.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Section: Order Summary -->
+                        <div class="col-md-6">
+                            <div class="card mb-6">
+                                <div class="card-body">
+                                    <h5 class="card-title">Order Summary</h5>
+                                    <ul class="list-group list-group-flush">
+                                        <% if (cart && cart.product && cart.product.length> 0) { %>
+                                            <% cart.product.forEach(productItem=> { %>
+                                                <li class="list-group-item">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span><strong>
+                                                                <%= productItem.productId.productName %>
+                                                            </strong></span>
+                                                        <span>Quantity: <%= productItem.quantity %></span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mt-1">
+                                                        <span>Original Price: <strong>Rs <%=
+                                                                    productItem.productId.productPrice.toFixed(2) %>
+                                                            </strong></span>
+                                                        <span>Product Offer: <strong>
+                                                            <%= productItem.productId.productDiscount ? productItem.productId.productDiscount.toFixed(2) : '0' %> %
+
+                                                            </strong></span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mt-1">
+                                                        <span>Offer Price: <strong>Rs <%=
+                                                                    (productItem.productId.productPrice -
+                                                                    (productItem.productId.productDiscount /
+                                                                    100)).toFixed(2) %></strong></span>
+                                                        <span>Total: <strong>Rs <%= ((productItem.productId.productPrice
+                                                                    - (productItem.productId.productDiscount / 100)) *
+                                                                    productItem.quantity).toFixed(2) %></strong></span>
+                                                    </div>
+                                                </li>
+                                                <% }); %>
+
+                                                    <li class="list-group-item">
+                                                        <strong>Total: Rs <%= cart.product.reduce((total, item)=> total
+                                                                + ((item.productId.productPrice -
+                                                                (item.productId.productDiscount / 100)) *
+                                                                item.quantity), 0).toFixed(2) %></strong>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>Delivery Charge: </strong> Rs <%=
+                                                            deliveryCharge.toFixed(2) %>
+                                                            <% if (deliveryCharge===0) { %>
+                                                                <span class="text-success">(Free delivery for orders
+                                                                    above ₹2000)</span>
+                                                                <% } else { %>
+                                                                    <span class="text-warning">(Delivery charge applies
+                                                                        for orders below ₹2000)</span>
+                                                                    <% } %>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <strong>Promotion Applied:</strong> Rs <span
+                                                            id="promotionAmount">
+                                                            <%= promotionAmount.toFixed(2) %>
+                                                        </span>
+                                                    </li>
+                                                    <li class="list-group-item">
+                                                        <h4 style="color:rgb(139, 12, 12)"><strong>Order Total:</strong>
+                                                            Rs <span id="OrderTotal">
+                                                                <%= (subtotal + deliveryCharge -
+                                                                    promotionAmount).toFixed(2) %>
+                                                            </span></h4>
+                                                    </li>
+                                                    <% } else { %>
+                                                        <li class="list-group-item">Your cart is empty.</li>
+                                                        <% } %>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Payment Options</h5>
-                                <!-- Payment Options -->
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="debitCardOption">
-                                    <label class="form-check-label" for="debitCardOption">
-                                        <strong>Debit Card</strong>
-                                    </label>
-                                    <div class="mt-2">
-                                        <input type="text" class="form-control mb-2" placeholder="Card Number">
-                                        <input type="text" class="form-control mb-2" placeholder="Expiry Date (MM/YY)">
-                                        <input type="text" class="form-control mb-2" placeholder="CVV">
+                    <!-- Place Order Button -->
+                    <div class="form-group text-center mt-5">
+                        <button class="btn btn-black btn-lg py-3" id="placeOrderButton"
+                            onclick="confirmCheckout(event)">Place Order</button>
+                    </div>
+                </form>
+            </div>
+
+
+            <input type="hidden" name="selectedAddress" id="selectedAddress"
+                value="<%= defaultAddress ? defaultAddress._id : '' %>">
+
+            <!-- Address Modal -->
+            <div id="addressModal" class="modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Select Delivery Address</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
+                                <% userAddress.address.forEach((address)=> { %>
+                                    <div class="address-item d-flex align-items-start mb-3">
+                                        <input type="radio" name="address"
+                                            onclick="updateSelectedAddress('<%= address._id %>')"
+                                            id="modalAddress<%= address._id %>" value="<%= address._id %>" class="me-2"
+                                            <%=address._id.toString()===(defaultAddress ? defaultAddress._id.toString()
+                                            : '' ) ? 'checked' : '' %>>
+                                        <label for="modalAddress<%= address._id %>" class="w-100">
+                                            <p class="mb-1"><strong>
+                                                    <%= address.fullName %>
+                                                </strong></p>
+                                            <p class="mb-1">
+                                                <%= address.addressLine1 %>, <%= address.addressLine2 %>
+                                            </p>
+                                            <p class="mb-1">
+                                                <%= address.city %>, <%= address.state %>, <%= address.country %>
+                                            </p>
+                                            <p class="mb-1">PINCODE: <%= address.pincode %>
+                                            </p>
+                                            <p>Phone Number: <%= address.phoneNumber %>
+                                            </p>
+                                        </label>
+                                        <button class="ms-3" onclick="editAddress('<%= address._id %>')"><i
+                                                class="fas fa-edit"></i></button>
+                                        <button class="ms-3" onclick="deleteAddress('<%= address._id %>')"><i
+                                                class="fas fa-trash-alt"></i></button>
                                     </div>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption">
-                                    <label class="form-check-label" for="creditCardOption">
-                                        <strong>Credit Card</strong>
-                                    </label>
-                                    <div class="mt-2">
-                                        <input type="text" class="form-control mb-2" placeholder="Card Number">
-                                        <input type="text" class="form-control mb-2" placeholder="Expiry Date (MM/YY)">
-                                        <input type="text" class="form-control mb-2" placeholder="CVV">
-                                    </div>
-                                </div>
-                    
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption" value="wallet">
-                                    <label class="form-check-label" for="walletOption">
-                                        <strong>Wallet</strong> (Balance: Rs 00.00)
-                                    </label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption" value="upi">
-                                    <label class="form-check-label" for="upiOption">
-                                        <strong>UPI (via RazorPay)</strong>
-                                    </label>
-                                    <div class="mt-2">
-                                        <input type="text" class="form-control" placeholder="Enter UPI ID">
-                                    </div>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="codOption" value="cod">
-                                    <label class="form-check-label" for="codOption">
-                                        <strong>Cash on Delivery (COD)</strong>
-                                    </label>
-                                    <p class="mb-0">Pay when your order is delivered.</p>
-                                </div>
-                    
-                                <!-- Use this Payment Method Button -->
-                                <!-- <div class="text-start">
-                                    <button class="btn mt-3" id="submitPayment">Use this Payment Method</button>
-                                </div> -->
-                            </div>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <p>No addresses available. Please add a new address.</p>
+                                            <% } %>
+                                                <a href="/addAddressCheckout" class="btn">Add New Address</a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary"
+                                onclick="confirmAddressSelection()">Confirm</button>
                         </div>
                     </div>
-                    
-                <!-- Place Order Button -->
-                <div class="form-group text-center mt-5">
-                    <button class="btn btn-black btn-lg py-3" id="placeOrderButton" onclick="confirmCheckout()">Place Order</button>
                 </div>
             </div>
-            </form>
-<script>
-
-// Function to select address from multiple addresses
-function updateSelectedAddress(addressId) {
-    document.getElementById('selectedAddress').value = addressId;
-}
-
-function confirmAddressSelection() {
-    // Get the selected address ID
-    const selectedAddressId = document.getElementById('selectedAddress').value;
-
-    if (!selectedAddressId) {
-        alert('Please select an address.');
-        return;
-    }
-
-    const addressLabel = document.querySelector(`label[for="modalAddress${selectedAddressId}"]`);
-    const cardBody = document.querySelector('.card-body');
-    
-    cardBody.innerHTML = addressLabel.innerHTML + `<button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>`;
-    
-    const modalElement = document.getElementById('addressModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalElement); 
-    if (modalInstance) {
-        modalInstance.hide(); 
-    }
-}
-
-document.getElementById('applyCouponBtn').addEventListener('click', async () => {
-    const couponCode = document.getElementById('couponCode').value;
-    const couponFeedback = document.getElementById('couponFeedback');
-
-    try {
-        // Make a POST request to apply the coupon
-        const response = await fetch('/applyCoupon', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ couponCode }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            // Update the feedback message on successful coupon application
-            couponFeedback.innerHTML = `<span class="text-success">Coupon applied successfully! Discount: ₹${result.discount.toFixed(2)}</span>`;
-            updateOrderSummary(result.totalAmount, result.discount);
-
-        } else {
-            // Show error message if the coupon application failed
-            couponFeedback.innerHTML = `<span class="text-danger">${result.message}</span>`;
-        }
-    } catch (error) {
-        couponFeedback.innerHTML = `<span class="text-danger">Error applying coupon. Please try again.${error}.</span>`;
-        console.error('Error applying coupon:', error);
-    }
-});
-
-function updateOrderSummary(totalAmount, discount) {
-    // Update the promotion amount
-    const promotionAmountElement = document.getElementById('promotionAmount');
-    if (promotionAmountElement) {
-        promotionAmountElement.innerHTML = ` ${discount.toFixed(2)}`;
-    }
-
-    // Update the order total
-    const orderTotalElement = document.getElementById('OrderTotal');;
-    if (orderTotalElement) {
-        orderTotalElement.innerHTML = ` ${totalAmount.toFixed(2)}`;
-    }
-}
-
-function confirmCheckout(event) {
-    if (event) {
-        event.preventDefault(); // Prevent the form from submitting the traditional way
-    }
-    console.log('confirmCheckout function triggered-----------------------------------------------------');
-
-    const selectedAddressId = document.getElementById('selectedAddress').value;
-    console.log('Selected Address IDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD:', selectedAddressId);
-
-
-    // Assuming you have the default address stored in your frontend
-    const defaultAddress = {
-        fullName: '<%= defaultAddress.fullName %>',
-        addressLine1: '<%= defaultAddress.addressLine1 %>',
-        addressLine2: '<%= defaultAddress.addressLine2 %>',
-        city: '<%= defaultAddress.city %>',
-        state: '<%= defaultAddress.state %>',
-        country: '<%= defaultAddress.country %>',
-        pincode: '<%= defaultAddress.pincode %>',
-        phoneNumber: '<%= defaultAddress.phoneNumber %>'
-    };
-
-    let addressToSend;
-
-    if (selectedAddressId) {
-        // Fetch the selected address details from `userAddress`
-        const selectedAddress = userAddress.address.find(addr => addr._id.toString() === selectedAddressId);
-
-        // Structure the address to send to the server
-        addressToSend = {
-            fullName: selectedAddress.fullName,
-            addressLine1: selectedAddress.addressLine1,
-            addressLine2: selectedAddress.addressLine2,
-            city: selectedAddress.city,
-            state: selectedAddress.state,
-            country: selectedAddress.country,
-            pincode: selectedAddress.pincode,
-            phoneNumber: selectedAddress.phoneNumber
-        };
-    } else {
-        // Use the default address
-        addressToSend = defaultAddress;
-    }
-
-    const couponCode = document.getElementById('couponCode') ? document.getElementById('couponCode').value : null;
-
-    // Define the order amount (fetch from your frontend or server)
-
-    const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
-
-
-    // Create an object to hold payment information
-    let paymentInfo = {
-        method: null,
-        details: null
-    };
-
-    // Get all payment method radio buttons
-    const paymentOptions = document.getElementsByName('paymentMethod');
-    let selectedOption = null;
-
-    // Loop through the options to find the selected one
-    for (let i = 0; i < paymentOptions.length; i++) {
-        if (paymentOptions[i].checked) {
-            selectedOption = paymentOptions[i].value;
-            paymentInfo.method = selectedOption; // Save the selected payment method
-            break;
-        }
-    }
-
-    // Check if a payment method is selected
-    if (!selectedOption) {
-        alert('Please select a payment method.');
-        return;
-    }
-
-    // Check for COD restrictions
-    if (selectedOption === 'cod' && orderTotal > 1000) {
-        alert('Cash on Delivery is not available for orders above ₹1000.');
-        return;
-    }
-
-    // Create the checkout data object
-    const checkoutData = {
-        address: addressToSend,
-        paymentInfo: paymentInfo,
-        // couponCode: couponCode
-    };
-    console.log('CHECKOUT DATAAAAAAAAAAAAAAAAAAAAAAA',checkoutData)
-
-    // Perform actions based on the selected payment method
-    switch (selectedOption) {
-        case 'wallet':
-            // Handle wallet payment logic
-            console.log('Wallet selected. Proceeding with wallet payment...');
-            paymentInfo.details = { balance: 0 }; 
-
-            fetch('/placeOrder', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ checkoutData })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/orderConfirmation';
-                } else if (data.error) {
-                    swal.fire({
-                        icon: 'warning',
-                        title: 'Error',
-                        text: data.error,
-                    });
-                }
-            })
-            .catch(err => {
-                console.log(`Error during wallet payment: ${err}`);
-            });
-            break;
-
-        case 'upi':
-            const upiId = document.querySelector('#upiOption + .mt-2 input').value;
-            if (!upiId) {
-                alert('Please enter a UPI ID.');
-                return;
-            }
-            paymentInfo.details = { upiId: upiId }; // Save UPI ID
-
-            // Proceed with UPI payment
-            console.log('UPI selected. UPI ID:', upiId);
-            fetch('/placeOrder', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(checkoutData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/orderConfirmation';
-                } else {
-                    console.error('Error processing UPI payment:', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error with the UPI payment:', error);
-            });
-            break;
-
-        case 'cod':
-            console.log('Cash on Delivery selected. Proceeding with COD...');
-            fetch('/placeOrder', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(checkoutData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/orderConfirmation';
-                } else {
-                    console.error('Error with COD:', data.error);
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with COD fetch operation:', error);
-            });
-            break;
-
-        default:
-            console.log('Unknown payment method selected.');
-    }
-
-    // Log the paymentInfo object to verify
-    console.log('Payment Info:', paymentInfo);
-}
-
-
-</script>
-
-
+            <!-- Script for Checkout -->
+            <script>
                 
+                function updateSelectedAddress(addressId) {
+                    document.getElementById("selectedAddress").value = addressId;
+                }
+
+
+                function confirmAddressSelection() {
+                    // Get the selected address ID
+                    const selectedAddressId = document.getElementById('selectedAddress').value;
+
+                    if (!selectedAddressId) {
+                        alert('Please select an address.');
+                        return;
+                    }
+
+                    const addressLabel = document.querySelector(`label[for="modalAddress${selectedAddressId}"]`);
+                    const cardBody = document.querySelector('.card-body');
+
+                    cardBody.innerHTML = addressLabel.innerHTML + `<button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addressModal">Change Address</button>`;
+
+                    const modalElement = document.getElementById('addressModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                }
+                function editAddress(addressId) {
+                    // Logic for editing an address (can be a modal or redirect to address edit page)
+                }
+
+                function deleteAddress(addressId) {
+                    // Logic for deleting an address
+                }
+
+                document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+                    const couponCode = document.getElementById('couponCode').value;
+                    const couponFeedback = document.getElementById('couponFeedback');
+
+                    try {
+                        // Make a POST request to apply the coupon
+                        const response = await fetch('/applyCoupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ couponCode }),
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Update the feedback message on successful coupon application
+                            couponFeedback.innerHTML = `<span class="text-success">Coupon applied successfully! Discount: ₹${result.discount.toFixed(2)}</span>`;
+                            updateOrderSummary(result.totalAmount, result.discount);
+
+                        } else {
+                            // Show error message if the coupon application failed
+                            couponFeedback.innerHTML = `<span class="text-danger">${result.message}</span>`;
+                        }
+                    } catch (error) {
+                        couponFeedback.innerHTML = `<span class="text-danger">Error applying coupon. Please try again.${error}.</span>`;
+                        console.error('Error applying coupon:', error);
+                    }
+                });
+
+                // function updateOrderSummary(totalAmount, discount) {
+                //     // Update the promotion amount
+                //     const promotionAmountElement = document.getElementById('promotionAmount');
+                //     if (promotionAmountElement) {
+                //         promotionAmountElement.innerHTML = ` ${discount.toFixed(2)}`;
+                //     }
+
+                //     // Update the order total
+                //     const orderTotalElement = document.getElementById('OrderTotal');;
+                //     if (orderTotalElement) {
+                //         orderTotalElement.innerHTML = ` ${totalAmount.toFixed(2)}`;
+                //     }
+                // }
+
+
+
+                const paymentOptions = document.getElementsByName('paymentMethod')
+                const userAddress = <%- JSON.stringify(userAddress) %>; 
+
+
+
+                function confirmCheckout(event) {
+                    if (event) {
+                        event.preventDefault();
+                    }
+
+                    const selectedAddressId = document.getElementById('selectedAddress').value;
+
+                    // Assuming you have the default address stored in your frontend
+                    const defaultAddress = {
+                        fullName: '<%= defaultAddress.fullName %>',
+                        addressLine1: '<%= defaultAddress.addressLine1 %>',
+                        addressLine2: '<%= defaultAddress.addressLine2 %>',
+                        city: '<%= defaultAddress.city %>',
+                        state: '<%= defaultAddress.state %>',
+                        country: '<%= defaultAddress.country %>',
+                        pincode: '<%= defaultAddress.pincode %>',
+                        phoneNumber: '<%= defaultAddress.phoneNumber %>'
+                    };
+
+                    let addressToSend;
+
+                    if (selectedAddressId) {
+                        // Fetch the selected address details from `userAddress`
+                        const selectedAddress = userAddress.address.find(addr => addr._id === selectedAddressId);
+                        addressToSend = {
+                            fullName: selectedAddress.fullName,
+                            addressLine1: selectedAddress.addressLine1,
+                            addressLine2: selectedAddress.addressLine2,
+                            city: selectedAddress.city,
+                            state: selectedAddress.state,
+                            country: selectedAddress.country,
+                            pincode: selectedAddress.pincode,
+                            phoneNumber: selectedAddress.phoneNumber
+                        };
+                    } else {
+                        // Use the default address
+                        addressToSend = defaultAddress;
+                    }
+
+                    const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+
+
+
+
+                    let paymentIsChecked = false
+                    let selectedPaymentOption = 0
+                    for (let i = 0; i < paymentOptions.length; i++) {
+                        if (paymentOptions[i].checked) {
+                            selectedPaymentOption = paymentOptions[i].value
+                            paymentIsChecked = true
+                            break;
+                        }
+                    }
+
+                    if (!paymentIsChecked) {
+                        Swal.fire({
+                            title: 'Error',
+                            icon: 'error',
+                            text: 'Select a payment method',
+                            confirmButtonText: 'OK'
+                        });
+                        return
+                    }
+                    //if the option is COD
+
+                    if (parseInt(selectedPaymentOption) === 0) {
+
+                        const URL = `/placeOrder`
+                        fetch(URL, {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ addressToSend, selectedPaymentOption })
+
+                        }).then((res) => {
+
+                            return res.json()
+                        }).then((data) => {
+
+                            if (data.success) {
+                                window.location.href = `/orderConfirmed/${data.orderId}`
+                            }
+                            if (data.error) {
+                                swal.fire({
+                                    icon: 'warning',
+                                    title: 'error',
+                                    text: data.error,
+                                })
+                            }
+                        }).catch((err) => {
+                            console.log(`error on paying using cod`)
+                        })
+                    }
+
+
+
+
+
+                }
+
+
+
+
+            </script>

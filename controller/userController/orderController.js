@@ -2,37 +2,55 @@ const userSchema = require('../../model/userSchema')
 const cartSchema = require('../../model/cartSchema')
 const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
-const wishlistSchema = require('../../model/wishlistSchema')
 const orderSchema = require('../../model/orderSchema')
+const walletSchema = require('../../model/walletSchema')
 const { ObjectId } = require('mongodb')
+const mongoose = require('mongoose');
+
 
 
 const placeOrder = async (req, res) => {
+    console.log('place order reached......')
     try {
-        const userId = req.session.user;
+        const userId = req.session.user; 
         const cart = req.session.cart;
-        const address = req.session.address;
+        const { addressToSend, selectedPaymentOption } = req.body;
 
-        const { paymentMethod } = req.body; 
-        
 
-        if (!cart || cart.cartItems.length === 0) {
-            return res.status(400).json({message:'No items in cart to place an order.'});
+        if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
+            return res.status(400).json({ message: 'No items in cart to place an order.' });
         }
 
-        // Prepare order details
+        const totalAmount = cart.subtotal + cart.deliveryCharge - cart.promotionAmount;
+
+
+        // Check if total amount exceeds ₹1000 for COD
+        if (parseInt(selectedPaymentOption) === 0 && totalAmount > 1000) { 
+            return res.status(400).json({ message: 'Cash on Delivery is not available for orders above ₹1000.' });
+        }
+
+
+        // check wallet balance for WALLET PAY
+        if (parseInt(selectedPaymentOption) === 2) { 
+            const userWallet = await walletSchema.findOne({ userId: new ObjectId(userId) }); 
+            if (!userWallet || userWallet.balance < totalAmount) {
+                return res.status(400).json({ message: 'Insufficient wallet balance to place this order.' });
+            }
+        }
+
+        // order details
         const order = new orderSchema({
             userId: new ObjectId(userId),
-            address: address, // Use the selected address
+            address: addressToSend,
             items: cart.cartItems.map(item => ({
                 productId: item.productId._id,
                 productName: item.productId.productName,
                 productPrice: item.productId.productPrice,
                 productImage: item.productId.productImage[0],
-                quantity : item.quantity
+                quantity: item.quantity
             })),
-            paymentMethod: paymentMethod,
-            totalAmount: cart.subtotal + cart.deliveryCharge - cart.promotionAmount
+            paymentMethod: selectedPaymentOption, 
+            totalAmount: totalAmount
         });
 
         // Save the order
@@ -41,17 +59,16 @@ const placeOrder = async (req, res) => {
         // Reduce product stock
         const updateStockPromises = cart.cartItems.map(async (item) => {
             const productId = item.productId._id;
-            const quantity = item.quantity; // assuming you have quantity in the cart
+            const quantity = item.quantity;
             await productSchema.updateOne(
                 { _id: productId },
-                { $inc: { stock: -quantity } } // reduce stock by the quantity ordered
+                { $inc: { stock: -quantity } } 
             );
         });
 
-        // Wait for all stock updates to finish
+       
         await Promise.all(updateStockPromises);
 
-        // Clear the cart from the database
         await cartSchema.deleteOne({ userId: new ObjectId(userId) });
 
         // Clear the cart session
@@ -59,19 +76,28 @@ const placeOrder = async (req, res) => {
         res.status(201).json({ success: true, orderId: savedOrder._id });
     } catch (error) {
         console.error(`Error placing order: ${error}`);
-        res.status(500).json({message:'Internal Server Error'});
+        res.status(500).json({ error: 'Failed to place the order. Please try again later.' });
     }
 };
+
 
 const orderConfirmed = async(req,res) => {
     try{
         const user = req.session.user
-        const orderId = req.params.orderId
+        const orderId = req.params.orderId;
+        console.log(orderId)
 
         const category = await categorySchema.find()
 
         const order = await orderSchema.findById(orderId).populate('items.productId');
-        res.render('user/orderConfirmation', {title:'Order Confirmation', user, order, category})
+
+        // Calculate the expected delivery date
+        const orderDate = new Date(order.orderDate);
+        const expectedDeliveryDate = new Date(orderDate);
+        expectedDeliveryDate.setDate(orderDate.getDate() + 10);
+
+        res.render('user/orderConfirmation', {title:'Order Confirmation', user, order, category, 
+        expectedDeliveryDate: expectedDeliveryDate.toDateString()})
     }
     catch(error){
         console.log(`Error in loading order confirmation page, ${error}`)
@@ -96,10 +122,8 @@ const cancelOrder = async (req, res) => {
         for (const item of order.items) {
             const product = await productSchema.findById(item.productId._id);
             if (product) {
-                // Ensure stock and quantity are valid numbers
                 const quantity = Number(item.quantity);
-                const stock = Number(product.stock) || 0; // Default to 0 if undefined
-
+                const stock = Number(product.stock) || 0; 
                 if (!isNaN(quantity)) {
                     product.stock = stock + quantity; 
                     await product.save();
@@ -118,6 +142,10 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+const returnOrder = async(req, res) => {
+
+}
+
 
 
 
@@ -127,6 +155,7 @@ const cancelOrder = async (req, res) => {
 module.exports = {
     placeOrder,
     orderConfirmed,
-    cancelOrder 
+    cancelOrder,
+    returnOrder
 
 }

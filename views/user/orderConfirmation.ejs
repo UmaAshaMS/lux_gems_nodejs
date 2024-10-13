@@ -4,12 +4,21 @@
 
 <div class="order-confirmation-container">
     <div class="order-confirmation-content">
+        
         <h4>Order Confirmation</h4>
         <p class="confirmation-message">Thank you for your order! Your order has been successfully placed.</p>
 
         <h4>Order Summary:</h4>
         <p><strong>Order ID:</strong> <%= order._id %></p>
         <p><strong>Total Amount:</strong> Rs <%= order.totalAmount %></p>
+        <% if(order.status !== 'Cancelled' && order.status !== 'Delivered' ) { %>
+            <h5>Expected Delivery On: <%= expectedDeliveryDate %> </h5>
+        <% } %>
+
+        <% if(order.status === 'Delivered') { %>
+            <h5>Delivered On: <%= expectedDeliveryDate %> </h5>
+
+            <% } %>
 
         <h5>Items Ordered:</h5>
         <ul>
@@ -32,6 +41,8 @@
         <a href="/all-products" class="btn btn-primary">Continue Shopping</a>
     </div>
 </div>
+
+
 
 <style>
     body {

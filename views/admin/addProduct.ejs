@@ -336,19 +336,14 @@
                 </div>
                 <div class="form-group">
                     <label for="productDiscuont">Product Discount in % :</label>
-                    <input type="text" id="productDiscount" name="productDiscount" class="validate-add-product"
-                        required>
+                    <input type="text" id="productDiscount" name="productDiscount" class="validate-add-product">
                 </div>
                 <div class="form-group">
                     <label for="productDescription">Product Description :</label>
                     <textarea id="productDescription" name="productDescription" class="validate-add-product"
                         required></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="productOffer">Product Offer :</label>
-                    <input type = "text" id="productOffer" name="productOffer" class="validate-add-product"
-                        required></input>
-                </div>
+                
                 <!-- Choose Images Button -->
                 <div class="form-group">
                     <button class="btn btn-dark chooseBtn" type="button" onclick="triggerFileInput()">Choose
@@ -429,10 +424,10 @@
                     validate = false;
                 }
 
-                if (discount.value > 100000 || isNaN(discount.value) || discount.value <= 0) {
-                    errorMessage = 'Discount must be a number and greater than 0';
-                    validate = false;
-                }
+                // if (discount.value > 100000 || isNaN(discount.value) || discount.value <= 0) {
+                //     errorMessage = 'Discount must be a number and greater than 0';
+                //     validate = false;
+                // }
 
                 if (validate) {
                     addProductForm.submit();

@@ -74,7 +74,7 @@ const checkout = async (req, res) => {
         const category = await categorySchema.find({ isBlocked: 0 });
         const cart = await cartSchema.findOne({ userId: new ObjectId(userId) }).populate({
             path: 'product.productId',
-            select: 'productName productPrice productImage'
+            select: 'productName productPrice productImage productDiscount'
         });
 
         // Check if cart exists
@@ -99,16 +99,16 @@ const checkout = async (req, res) => {
         // Calculate subtotal
         const subtotal = cartItems.reduce((total, item) => {
             const productPrice = item.productId.productPrice || 0;
-            return total + (productPrice * item.quantity);
+            const productDiscount = item.productId.productDiscount || 0;
+            return total + ((productPrice - productPrice * (productDiscount/100)) * item.quantity);
         }, 0);
 
 
         let deliveryCharge = 100.00; // Default delivery charge is ₹100
-        if (subtotal > 4000) {
-            deliveryCharge = 0.00; // Free delivery for orders over ₹4000
+        if (subtotal > 2000) {
+            deliveryCharge = 0.00; // Free delivery for orders over ₹2000
         }
 
-        // Initialize req.session.cart if it doesn't exist
         if (!req.session.cart) {
             req.session.cart = {
                 cartItems: [],
@@ -118,10 +118,6 @@ const checkout = async (req, res) => {
             };
         }
 
-    //     // Check the payment method
-    // if (paymentInfo.method === 'cod' && orderAmount > 1000) {
-    //     return res.status(400).json({ message: 'Cash on Delivery is not available for orders above ₹1000.' });
-    // }
 
         // Update session cart
         req.session.cart.cartItems = cartItems;
@@ -133,7 +129,7 @@ const checkout = async (req, res) => {
 
         req.session.address = defaultAddress || null;
 
-        console.log('------------Session:',req.session)
+        // console.log('------------Session:',req.session)
 
         res.render('user/checkOut', {
             title: 'Checkout',

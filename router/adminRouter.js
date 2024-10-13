@@ -68,7 +68,7 @@ admin.put('/unblockCoupon/:id',checkAdminLogin, adminCouponController.unblockCou
 admin.get('/Offers', checkAdminLogin, adminOfferController.offers)
 admin.post('/addOffer',checkAdminLogin, adminOfferController.addOfferPost)
 admin.get('getOffer/:id', checkAdminLogin, adminOfferController.offerById)
-admin.post('/editOffer/:id', checkAdminLogin, adminOfferController.editOffer)
+admin.put('/editOffer/:id', checkAdminLogin, adminOfferController.editOffer)
 admin.delete('/deleteOffer/:id', checkAdminLogin, adminOfferController.deleteOffer)
 
 //Admin Logout

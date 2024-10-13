@@ -211,6 +211,7 @@
                     <th scope="col">Sl.No</th>
                     <th scope="col">Offer Title</th>
                     <th scope="col">Offer Type</th>
+                    <th scope="col">Offer For</th>
                     <th scope="col">Discount Percentage</th>
                     <th scope="col">Status</th>
                     <th scope="col">Actions</th>
@@ -229,6 +230,15 @@
                         <%= offers.offerType %>
                     </td>
                     <td>
+                        <% if (offers.offerType === 'product') { %>
+                            <%= offers.referenceId.productName %> 
+                        <% } else if (offers.offerType === 'category') { %>
+                            <%= offers.referenceId.name %> 
+                        <% } else if (offers.offerType === 'referral') { %>
+                            Referral 
+                        <% } %>
+                    </td>
+                    <td>
                         <%= offers.discountPercent %>
                     </td>
                     <td>
@@ -240,13 +250,13 @@
                     </td>
                     <td>
                         <div class="d-flex justify-content-center align-items-center">
-
-                            <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#editOfferModal"  > 
-                                Edit
-                                </button>
+                            <button class="btn btn-warning me-2" data-bs-toggle="modal"
+                                    data-bs-target="#editOfferModal"
+                                    onclick="editOffer('<%= offers._id %>')">Edit
+                            </button>
                             <button class="btn btn-dark me-2" onclick="deleteOffer('<%= offers._id %>')">
                                 Delete
-                                </button> 
+                            </button> 
                         </div>
                     </td>
 
@@ -268,7 +278,7 @@
                 <form id="offerForm">
                     <div class="mb-3">
                         <label for="offerTitle" class="form-label">Offer Title</label>
-                        <input type="text" class="form-control" id="offerTitle" value="<%=offers.offerTitle  %>" required>
+                        <input type="text" class="form-control" id="offerTitle" required>
                     </div>
                     <div class="mb-3">
                         <label for="offerType" class="form-label">Offer Type</label>
@@ -285,8 +295,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary" form="offerForm">Save changes</button>
+                <button type="submit" class="btn btn-primary" onclick="submitEditOfferForm()">Save changes</button>
             </div>
         </div>
     </div>
@@ -446,100 +455,70 @@ async function deleteOffer(offerId) {
     }
 }
 
-async function updateOffer(offerId) {
-    try {
-        // Fetch the offer details from the server
-        const response = await fetch(`/admin/getOffer/${offerId}`);
-        const offer = await response.json();
+function editOffer(offerId) {
+    // Fetch offer details to populate the modal
+    fetch(`/admin/getOffer/${offerId}`, {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data) {
+            // Populate modal form fields with offer details
+            document.getElementById('editOfferId').value = data._id;
+            document.getElementById('offerTitle').value = data.offerTitle;
+            document.getElementById('offerType').value = data.offerType;
+            document.getElementById('referenceId').value = data.referenceId;
+            document.getElementById('discountPercent').value = data.discountPercent;
 
-        if (!response.ok) {
-            throw new Error(offer.message);
+            // Show the modal
+            $('#editOfferModal').modal('show');
+        } else {
+            alert("Offer not found.");
         }
-
-        // Populate the form fields with offer details
-        document.getElementById('offerTitle').value = offer.offerTitle;
-        document.getElementById('offerType').value = offer.offerType;
-        document.getElementById('referenceId').value = offer.referenceId;
-        document.getElementById('discountPercent').value = offer.discountPercent;
-
-        // Change the form submission behavior to update the offer
-        document.getElementById('offerForm').onsubmit = async (e) => {
-            e.preventDefault();
-            await updateOfferDetails(offerId);
-        };
-
-        // Show the modal
-        const editOfferModal = new bootstrap.Modal(document.getElementById('editOfferModal'));
-        editOfferModal.show();
-    } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: error.message,
-            showConfirmButton: true
-        });
-    }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
-async function updateOfferDetails(offerId) {
+function submitEditOfferForm() {
+    const offerId = document.getElementById('editOfferId').value;
     const offerTitle = document.getElementById('offerTitle').value;
     const offerType = document.getElementById('offerType').value;
     const referenceId = document.getElementById('referenceId').value;
     const discountPercent = document.getElementById('discountPercent').value;
 
-    // Validate the required fields
-    if (!offerTitle || !offerType || !referenceId || !discountPercent) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Missing Information',
-            text: 'Please fill in all required fields.',
-            showConfirmButton: true
-        });
-        return;
-    }
+    fetch(`/admin/editOffer/${offerId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            offerTitle: offerTitle,
+            offerType: offerType,
+            referenceId: referenceId,
+            discountPercent: discountPercent
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Offer updated successfully!');
 
-    // Send the update request to the server
-    try {
-        const response = await fetch(`/admin/editOffer/${offerId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                offerTitle,
-                offerType,
-                referenceId,
-                discountPercent
-            })
-        });
+            // Update the offer in the table without reloading the page
+            const row = document.querySelector(`tr[data-id="${offerId}"]`);
+            if (row) {
+                row.querySelector('.offer-title').textContent = offerTitle;
+                row.querySelector('.offer-type').textContent = offerType;
+                row.querySelector('.reference-id').textContent = referenceId;
+                row.querySelector('.discount-percent').textContent = discountPercent;
+            }
 
-        const result = await response.json();
-
-        if (response.ok) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: result.message,
-                showConfirmButton: true
-            }).then(() => {
-                window.location.reload(); // Refresh the page after success
-            });
+            // Hide the modal
+            $('#editOfferModal').modal('hide');
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: result.message,
-                showConfirmButton: true
-            });
+            alert(data.message || 'Error updating offer.');
         }
-    } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'An error occurred. Please try again later.',
-            showConfirmButton: true
-        });
-    }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
