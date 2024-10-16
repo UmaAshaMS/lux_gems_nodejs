@@ -299,9 +299,10 @@
         }
 
         .product-item {
-            flex: 1 1 calc(100% - 15px);
-            /* 4 items in a row with space  and takes full width*/
-            max-width: calc(100% - 15px);
+            /* flex: 1 1 calc(100% - 15px);
+            max-width: calc(100% - 15px); */
+            flex: 1 1 calc(33.33% - 30px); /* Flex-basis with 3 columns */
+    max-width: calc(33.33% - 30px);
             border: 1px solid #ddd;
             padding: 15px;
             text-align: center;

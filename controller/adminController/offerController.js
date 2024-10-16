@@ -40,15 +40,15 @@ const addOfferPost = async (req, res) => {
             return res.status(400).json({ message: 'Offer Already Exists' });
         }
 
+        // Delete existing offers
+        await offerSchema.deleteMany({ referenceId });
+
         // Handle category offers
         if (offerType === 'category') {
             const category = await categorySchema.findById(referenceId);
             if (!category) {
                 return res.status(404).json({ message: 'Category not found' });
             }
-
-            // Delete existing category offers
-            await offerSchema.deleteOne({ offerType: 'category', referenceId: category._id });
 
             // Add new category offer
             const newOffer = new offerSchema({
@@ -60,7 +60,8 @@ const addOfferPost = async (req, res) => {
             await newOffer.save();
 
             // Update all products under this category
-            const allProducts = await productSchema.find({ productCollection: category.name });
+            const allProducts = await productSchema.find({ productCategory: category._id });
+            console.log('All products under this category are : ', allProducts)
             const bulkOperations = allProducts.map(product => ({
                 updateOne: {
                     filter: { _id: product._id },
@@ -82,8 +83,6 @@ const addOfferPost = async (req, res) => {
                 return res.status(404).json({ message: 'Product not found' });
             }
 
-            // Delete existing product offers
-            await offerSchema.deleteOne({ offerType: 'product', referenceId: product._id });
 
             // Add new product offer
             const newOffer = new offerSchema({

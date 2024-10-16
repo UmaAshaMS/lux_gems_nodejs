@@ -6,7 +6,11 @@
     <div class="order-confirmation-content">
         
         <h4>Order Confirmation</h4>
+        <% if(order.status !== 'Cancelled') { %>
         <p class="confirmation-message">Thank you for your order! Your order has been successfully placed.</p>
+        <% } else { %>
+            <p class="confirmation-message">Order Cancelled.</p>
+        <% } %>
 
         <h4>Order Summary:</h4>
         <p><strong>Order ID:</strong> <%= order._id %></p>

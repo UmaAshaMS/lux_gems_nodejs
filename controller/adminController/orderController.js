@@ -48,66 +48,114 @@ const orderDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
+        const { orderId, itemId } = req.params;
 
-        // Fetch the order
+        // Fetch the order by ID
         const order = await orderSchema.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        for (const item of order.items) {
-            const product = await productSchema.findById(order.productId);
-            if (product) {
-
-                product.stock -= item.quantity;
-
-
-                if (product.stock < 0) {
-                    product.stock = 0;
-                }
-
-
-                await product.save();
-            }
+        // Find the item within the order that matches the provided itemId
+        const itemIndex = order.items.findIndex(item => item._id.toString() === itemId);
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Item not found in the order' });
         }
 
-        // Update the order status to 'Canceled'
-        order.status = 'Rejected';
+        // Get the specific item from the order
+        const item = order.items[itemIndex];
+        const product = await productSchema.findById(item.productId);
+        if (product) {
+            // Update the stock based on the item quantity
+            product.stock += item.quantity;
+
+            // Ensure the stock doesn't go below 0 (just in case)
+            if (product.stock < 0) {
+                product.stock = 0;
+            }
+
+            // Save the product with updated stock
+            await product.save();
+        }
+
+        // Option 1: Remove the item from the order
+        // order.items.splice(itemIndex, 1); // Remove the item from the array
+
+        // Option 2: Mark the item as "Canceled"
+        order.items[itemIndex].status = 'Canceled'; // Mark the item as canceled
+
+        // Check if all items are now canceled, and update the order status if necessary
+        const allItemsCanceled = order.items.every(item => item.status === 'Canceled');
+        if (allItemsCanceled) {
+            order.status = 'Rejected'; // Mark the entire order as rejected if all items are canceled
+        }
+
+        // Save the updated order
         await order.save();
 
-
-        // res.status(200).json({ message: 'Order canceled and stock updated' });
-        res.redirect('/admin/Orders')
+        // Redirect or send a response
+        res.redirect('/admin/Orders');
     } catch (error) {
-        console.log(`Error canceling order, ${error}`);
-        res.status(500).json({ message: 'Error canceling order' });
+        console.error(`Error canceling order item, ${error}`);
+        res.status(500).json({ message: 'Error canceling order item' });
     }
-}
+};
+
+
+// const changeStatus = async (req, res) => {
+//     try {
+//         const { orderId } = req.params;
+//         const { status } = req.body;
+
+//         try {
+
+//             const order = await orderSchema.findByIdAndUpdate(orderId, { status }, { new: true });
+
+//             if (!order) {
+//                 return res.status(404).json({ success: false, message: 'Order not found' });
+//             }
+
+//             res.json({ success: true, message: 'Order status updated successfully', order });
+//         } catch (error) {
+//             console.error('Error updating order status:', error);
+//             res.status(500).json({ success: false, message: 'Server error' });
+//         }
+//     }
+//     catch (error) {
+//         console.log(`Error in changing status, ${error}`)
+//     }
+// }
 
 const changeStatus = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { orderId, itemId } = req.params; 
         const { status } = req.body;
 
-        try {
+        // Find the order by orderId
+        const order = await orderSchema.findById(orderId);
 
-            const order = await orderSchema.findByIdAndUpdate(orderId, { status }, { new: true });
-
-            if (!order) {
-                return res.status(404).json({ success: false, message: 'Order not found' });
-            }
-
-            res.json({ success: true, message: 'Order status updated successfully', order });
-        } catch (error) {
-            console.error('Error updating order status:', error);
-            res.status(500).json({ success: false, message: 'Server error' });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
         }
-    }
-    catch (error) {
-        console.log(`Error in changing status, ${error}`)
+
+        // Find the item in the order by itemId
+        const item = order.items.id(itemId); // Mongoose provides a method to get the sub-document by ID
+
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Item not found in the order' });
+        }
+
+        // Update the status of the specific item
+        item.status = status;
+        await order.save(); // Save the updated order document
+
+        res.json({ success: true, message: 'Item status updated successfully', order });
+    } catch (error) {
+        console.error('Error updating item status:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 }
+
 module.exports = {
     order,
     orderDetails,

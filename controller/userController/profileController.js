@@ -174,7 +174,7 @@ const setDefaultAddress = async (req, res) => {
 const orderHistory = async (req, res) => {
     try {
         const category = await categorySchema.find();
-        const orders = await orderSchema.find();
+        const orders = await orderSchema.find({userId: req.session.user}).sort({ createdAt: -1 });
         const user = req.session.user
 
         const orderDetails = orders.map(order => {

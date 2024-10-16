@@ -50,30 +50,35 @@ const productDetails = async (req,res) => {
     }
 }
 
-const productCategory = async(req,res) => {
-    try{
-    const categoryId = req.params.id
-    const category = await categorySchema.find()
+const productCategory = async (req, res) => {
+    try {
+        const categoryId = req.params.id;
 
-    const categorySam = await categorySchema.findById(categoryId)
-    if(!category){
-        return res.status(404).send('Category not found');
-    }
+        const category = await categorySchema.find();
 
-    const products = await productSchema.find({ productCategory: categorySam._id });
-    const user = req.session.user || null;
+        const categorySam = await categorySchema.findById(categoryId);
 
-    
-        res.render('user/AllProducts',{title:'Products', 
-        category,
-        categorySam,
-        product: products,
-        user})
+        if (!categorySam) {
+            return res.status(404).send('Category not found');
+        }
+
+        const products = await productSchema.find({ productCategory: categorySam._id });
+
+        const user = req.session.user || null;
+
+        res.render('user/AllProducts', {
+            title: 'Products',
+            category, 
+            categorySam,
+            product: products,
+            user
+        });
+    } catch (err) {
+        console.error('Error in loading category-wise products:', err);
+        res.status(500).send('Internal Server Error'); // Send error response to client
     }
-    catch(err){
-        console.error('Error:' , err)
-    }
-}
+};
+
 
 
 module.exports ={

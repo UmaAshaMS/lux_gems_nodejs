@@ -33,6 +33,11 @@ const schema = new mongoose.Schema(
             quantity : {
                 type : Number
             },
+            status: {
+                type: String, 
+                enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned'], 
+                default: 'Pending' 
+            }
         }
     ],
     paymentMethod: {
@@ -40,7 +45,7 @@ const schema = new mongoose.Schema(
     },
     status: {
         type: String, 
-        default: 'Order Placed'
+        default: 'Pending'
     },
     orderDate: { 
         type: Date, 

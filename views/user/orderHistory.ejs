@@ -3,75 +3,79 @@
 <%- include('./layout/category_navbar') %>
 
 <style>
-    h1 {
-        text-align: center;
-        color: #333;
-    }
+.Orders {
+    max-width: 800px;
+    margin: 0 auto; 
+    padding: 20px;
+}
 
-    .Orders {
-        max-width: 800px;
-        margin: 0 auto; 
-        padding: 20px;
-    }
+.order-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-    .order-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 10px 0;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        display: flex; 
-        align-items: center; 
-    }
+.product-details {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    margin-bottom: 10px; /* Spacing between each product */
+}
 
-    .order-image {
-        flex-shrink: 0;
-        margin-right: 20px; 
-    }
+.product-image {
+    flex-shrink: 0; /* Prevents image from shrinking */
+    margin-right: 20px; /* Spacing between image and details */
+}
 
-    .order-card img {
-        border-radius: 4px;
-        max-width: 100px; 
-        height: auto; 
-        cursor: pointer;
-    }
+.product-image img {
+    max-width: 100px; 
+    height: auto;
+    border-radius: 4px;
+}
 
-    .order-details {
-        flex-grow: 1; 
-        color: #555;
-    }
+.product-info {
+    flex-grow: 1; /* Takes up available space next to the image */
+    margin-right: 20px; /* Space between details and buttons */
+}
 
-    .order-details p, .order-details h4 {
-        margin: 5px 0; 
-    }
+.product-info p {
+    margin: 5px 0;
+    color: #555;
+}
 
-    .Orders a {
-        display: inline-block;
-        margin-top: 10px;
-        padding: 8px 15px;
-        background-color: black;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-    }
+.order-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+}
 
-    .Orders a:hover {
-        background-color: #caaf7a;
-    }
+.order-actions button {
+    margin-top: 5px;
+    font-size: 0.9em;
+    padding: 5px 10px;
+    color: white;
+    background-color: #d10e21;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
-    .order-status {
-        font-weight: bold;
-        color: #007bff; 
-    }
+.order-actions button:hover {
+    background-color: #c82333;
+}
 
-    .cancel-order {
-        margin-top: 5px;
-        font-size: 0.9em;
-        color: #dc3545; 
-    }
-   
+.return-order {
+    background-color: #28a745; 
+}
+
+.return-order:hover {
+    background-color: #218838;
+}
+
 </style>
+
 <div class="breadcrumbs mb-4">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -82,54 +86,57 @@
 </div>
 <h4>Order History</h4>
 
-
-
 <div class="Orders">
     <% if (orders.length === 0) { %>
         <p>You have no previous orders.</p>
     <% } else { %>
         <% orders.forEach(order => { %>
             <div class="order-card">
-                <div class="order-image">
-                    <img src="<%= order.items[0].productImage %>" alt="Product Image" class="productImage" data-product-id="<%= order.items[0].productId %>">
-                </div>
                 <div class="order-details">
                     <p><strong>Order ID:</strong> <%= order._id %></p>
                     <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                     <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
                     <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-                    <h4>Items:</h4>
-                    <ul>
-                        <% order.items.forEach(item => { %>
-                            <li>
-                                <strong><%= item.productName %></strong> - Rs<%= item.productPrice %>
-                            </li>
-                        <% }) %>
-                    </ul>
-                    <p class="order-status"><strong>Status:</strong> <%= order.status %></p> 
-                    <a href="/orderConfirmed/<%= order._id %>">View Details</a>
-                    <% if(order.status !== 'Cancelled' && order.status !== 'Delivered'){ %>
-                    <form action="/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
-                        <a <button type="submit" class="cancel-order">Cancel Order</button></a>
-                    </form>
-                    <% } %>
-                    <% if(order.status === 'Delivered' ) { %>
-                        <p>Delivered On: <%= order.expectedDeliveryDate %> </p>
-                        <% if (order.returnWindowClosed) { %>
-                            <span>Return window closed on: <%= order.formattedReturnDate %></span>
-                        <% } else { %>
-                        <form action="/returnOrder/<%= order._id %>" method="POST" style="display:inline;">
-                            <a <button type="submit" class="return-order">Return Order</button></a>
-                            <span>Return window open till <%= order.formattedReturnDate %></span>
-                        </form>
-                        <% } %>
-                        <% } %>
-                    <!-- <a class= 'link' href="/archiveOrder/<%= order._id %>">Archive</a> -->
+                    <h4>Items in this order:</h4>
+                    
+                    <% order.items.forEach(item => { %>
+                        <div class="product-details">
+                            <div class="product-image">
+                                <img src="<%= item.productImage %>" alt="Product Image">
+                            </div>
+                            <div class="product-info">
+                                <p><strong>Product Name:</strong> <%= item.productName %></p>
+                                <p><strong>Price:</strong> Rs<%= item.productPrice %></p>
+                                <p><strong>Quantity:</strong> <%= item.quantity %></p>
+                                <p><strong>Status:</strong> <%= item.status %></p>
+                            </div>
+                            <div class="order-actions">
+                                <% if(item.status !== 'Cancelled' && order.status !== 'Delivered'){ %>
+                                    <form action="/cancelOrder/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="cancel-order">Cancel Product</button>
+                                    </form>
+                                <% } %>
+
+                                <% if(order.status === 'Delivered' && item.status !== 'Returned'){ %>
+                                    <% if (!item.returnWindowClosed) { %>
+                                    <form action="/returnOrder/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
+                                        <button type="submit" class="return-order">Return Product</button>
+                                    </form>
+                                    <span>Return window open till <%= order.formattedReturnDate %></span>
+                                    <% } else { %>
+                                    <span>Return window closed on: <%= order.formattedReturnDate %></span>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                    
+                    <a class="btn" href="/orderConfirmed/<%= order._id %>">Order Details</a>
                 </div>
             </div>
         <% }) %>
     <% } %>
-    <a href="/all-products">Continue Shopping</a>
+    <a class="btn" href="/all-products">Continue Shopping</a>
 </div>
 
 
@@ -147,7 +154,6 @@
             const form = this.closest('form');
             const actionUrl = form.action;
 
-            // SweetAlert confirmation dialog
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You won’t be able to revert this!',
@@ -168,11 +174,19 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            Swal.fire('Cancelled!', 'Your order has been canceled.', 'success').then(() => {
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Cancelled',
+                                    text: data.message,
+                                }).then(() => {
                                 window.location.reload();
                             });
                         } else {
-                            Swal.fire('Error!', data.message, 'error');
+                            Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data.message,
+                                })
                         }
                     })
                     .catch(error => {
@@ -182,5 +196,74 @@
             });
         });
     });
+
+
+    document.querySelectorAll('.return-order').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = this.closest('form');
+        const actionUrl = form.action;
+
+        Swal.fire({
+            title: 'Return Order',
+            html: `
+                <form id="returnForm">
+                    <label for="reason">Reason for Return</label>
+                    <textarea id="reason" name="reason" placeholder="Mention your reason here" style="width: 100%; height: 100px;" required></textarea>
+                </form>
+            `,
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Submit Return',
+            cancelButtonText: 'Cancel',
+            preConfirm: () => {
+                const reason = document.getElementById('reason').value;
+                if (!reason) {
+                    Swal.showValidationMessage('Please enter a reason for return');
+                }
+                return reason;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const reason = result.value; // Capture the reason for return
+
+                // Make the POST request with the return reason
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        reason: reason
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Returned',
+                            text: data.message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'Failed to return the order. Please try again.', 'error');
+                });
+            }
+        });
+    });
+});
+
 
 </script>

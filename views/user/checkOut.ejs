@@ -121,7 +121,9 @@
                                                                     productItem.productId.productPrice.toFixed(2) %>
                                                             </strong></span>
                                                         <span>Product Offer: <strong>
-                                                            <%= productItem.productId.productDiscount ? productItem.productId.productDiscount.toFixed(2) : '0' %> %
+                                                                <%= productItem.productId.productDiscount ?
+                                                                    productItem.productId.productDiscount.toFixed(2)
+                                                                    : '0' %> %
 
                                                             </strong></span>
                                                     </div>
@@ -178,7 +180,7 @@
 
                     <!-- Place Order Button -->
                     <div class="form-group text-center mt-5">
-                        <button class="btn btn-black btn-lg py-3" id="placeOrderButton"
+                        <button type="button" class="btn btn-black btn-lg py-3" id="placeOrderButton"
                             onclick="confirmCheckout(event)">Place Order</button>
                     </div>
                 </form>
@@ -241,7 +243,7 @@
             </div>
             <!-- Script for Checkout -->
             <script>
-                
+
                 function updateSelectedAddress(addressId) {
                     document.getElementById("selectedAddress").value = addressId;
                 }
@@ -323,18 +325,22 @@
 
 
                 const paymentOptions = document.getElementsByName('paymentMethod')
-                const userAddress = <%- JSON.stringify(userAddress) %>; 
+                const userAddress =  <%- JSON.stringify(userAddress) %>
+                console.log(userAddress)
+
 
 
 
                 function confirmCheckout(event) {
                     if (event) {
                         event.preventDefault();
+                        console.log('event triggered')
                     }
+            
+                    // console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
 
-                    // Assuming you have the default address stored in your frontend
                     const defaultAddress = {
                         fullName: '<%= defaultAddress.fullName %>',
                         addressLine1: '<%= defaultAddress.addressLine1 %>',
@@ -349,7 +355,6 @@
                     let addressToSend;
 
                     if (selectedAddressId) {
-                        // Fetch the selected address details from `userAddress`
                         const selectedAddress = userAddress.address.find(addr => addr._id === selectedAddressId);
                         addressToSend = {
                             fullName: selectedAddress.fullName,
@@ -362,14 +367,8 @@
                             phoneNumber: selectedAddress.phoneNumber
                         };
                     } else {
-                        // Use the default address
                         addressToSend = defaultAddress;
                     }
-
-                    const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
-
-
-
 
                     let paymentIsChecked = false
                     let selectedPaymentOption = 0
@@ -390,10 +389,11 @@
                         });
                         return
                     }
+
+                    const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+
                     //if the option is COD
-
                     if (parseInt(selectedPaymentOption) === 0) {
-
                         const URL = `/placeOrder`
                         fetch(URL, {
                             method: 'POST',
@@ -410,11 +410,11 @@
                             if (data.success) {
                                 window.location.href = `/orderConfirmed/${data.orderId}`
                             }
-                            if (data.error) {
-                                swal.fire({
+                            else if (data.message) {
+                            Swal.fire({
                                     icon: 'warning',
                                     title: 'error',
-                                    text: data.error,
+                                    text: data.message,
                                 })
                             }
                         }).catch((err) => {
@@ -422,13 +422,35 @@
                         })
                     }
 
+                    //if the option is WALLET
+                    if (parseInt(selectedPaymentOption) === 2) {
+                        const URL = `/placeOrder`
+                        fetch(URL, {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ addressToSend, selectedPaymentOption })
 
+                        }).then((res) => {
 
+                            return res.json()
+                        }).then((data) => {
 
-
+                            if (data.success) {
+                                window.location.href = `/orderConfirmed/${data.orderId}`
+                            }
+                            else if (data.message) {
+                            Swal.fire({
+                                    icon: 'warning',
+                                    title: 'error',
+                                    text: data.message,
+                                })
+                            }
+                        }).catch((err) => {
+                            console.log(`error on paying using cod`)
+                        })
+                    }
+                   
                 }
-
-
-
-
             </script>

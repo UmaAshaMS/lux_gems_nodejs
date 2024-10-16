@@ -265,9 +265,9 @@
             </div>
             <div class="modal-body">
                 <select id="orderStatusSelect" class="form-select">
-                    <option value="Order Placed">Order Placed</option>
                     <option value="Pending">Pending</option>
                     <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
                     <option value="Returned">Returned</option>
                     <option value="Rejected">Rejected</option>
                 </select>
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const changeStatusLinks = document.querySelectorAll('.change-status');
     changeStatusLinks.forEach(link => {
         link.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault(); 
             const orderId = link.getAttribute('data-order-id');
 
             // Set the order ID in a custom attribute or variable if needed

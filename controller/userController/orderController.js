@@ -15,6 +15,7 @@ const placeOrder = async (req, res) => {
         const userId = req.session.user; 
         const cart = req.session.cart;
         const { addressToSend, selectedPaymentOption } = req.body;
+        console.log(req.body)
 
 
         if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
@@ -85,7 +86,6 @@ const orderConfirmed = async(req,res) => {
     try{
         const user = req.session.user
         const orderId = req.params.orderId;
-        console.log(orderId)
 
         const category = await categorySchema.find()
 
@@ -106,7 +106,7 @@ const orderConfirmed = async(req,res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
+        const {orderId, itemId} = req.params;
 
         const order = await orderSchema.findById(orderId).populate('items.productId');
 
@@ -135,7 +135,7 @@ const cancelOrder = async (req, res) => {
             }
         }
 
-        res.json({ message: 'Order canceled successfully' });
+        res.status(200).json({ success: true, message : 'Order canceled successfully' });
     } catch (error) {
         console.error(`Error canceling order: ${error}`);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -143,7 +143,7 @@ const cancelOrder = async (req, res) => {
 };
 
 const returnOrder = async(req, res) => {
-
+    
 }
 
 
