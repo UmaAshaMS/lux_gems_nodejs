@@ -106,7 +106,7 @@ const orderConfirmed = async(req,res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const {orderId, itemId} = req.params;
+        const { orderId, itemId } = req.params; 
 
         const order = await orderSchema.findById(orderId).populate('items.productId');
 
@@ -114,33 +114,44 @@ const cancelOrder = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        // Update order status 
-        order.status = 'Cancelled';
-        await order.save();
+        // Find the specific item to cancel in the order
+        const itemToCancel = order.items.find(item => item.productId._id.toString() === itemId);
 
-        // Update stock for each product
-        for (const item of order.items) {
-            const product = await productSchema.findById(item.productId._id);
-            if (product) {
-                const quantity = Number(item.quantity);
-                const stock = Number(product.stock) || 0; 
-                if (!isNaN(quantity)) {
-                    product.stock = stock + quantity; 
-                    await product.save();
-                } else {
-                    console.error(`Invalid quantity for item: ${item.productId._id}`);
-                }
-            } else {
-                console.error(`Product not found: ${item.productId._id}`);
-            }
+        if (!itemToCancel) {
+            return res.status(404).json({ message: 'Item not found in order' });
         }
 
-        res.status(200).json({ success: true, message : 'Order canceled successfully' });
+        // Update the product stock
+        const product = await productSchema.findById(itemToCancel.productId._id);
+        if (product) {
+            const quantity = Number(itemToCancel.quantity);
+            const stock = Number(product.stock) || 0;
+            if (!isNaN(quantity)) {
+                product.stock = stock + quantity; 
+                await product.save();
+            } else {
+                console.error(`Invalid quantity for item: ${itemToCancel.productId._id}`);
+            }
+        } else {
+            console.error(`Product not found: ${itemToCancel.productId._id}`);
+        }
+
+        itemToCancel.status = 'Cancelled';
+
+        if (order.items.every(item => item.status === 'Cancelled')) {
+            order.status = 'Cancelled';
+        }
+
+        await order.save(); 
+
+        res.status(200).json({ success: true, message: 'Item marked as cancelled successfully' });
     } catch (error) {
-        console.error(`Error canceling order: ${error}`);
+        console.error(`Error canceling order item: ${error}`);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+
 
 const returnOrder = async(req, res) => {
     

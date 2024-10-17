@@ -51,8 +51,11 @@ admin.delete('/deleteProduct/:id', checkAdminLogin, adminProductController.delet
 //order management
 admin.get('/Orders', checkAdminLogin, adminOrderController.order )
 admin.get('/orderDetails/:orderId', checkAdminLogin, adminOrderController.orderDetails)
-admin.post('/cancelOrder/:orderId/:itemId', checkAdminLogin, adminOrderController.cancelOrder)
-admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.changeStatus)
+admin.post('/cancelOrder/:orderId', checkAdminLogin, adminOrderController.cancelOrder)
+admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.changeOrderStatus)
+admin.post('/cancelProduct/:orderId/:productId', checkAdminLogin, adminOrderController.cancelProduct)
+admin.post('/changeProductStatus/:orderId/:productId', checkAdminLogin, adminOrderController.changeProductStatus)
+
 
 //Coupon Management
 admin.get('/Coupons', checkAdminLogin, adminCouponController.coupon)

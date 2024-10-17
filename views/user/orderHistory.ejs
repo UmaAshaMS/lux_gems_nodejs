@@ -97,6 +97,7 @@
                     <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                     <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
                     <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                    <p><strong>Order status : </strong><%= order.status  %></p>
                     <h4>Items in this order:</h4>
                     
                     <% order.items.forEach(item => { %>
@@ -111,13 +112,13 @@
                                 <p><strong>Status:</strong> <%= item.status %></p>
                             </div>
                             <div class="order-actions">
-                                <% if(item.status !== 'Cancelled' && order.status !== 'Delivered'){ %>
+                                <% if(item.status !== 'Cancelled' && item.status !== 'Delivered' && item.status !== 'Rejected'){ %>
                                     <form action="/cancelOrder/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
                                         <button type="submit" class="cancel-order">Cancel Product</button>
                                     </form>
                                 <% } %>
 
-                                <% if(order.status === 'Delivered' && item.status !== 'Returned'){ %>
+                                <% if(item.status === 'Delivered' && item.status !== 'Returned'){ %>
                                     <% if (!item.returnWindowClosed) { %>
                                     <form action="/returnOrder/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
                                         <button type="submit" class="return-order">Return Product</button>

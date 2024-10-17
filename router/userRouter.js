@@ -88,7 +88,7 @@ user.post('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddres
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
 user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfirmed)
-user.post('/cancelOrder/:orderId', checkUserLogin, orderController.cancelOrder)
+user.post('/cancelOrder/:orderId/:itemId', checkUserLogin, orderController.cancelOrder)
 user.post('/returnOrder/:orderId',checkUserLogin, orderController.returnOrder)
 
 // Logout

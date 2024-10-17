@@ -1,9 +1,10 @@
 const orderSchema = require('../../model/orderSchema')
 const productSchema = require('../../model/productSchema')
+const walletSchema = require('../../model/walletSchema')
 
 const order = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 2;
     const skip = (page - 1) * limit;
     try {
 
@@ -48,111 +49,143 @@ const orderDetails = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { orderId, itemId } = req.params;
+        const { orderId } = req.params;
 
-        // Fetch the order by ID
+        const order = await orderSchema.findById(orderId)
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        order.items.forEach(item => {
+            item.status = 'Rejected';
+        });
+
+        order.status = 'Rejected';
+
+        for (const item of order.items) {
+            const product = await productSchema.findById(item.productId);
+            if (product) {
+                product.stock += item.quantity; // Restock 
+                await product.save();
+            }
+        }
+        if (order.paymentMethod === 1) {
+            const refundAmount = order.items.reduce((total, item) => total + item.quantity * item.price, 0);
+
+            const wallet = await walletSchema.findOne({user : order.userId});
+            if (wallet) {
+                wallet.balance += refundAmount; 
+                await wallet.save(); 
+            } else {
+                return res.status(404).json({ message: 'User wallet not found' });
+            }
+        }
+
+        await order.save();
+
+        return res.status(200).json({ success: true, message: 'Order rejected successfully' });
+
+    } catch (error) {
+        console.error(`Error canceling order item, ${error}`);
+    }
+};
+
+const cancelProduct = async(req,res) => {
+    try {
+        const { orderId, productId } = req.params;
+        
         const order = await orderSchema.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        // Find the item within the order that matches the provided itemId
-        const itemIndex = order.items.findIndex(item => item._id.toString() === itemId);
+        const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
         if (itemIndex === -1) {
-            return res.status(404).json({ message: 'Item not found in the order' });
+            return res.status(404).json({ message: 'Product not found in the order' });
         }
 
-        // Get the specific item from the order
-        const item = order.items[itemIndex];
-        const product = await productSchema.findById(item.productId);
-        if (product) {
-            // Update the stock based on the item quantity
-            product.stock += item.quantity;
-
-            // Ensure the stock doesn't go below 0 (just in case)
-            if (product.stock < 0) {
-                product.stock = 0;
-            }
-
-            // Save the product with updated stock
-            await product.save();
+        const product = await productSchema.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
         }
+        product.stock += order.items[itemIndex].quantity; 
+        await product.save();
 
-        // Option 1: Remove the item from the order
-        // order.items.splice(itemIndex, 1); // Remove the item from the array
+        order.items[itemIndex].status = 'Rejected';
 
-        // Option 2: Mark the item as "Canceled"
-        order.items[itemIndex].status = 'Canceled'; // Mark the item as canceled
-
-        // Check if all items are now canceled, and update the order status if necessary
-        const allItemsCanceled = order.items.every(item => item.status === 'Canceled');
-        if (allItemsCanceled) {
-            order.status = 'Rejected'; // Mark the entire order as rejected if all items are canceled
-        }
-
-        // Save the updated order
         await order.save();
 
-        // Redirect or send a response
-        res.redirect('/admin/Orders');
+        res.status(200).json({ success: true, message: 'Product cancelled successfully' });
     } catch (error) {
-        console.error(`Error canceling order item, ${error}`);
-        res.status(500).json({ message: 'Error canceling order item' });
+        console.error(error);
+        res.status(500).json({ message: 'Error cancelling product' });
     }
-};
+}
+
+const changeProductStatus = async(req,res) => {
+    try{
+
+        const {orderId, productId} = req.params
+        const {newStatus} = req.body
+
+        const order = await orderSchema.findById(orderId)
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const product = order.items.find(item => item.productId.toString() === productId);
+
+         if (!product) {
+             return res.status(404).json({ success: false, message: 'Product not found in the order' });
+         }
+ 
+        product.status = newStatus;
+ 
+        const allItemsSameStatus = order.items.every(i => i.status === newStatus);
+
+        if (allItemsSameStatus) {
+            order.status = newStatus;
+        }
+        await order.save();        
+        
+        return res.status(200).json({ success: true, message: 'Product status updated successfully' });
+
+    }
+    catch(error){
+        console.log('Error in changing product status:', error)
+    }
+
+}
 
 
-// const changeStatus = async (req, res) => {
-//     try {
-//         const { orderId } = req.params;
-//         const { status } = req.body;
-
-//         try {
-
-//             const order = await orderSchema.findByIdAndUpdate(orderId, { status }, { new: true });
-
-//             if (!order) {
-//                 return res.status(404).json({ success: false, message: 'Order not found' });
-//             }
-
-//             res.json({ success: true, message: 'Order status updated successfully', order });
-//         } catch (error) {
-//             console.error('Error updating order status:', error);
-//             res.status(500).json({ success: false, message: 'Server error' });
-//         }
-//     }
-//     catch (error) {
-//         console.log(`Error in changing status, ${error}`)
-//     }
-// }
-
-const changeStatus = async (req, res) => {
+const changeOrderStatus = async (req, res) => {
     try {
-        const { orderId, itemId } = req.params; 
+        const { orderId } = req.params; 
         const { status } = req.body;
-
-        // Find the order by orderId
+        
         const order = await orderSchema.findById(orderId);
 
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Find the item in the order by itemId
-        const item = order.items.id(itemId); // Mongoose provides a method to get the sub-document by ID
+        order.status = status;
 
-        if (!item) {
-            return res.status(404).json({ success: false, message: 'Item not found in the order' });
+        order.items.forEach(item => {
+            item.status = status;
+        });
+
+        const allItemsSameStatus = order.items.every(i => i.status === status);
+
+        if (allItemsSameStatus) {
+            order.status = status;
         }
 
-        // Update the status of the specific item
-        item.status = status;
-        await order.save(); // Save the updated order document
+        await order.save();
 
-        res.json({ success: true, message: 'Item status updated successfully', order });
+        res.json({ success: true, message: 'Order and product status updated successfully', order });
     } catch (error) {
-        console.error('Error updating item status:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Error updating order status:', error);
     }
 }
 
@@ -160,6 +193,8 @@ module.exports = {
     order,
     orderDetails,
     cancelOrder,
-    changeStatus,
+    changeOrderStatus,
+    cancelProduct,
+    changeProductStatus
 
 }
