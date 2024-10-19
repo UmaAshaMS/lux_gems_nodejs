@@ -131,9 +131,11 @@
                                                         <span>Offer Price: <strong>Rs <%=
                                                                     (productItem.productId.productPrice -
                                                                     (productItem.productId.productDiscount /
-                                                                    100)*productItem.productId.productPrice).toFixed(2) %></strong></span>
+                                                                    100)*productItem.productId.productPrice).toFixed(2)
+                                                                    %></strong></span>
                                                         <span>Total: <strong>Rs <%= ((productItem.productId.productPrice
-                                                                    - (productItem.productId.productDiscount / 100) * productItem.productId.productPrice) *
+                                                                    - (productItem.productId.productDiscount / 100) *
+                                                                    productItem.productId.productPrice) *
                                                                     productItem.quantity).toFixed(2) %></strong></span>
                                                     </div>
                                                 </li>
@@ -222,7 +224,8 @@
                                             <p>Phone Number: <%= address.phoneNumber %>
                                             </p>
                                         </label>
-                                        <button class="ms-3" onclick="editAddress('<%= address._id %>')"><i
+                                        <button class="ms-3" onclick="editAddress('<%= address._id %>')"
+                                            data-bs-toggle="modal" data-bs-target="#editAddressModal"><i
                                                 class="fas fa-edit"></i></button>
                                         <button class="ms-3" onclick="deleteAddress('<%= address._id %>')"><i
                                                 class="fas fa-trash-alt"></i></button>
@@ -241,8 +244,82 @@
                     </div>
                 </div>
             </div>
+
+
+            <!-- Modal for Editing Address -->
+            <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editAddressModalLabel">Edit Address</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editAddressForm">
+                                <div class="mb-3">
+                                    <label for="fullName">Full Name:</label>
+                                    <input type="text" class="form-control mx-auto" id="fullName" name="fullName"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phoneNumber">Phone Number:</label>
+                                    <input type="text" class="form-control mx-auto" id="phoneNumber" name="phoneNumber"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addressLine1" class="form-label">Address Line 1</label>
+                                    <input type="text" class="form-control" id="addressLine1" name="addressLine1"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addressLine2" class="form-label">Address Line 2</label>
+                                    <input type="text" class="form-control" id="addressLine2" name="addressLine2">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" name="city" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="pinCode" class="form-label">Pin Code</label>
+                                    <input type="text" class="form-control" id="pinCode" name="pinCode" required>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="state">State:</label>
+                                        <select class="form-control" id="state" name="state" required>
+                                            <option value="" disabled selected>Select your state</option>
+                                            <option value="Kerala">Kerala</option>
+                                            <option value="Tamil Nadu">Tamil Nadu</option>
+                                            <option value="Karnataka">Karnataka</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="country">Country:</label>
+                                        <select class="form-control" id="country" name="country" required>
+                                            <option value="" disabled selected>Select your country</option>
+                                            <option value="India">India</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="addressId" name="addressId">
+                                <!-- Hidden field to store the address ID -->
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- Script for Checkout -->
             <script>
+                console.log('hloo')
+                const paymentOptions = document.getElementsByName('paymentMethod')
+                // console.log(paymentOptions)
+                const userAddress = '<%- JSON.stringify(userAddress) %>';
+
+                console.log('USER ADDRESS',userAddress)
 
                 function updateSelectedAddress(addressId) {
                     document.getElementById("selectedAddress").value = addressId;
@@ -269,9 +346,35 @@
                         modalInstance.hide();
                     }
                 }
+                
+
                 function editAddress(addressId) {
-                    // Logic for editing an address (can be a modal or redirect to address edit page)
+                    const addressess = JSON.parse('<%- JSON.stringify(userAddress.address) %>');
+                    console.log('ADDRESS',addressess)
+                    // const address = userAddress.find(addr => addr._id === addressId);
+                    const address = addresses.find(addr => addr._id === addressId);
+                    console.log('ADDRESS of the id',address)
+
+
+                    if (address) {
+                        // Prefill the form fields with the user address data
+                        document.getElementById('fullName').value = address.fullName || '';
+                        document.getElementById('phoneNumber').value = userAddress.phoneNumber || '';
+                        document.getElementById('addressLine1').value = userAddress.addressLine1 || '';
+                        document.getElementById('addressLine2').value = userAddress.addressLine2 || '';
+                        document.getElementById('city').value = userAddress.city || '';
+                        document.getElementById('pinCode').value = userAddress.pinCode || '';
+                        document.getElementById('state').value = userAddress.state || '';
+                        document.getElementById('country').value = userAddress.country || '';
+
+                        // Show the modal (Bootstrap modal)
+                        const modal = new bootstrap.Modal(document.getElementById('editAddressModal'));
+                        modal.show();
+                    } else {
+                        console.error('Address not found');
+                    }
                 }
+
 
                 function deleteAddress(addressId) {
                     // Logic for deleting an address
@@ -324,9 +427,11 @@
 
 
 
-                const paymentOptions = document.getElementsByName('paymentMethod')
-                const userAddress =  <%- JSON.stringify(userAddress) %>
-                console.log(userAddress)
+
+
+
+
+
 
 
 
@@ -336,7 +441,7 @@
                         event.preventDefault();
                         console.log('event triggered')
                     }
-            
+
                     // console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
@@ -411,7 +516,7 @@
                                 window.location.href = `/orderConfirmed/${data.orderId}`
                             }
                             else if (data.message) {
-                            Swal.fire({
+                                Swal.fire({
                                     icon: 'warning',
                                     title: 'error',
                                     text: data.message,
@@ -441,7 +546,7 @@
                                 window.location.href = `/orderConfirmed/${data.orderId}`
                             }
                             else if (data.message) {
-                            Swal.fire({
+                                Swal.fire({
                                     icon: 'warning',
                                     title: 'error',
                                     text: data.message,
@@ -451,6 +556,6 @@
                             console.log(`error on paying using cod`)
                         })
                     }
-                   
+
                 }
             </script>

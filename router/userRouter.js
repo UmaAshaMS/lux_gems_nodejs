@@ -84,6 +84,8 @@ user.post('/applyCoupon', checkUserLogin, checkoutController.applyCoupon)
 user.get('/checkout', checkUserLogin, checkoutController.checkout)
 user.get('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddress)
 user.post('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddressPost)
+user.post('/editAddressCheckout',checkUserLogin, checkoutController.editAdressCheckout)
+user.delete('/deleteAddressCheckout', checkUserLogin, checkoutController.deleteAddressCheckout)
 
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )

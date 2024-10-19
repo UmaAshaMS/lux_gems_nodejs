@@ -212,7 +212,23 @@ const addNewAddressPost = async(req,res) => {
       }
     }
 
+    const editAdressCheckout = async(req,res) => {
+        try{
 
+        }
+        catch(error){
+            console.log(`Error in editing address in checkout page: ${error}`)
+        }
+    }
+
+    const deleteAddressCheckout = async(req,res) => {
+        try{
+
+        }
+        catch(error){
+            console.log(`Error in deleting address in checkout: ${error}`)
+        }
+    }
 
 
 module.exports = {
@@ -221,4 +237,7 @@ module.exports = {
     updateDefaultAddress,
     addNewAddress,
     addNewAddressPost,
+    editAdressCheckout,
+    deleteAddressCheckout,
+
 }

@@ -169,6 +169,26 @@ const returnOrder = async(req, res) => {
         order.items[itemIndex].status = 'Return Under Process';
         order.items[itemIndex].returnReason = returnReason;
 
+        if (order.paymentMethod === 1) {
+            // console.log('Initiating PayPal refund...');
+            const refundAmount = order.items[itemIndex].price * order.items[itemIndex].quantity;
+
+            const wallet = await walletSchema.findById(order.userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            wallet.balance += refundAmount;
+
+        } else if (order.paymentMethod === 2) {
+            const refundAmount = order.items[itemIndex].price * order.items[itemIndex].quantity;
+
+            const wallet = await walletSchema.findById(order.userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            wallet.balance += refundAmount;
+        }
+
         await order.save();
 
         return res.status(200).json({ success:true, message: 'Return request submitted. Waiting for admin approval.' });
