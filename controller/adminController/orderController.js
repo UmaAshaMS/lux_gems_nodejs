@@ -111,7 +111,7 @@ const cancelProduct = async(req,res) => {
         product.stock += order.items[itemIndex].quantity; 
         await product.save();
 
-        order.items[itemIndex].status = 'Rejected';
+        order.items[itemIndex].status = 'Cancelled';
 
         await order.save();
 
@@ -189,12 +189,45 @@ const changeOrderStatus = async (req, res) => {
     }
 }
 
+const returnProduct = async(req,res) => {
+    
+        try {
+            const { orderId, productId } = req.params;
+            const { returnDecision } = req.body; 
+    
+            const order = await orderSchema.findById(orderId);
+            const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
+    
+            if (itemIndex === -1) {
+                return res.status(404).json({ message: 'Product not found in the order' }).render('pageNotFound',{ title: 'Page Not Found'});
+            }
+    
+            // If admin approves the return
+            if (returnDecision === 'Accept') {
+                order.items[itemIndex].status = 'Returned';
+    
+                await productSchema.findByIdAndUpdate(productId, { $inc: { stock: order.items[itemIndex].quantity } });
+            } else if ( returnDecision === 'Reject') {
+                order.items[itemIndex].status = 'Rejected'; 
+            }
+    
+            await order.save();
+
+            return res.status(200).json({ message: `Return ${returnDecision === 'approve' ? 'approved' : 'rejected'} successfully.` });
+        } catch (error) {
+            console.error("Error in returnProduct:", error); 
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+    
+}
+ 
 module.exports = {
     order,
     orderDetails,
     cancelOrder,
     changeOrderStatus,
     cancelProduct,
-    changeProductStatus
+    changeProductStatus,
+    returnProduct
 
 }

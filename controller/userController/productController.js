@@ -35,7 +35,7 @@ const productDetails = async (req,res) => {
         // Fetch product details
         const product = await productSchema.findById(productID).populate('productCategory', 'name').exec();
         if (!product) {
-            return res.status(404).send('Product not found');
+            return res.status(404).render('pageNotFound', { title: 'Page Not Found' });
         }
 
         // Fetch recommended products (same category)
@@ -59,7 +59,7 @@ const productCategory = async (req, res) => {
         const categorySam = await categorySchema.findById(categoryId);
 
         if (!categorySam) {
-            return res.status(404).send('Category not found');
+            return res.status(404).render('pageNotFound',{ title: 'Page Not Found'})
         }
 
         const products = await productSchema.find({ productCategory: categorySam._id });

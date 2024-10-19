@@ -55,6 +55,8 @@ admin.post('/cancelOrder/:orderId', checkAdminLogin, adminOrderController.cancel
 admin.post('/changeStatus/:orderId', checkAdminLogin, adminOrderController.changeOrderStatus)
 admin.post('/cancelProduct/:orderId/:productId', checkAdminLogin, adminOrderController.cancelProduct)
 admin.post('/changeProductStatus/:orderId/:productId', checkAdminLogin, adminOrderController.changeProductStatus)
+admin.post('/returnProduct/:orderId/:productId', checkAdminLogin, adminOrderController.returnProduct)
+
 
 
 //Coupon Management

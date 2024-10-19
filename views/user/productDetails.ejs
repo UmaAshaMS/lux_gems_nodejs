@@ -94,10 +94,8 @@
                     </div>
                 </div>
                 <script>
-                    // Ensure the script runs after the DOM is fully loaded
                     document.addEventListener('DOMContentLoaded', function () {
                         function changeImage(imageSrc) {
-                            // Log the imageSrc to check if it's correct
                             console.log("Changing image to:", imageSrc);
                             var mainImage = document.getElementById('mainImage');
                             if (mainImage) {
@@ -107,25 +105,24 @@
                             }
                         }
 
-                        // Attach changeImage function to global scope if needed
                         window.changeImage = changeImage;
 
 
-                        const imageContainer = document.querySelector('.Main-Image-Box'); // Select the container element
-                        const productImg = imageContainer.querySelector('.main-image'); // Select the image within the container
+                        const imageContainer = document.querySelector('.Main-Image-Box'); 
+                        const productImg = imageContainer.querySelector('.main-image'); 
 
                         imageContainer.addEventListener("mousemove", (e) => {
-                            const rect = imageContainer.getBoundingClientRect(); // Get container's bounding rectangle
-                            const x = (e.clientX - rect.left) / rect.width; // Calculate relative X position
-                            const y = (e.clientY - rect.top) / rect.height; // Calculate relative Y position
+                            const rect = imageContainer.getBoundingClientRect(); 
+                            const x = (e.clientX - rect.left) / rect.width; 
+                            const y = (e.clientY - rect.top) / rect.height; 
 
-                            productImg.style.transformOrigin = `${x * 100}% ${y * 100}%`; // Set transform origin based on mouse position
-                            productImg.style.transform = "scale(1.5)"; // Apply zoom effect (adjust scale as needed)
+                            productImg.style.transformOrigin = `${x * 100}% ${y * 100}%`; 
+                            productImg.style.transform = "scale(1.5)"; 
                         });
 
                         imageContainer.addEventListener("mouseleave", () => {
-                            productImg.style.transformOrigin = "center"; // Reset transform origin to center
-                            productImg.style.transform = "scale(1)"; // Reset zoom to normal
+                            productImg.style.transformOrigin = "center"; 
+                            productImg.style.transform = "scale(1)";
                         });
                     });
 
@@ -140,20 +137,17 @@
                         })
                             .then(response => response.json().then(data => ({ data, status: response.status })))
                             .then(({ data, status }) => {
-                                // Check if response was successful (status 200)
                                 if (status === 200) {
                                     Swal.fire({
                                         title: 'Success',
                                         icon: 'success',
-                                        text: data.message,  // Success message from server
+                                        text: data.message,  
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        // Redirect to the same page after confirmation
                                         window.location.href = `/productDetails/${productId}`;
                                         
                                     });
                                 } else {
-                                    // If the request failed, show an error message
                                     Swal.fire({
                                         title: 'Error',
                                         icon: 'error',
@@ -163,7 +157,6 @@
                                 }
                             })
                             .catch((error) => {
-                                // Catch any other errors in the fetch process
                                 console.error('Error adding product to cart:', error);
                             });
                     }

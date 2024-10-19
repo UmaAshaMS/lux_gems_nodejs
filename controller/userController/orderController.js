@@ -154,7 +154,27 @@ const cancelOrder = async (req, res) => {
 
 
 const returnOrder = async(req, res) => {
-    
+    try {
+        const { orderId, productId } = req.params;
+        const { returnReason } = req.body;
+
+        const order = await orderSchema.findById(orderId);
+        const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({message:'Product Not found'}).render('pageNotFound',{ title: 'Page Not Found'});
+        }
+
+        // Update the status of the product in the order to 'Return Under Process'
+        order.items[itemIndex].status = 'Return Under Process';
+        order.items[itemIndex].returnReason = returnReason;
+
+        await order.save();
+
+        return res.status(200).json({ success:true, message: 'Return request submitted. Waiting for admin approval.' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
 }
 
 

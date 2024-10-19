@@ -35,9 +35,10 @@ const schema = new mongoose.Schema(
             },
             status: {
                 type: String, 
-                enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Rejected'], 
+                enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Rejected', 'Return Under Process', ], 
                 default: 'Pending' 
-            }
+            },
+            returnReason: String,
         }
     ],
     paymentMethod: {

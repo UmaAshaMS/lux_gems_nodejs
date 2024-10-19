@@ -83,7 +83,7 @@
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
                                             value="1">
                                         <label class="form-check-label" for="upiOption">
-                                            <strong>UPI (via RazorPay)</strong>
+                                            <strong>UPI (via PayPal)</strong>
                                         </label>
                                         <div class="mt-2">
                                             <input type="text" class="form-control" placeholder="Enter UPI ID">
@@ -131,9 +131,9 @@
                                                         <span>Offer Price: <strong>Rs <%=
                                                                     (productItem.productId.productPrice -
                                                                     (productItem.productId.productDiscount /
-                                                                    100)).toFixed(2) %></strong></span>
+                                                                    100)*productItem.productId.productPrice).toFixed(2) %></strong></span>
                                                         <span>Total: <strong>Rs <%= ((productItem.productId.productPrice
-                                                                    - (productItem.productId.productDiscount / 100)) *
+                                                                    - (productItem.productId.productDiscount / 100) * productItem.productId.productPrice) *
                                                                     productItem.quantity).toFixed(2) %></strong></span>
                                                     </div>
                                                 </li>

@@ -1,586 +1,689 @@
 <%- include('navbar') %>
-<style>
-    .Container {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        border-radius: 10px;
-    }
+    <style>
+        .Container {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            border-radius: 10px;
+        }
 
-    .SideBar .btn {
-        display: block;
-        width: 150px;
-        margin-bottom: 10px;
-        text-align: center;
-    }
+        .SideBar .btn {
+            display: block;
+            width: 150px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
 
-    .SideBar {
-        width: 250px;
-        margin: 20px;
-        margin-right: 0%;
-        background-color: #caaf7a;
-        color: white;
-        height: 70vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        border-radius: 10px;
-    }
+        .SideBar {
+            width: 250px;
+            margin: 20px;
+            margin-right: 0%;
+            background-color: #caaf7a;
+            color: white;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 10px;
+        }
 
-    .SideBar a {
-        text-decoration: none;
-        color: inherit;
-    }
+        .SideBar a {
+            text-decoration: none;
+            color: inherit;
+        }
 
-    .Customer-Page {
-        display: flex;
-        flex-direction: column;
-    }
+        .Customer-Page {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .Customer-container {
-        display: flex;
-        flex-direction: row;
-        flex: 1;
-        margin-left: 0px;
-        padding: 20px;
-    }
+        .Customer-container {
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+            margin-left: 0px;
+            padding: 20px;
+        }
 
-    .Customer-container table {
-        text-align: center;
-        flex-direction: column;
-    }
+        .Customer-container table {
+            text-align: center;
+            flex-direction: column;
+        }
 
-    .btn {
-        width: 100px;
-    }
+        .btn {
+            width: 100px;
+        }
 
-    .searchUser {
-        display: flex;
-        flex-direction: row;
-        border: 1px;
-        border-radius: 4px;
-        gap: 10px;
-        width: 800px;
-        margin-top: 2%;
-    }
+        .searchUser {
+            display: flex;
+            flex-direction: row;
+            border: 1px;
+            border-radius: 4px;
+            gap: 10px;
+            width: 800px;
+            margin-top: 2%;
+        }
 
-    .Search form {
-        display: flex;
-    }
+        .Search form {
+            display: flex;
+        }
 
-    .form-control {
-        width: 500px;
-        margin-left: 90px;
-    }
+        .form-control {
+            width: 500px;
+            margin-left: 90px;
+        }
 
-    .searchBtn {
-        flex: 2;
-        width: 10px;
-        color: white;
-        border: 2px;
-        flex-shrink: 0;
-    }
+        .searchBtn {
+            flex: 2;
+            width: 10px;
+            color: white;
+            border: 2px;
+            flex-shrink: 0;
+        }
 
-    .table {
-        margin-top: 0%;
-        width: 1100px;
-        height: auto;
-        border: black;
-        text-align: center;
-        align-self: center;
-    }
+        .table {
+            margin-top: 0%;
+            width: 1100px;
+            height: auto;
+            border: black;
+            text-align: center;
+            align-self: center;
+        }
 
-    .btn a {
-        text-decoration: none;
-        color: black;
-    }
+        .btn a {
+            text-decoration: none;
+            color: black;
+        }
 
-     /* Improved table styling */
-     table.table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 22px 22px ;
-        font-size: 16px;
-        font-family: Arial, sans-serif;
-    }
+        /* Improved table styling */
+        table.table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 22px 22px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
 
-    table.table th, table.table td {
-        border: 1px solid #ddd;
-        padding: 12px;
-        text-align: center;
-    }
+        table.table th,
+        table.table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
 
-    table.table thead th {
-        background-color: #f2f2f2;
-        color: #333;
-        font-weight: bold;
-    }
+        table.table thead th {
+            background-color: #f2f2f2;
+            color: #333;
+            font-weight: bold;
+        }
 
-    table.table tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
+        table.table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
 
-    table.table tbody tr:hover {
-        background-color: #f1f1f1;
-    }
+        table.table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
 
-    table.table tbody tr td {
-        padding: 15px;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
+        table.table tbody tr td {
+            padding: 15px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
 
-    .btn {
-        padding: 8px 8px;
-        border: none;
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-    }
+        .btn {
+            padding: 8px 8px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-    .btn-outline-none a {
-        color: #010101;
-        text-decoration: underline;
-        font-weight: lighter;
-    }
+        .btn-outline-none a {
+            color: #010101;
+            text-decoration: underline;
+            font-weight: lighter;
+        }
 
-    .btn-outline-danger {
-        background-color: #dc3545;
-        color: white;
-    }
+        .btn-outline-danger {
+            background-color: #dc3545;
+            color: white;
+        }
 
-    .btn-outline-danger:hover {
-        background-color: #c82333;
-    }
+        .btn-outline-danger:hover {
+            background-color: #c82333;
+        }
 
-    .change-status {
-        text-decoration: underline;
-        font-size: 14px;
-        cursor: pointer;
-    }
+        .change-status {
+            text-decoration: underline;
+            font-size: 14px;
+            cursor: pointer;
+        }
 
-    /* Center table on the page */
-    .Customer-container {
-        display: flex;
-        justify-content: center;
-        padding: 20px;
-    }
-    .pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 15px 0;
-}
+        /* Center table on the page */
+        .Customer-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
 
-.pagination button {
-    padding: 10px 15px;
-    margin: 0 5px;
-    background-color: #caaf7a;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    border: 1px solid #caaf7a;
-    cursor: pointer;
-}
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px 0;
+        }
 
-.pagination button:hover {
-    background-color: #ffffff;
-    border-color: #ffffff;
-}
+        .pagination button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background-color: #caaf7a;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: 1px solid #caaf7a;
+            cursor: pointer;
+        }
 
-.pagination .active {
-    background-color: #ffffff;
-    border-color: #ffffff;
-    cursor: default;
-}
+        .pagination button:hover {
+            background-color: #ffffff;
+            border-color: #ffffff;
+        }
 
-.cancel-item{
-    color: #010101;
-    background-color: #ffffff;
-    outline: #010101;
-    text-decoration: underline;
-}
+        .pagination .active {
+            background-color: #ffffff;
+            border-color: #ffffff;
+            cursor: default;
+        }
 
-</style>
+        .cancel-item {
+            color: #010101;
+            background-color: #ffffff;
+            outline: #010101;
+            text-decoration: underline;
+        }
+    </style>
 
-<div class="Customer-container">
-    <div class="Container">
-        <div class='SideBar'>
-            <a href="/admin/home"><button class="btn btn-dark">  Dashboard</button></a>
-            <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
-            <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
-            <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
-            <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
-            <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
-            <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
-            <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
-            <form action="/admin/logout" method="POST">
-                <button type="submit" class="btn btn-dark">Logout</button>
-            </form>
-        </div>
-    </div>
-    <table class="table table-hover table-bordered">
-        <thead>
-            <tr>
-                <th scope="col">Sl.No</th>
-                <th scope="col">User Name & Order Id</th>
-                <th scope="col">Product Details</th>
-                <th scope="col">Status</th>
-                <th scope="col">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% orderDetails.forEach((order, index) => { %>
-                <tr>
-                    <!-- Order Main Row -->
-                    <th scope="row"><%= index + 1 %></th>
-                    <td><%= order.userId ? order.userId.name : "N/A" %> <br>
-                        <%= order._id %>
-                    </td>
-                    <td>
-                        <!-- Product Details Split into Sub-Rows -->
-                        <table class="table table-borderless">
-                            <% order.items.forEach((item, itemIndex) => { %>
-                            <tr>
-                                <td>
-                                    <!-- Product Name and Quantity -->
-                                    <strong><%= item.productName %></strong> <br>
-                                    Quantity : <%= item.quantity %> <br>
-                                    Status : <%= item.status || 'Pending' %>
-                                    <br>
-                                    <% if(item.status !== 'Cancelled' && item.status !== 'Delivered' && item.status !== 'Rejected') {%>
-                                    <form action="/admin/cancelProduct/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
-                                        <button type="button" class="cancel-item btn " onclick="confirmCancelProduct('<%=order._id %>', '<%= item.productId%>')">Cancel Product</button>
-                                    </form>
-                                    
-                                    <% } %>
-                                    <br>
-                                    <a href="#" data-order-id="<%= order._id %>" data-item-id="<%= item.productId %>" class="change-item-status">Change Product Status</a>
-
-                                </td>
-                                
-                            </tr>
-                            <% }) %>
-                        </table>
-                    </td>
-                    <td><%= order.status %></td>
-                    <td>
-                        <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
-                            <button type="button" class="cancel-order btn btn-outline-danger" onclick="confirmCancelOrder('<%=order._id%>')">Cancel Order</button>
-
-                        </form>
-                        <br>
-                        <a href="#" data-order-id="<%= order._id %>" class="change-status" style="color:green">Change Status</a>
-                        <br>
-                        <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>" 
-                            style="text-decoration: underline;"> View Order Details</a></button>
-                    </td>
-                </tr>
-            <% }) %>
-            
-        </tbody>
-    </table>
-</div>
-
-<!-- Change Order Status Modal -->
-<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="changeStatusModalLabel">Change Order Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <select id="orderStatusSelect" class="form-select">
-                    <option value="Pending">Pending</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Returned">Returned</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="confirmChangeStatus">Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Changing Product Status -->
-<div class="modal fade" id="changeProductStatusModal" tabindex="-1" aria-labelledby="changeProductStatusLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="changeProductStatusLabel">Change Product Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="changeProductStatusForm">
-                    <input type="hidden" id="orderId" name="orderId">
-                    <input type="hidden" id="productId" name="productId">
-
-                    <div class="mb-3">
-                        <label for="newStatus" class="form-label">New Status</label>
-                        <select class="form-select" id="newStatus" name="newStatus" required>
-                            <option value="Pending">Pending</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
-                            <option value="Cancelled">Retruned</option>
-
-                            
-                        </select>
-                    </div>
-                    
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Change Status</button>
-                    </div>
+    <div class="Customer-container">
+        <div class="Container">
+            <div class='SideBar'>
+                <a href="/admin/home"><button class="btn btn-dark"> Dashboard</button></a>
+                <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
+                <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+                <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+                <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+                <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+                <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
+                <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+                <form action="/admin/logout" method="POST">
+                    <button type="submit" class="btn btn-dark">Logout</button>
                 </form>
             </div>
         </div>
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Sl.No</th>
+                    <th scope="col">User Name & Order Id</th>
+                    <th scope="col">Product Details</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orderDetails.forEach((order, index)=> { %>
+                    <tr>
+                        <!-- Order Main Row -->
+                        <th scope="row">
+                            <%= index + 1 %>
+                        </th>
+                        <td>
+                            <%= order.userId ? order.userId.name : "N/A" %> <br>
+                                <%= order._id %>
+                        </td>
+                        <td>
+                            <!-- Product Details Split into Sub-Rows -->
+                            <table class="table table-borderless">
+                                <% order.items.forEach((item, itemIndex)=> { %>
+                                    <tr>
+                                        <td>
+                                            <!-- Product Name and Quantity -->
+                                            <strong>
+                                                <%= item.productName %>
+                                            </strong> <br>
+                                            Quantity : <%= item.quantity %> <br>
+                                                Status : <%= item.status || 'Pending' %>
+                                                    <br>
+                                                    <% if(item.status !=='Cancelled' && item.status !=='Delivered' &&
+                                                        item.status !=='Rejected' && item.status
+                                                        !=='Return Under Process' ) {%>
+                                                        <form
+                                                            action="/admin/cancelProduct/<%= order._id %>/<%= item.productId %>"
+                                                            method="POST" style="display:inline;">
+                                                            <button type="button" class="cancel-item btn "
+                                                                onclick="confirmCancelProduct('<%=order._id %>', '<%= item.productId%>')">Cancel
+                                                                Product</button>
+                                                        </form>
+                                                        <% } %>
+
+                                                            <% if (item.status==='Return Under Process' ) { %>
+                                                                <!-- Flag to indicate a pending return request -->
+                                                                <span class="badge bg-warning" style="cursor: pointer;"
+                                                                    onclick="toggleReturnForm('<%= order._id %>', '<%= item.productId %>')">
+                                                                    Return Request Pending
+                                                                </span>
+                                                                <div id="returnForm-<%= item.productId %>"
+                                                                    style="display:none; margin-top: 10px;">
+                                                                    <p>Reason for return : <%= item.returnReason %>
+                                                                    </p>
+                                                                    <!-- Dropdown to accept or reject the return request -->
+                                                                    <form
+                                                                        action="/admin/returnProduct/<%= order._id %>/<%= item.productId %>"
+                                                                        method="POST"
+                                                                        onsubmit="submitReturnDecision(event)">
+                                                                        <select name="returnDecision"
+                                                                            class="form-select" required>
+                                                                            <option value="">Select Action</option>
+                                                                            <option value="Accept">Accept</option>
+                                                                            <option value="Reject">Reject</option>
+                                                                        </select>
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary">Submit</button>
+                                                                    </form>
+                                                                </div>
+                                                                <% } %>
+                                                                    <br>
+                                                                    <a href="#" data-order-id="<%= order._id %>"
+                                                                        data-item-id="<%= item.productId %>"
+                                                                        class="change-item-status">Change Product
+                                                                        Status</a>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </table>
+                        </td>
+                        <td>
+                            <%= order.status %>
+                        </td>
+                        <td>
+                            <form action="/admin/cancelOrder/<%= order._id %>" method="POST" style="display:inline;">
+                                <button type="button" class="cancel-order btn btn-outline-danger"
+                                    onclick="confirmCancelOrder('<%=order._id%>')">Cancel Order</button>
+
+                            </form>
+                            <br>
+                            <a href="#" data-order-id="<%= order._id %>" class="change-status"
+                                style="color:green">Change Status</a>
+                            <br>
+                            <button class="btn btn-outline-none"><a href="/admin/orderDetails/<%= order._id %>"
+                                    style="text-decoration: underline;"> View Order Details</a></button>
+                        </td>
+                    </tr>
+                    <% }) %>
+
+            </tbody>
+        </table>
     </div>
-</div>
+
+    <!-- Change Order Status Modal -->
+    <div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeStatusModalLabel">Change Order Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select id="orderStatusSelect" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Returned">Returned</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="confirmChangeStatus">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Changing Product Status -->
+    <div class="modal fade" id="changeProductStatusModal" tabindex="-1" aria-labelledby="changeProductStatusLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeProductStatusLabel">Change Product Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changeProductStatusForm">
+                        <input type="hidden" id="orderId" name="orderId">
+                        <input type="hidden" id="productId" name="productId">
+
+                        <div class="mb-3">
+                            <label for="newStatus" class="form-label">New Status</label>
+                            <select class="form-select" id="newStatus" name="newStatus" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Cancelled">Retruned</option>
 
 
-<div class="pagination">
-    <% if (hasPreviousPage) { %>
-        <form action="/admin/orders" method="get" style="display:inline;">
-            <input type="hidden" name="page" value="<%= previousPage %>">
-            <button type="submit" class="btn">Previous</button>
-        </form>
-    <% } %>
+                            </select>
+                        </div>
 
-    <% for (let i = 1; i <= totalPages; i++) { %>
-        <form action="/admin/orders" method="get" style="display:inline;">
-            <input type="hidden" name="page" value="<%= i %>">
-            <button type="submit" class="btn <%= i === currentPage ? 'active' : '' %>"><%= i %></button>
-        </form>
-    <% } %>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Change Status</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <% if (hasNextPage) { %>
-        <form action="/admin/orders" method="get" style="display:inline;">
-            <input type="hidden" name="page" value="<%= nextPage %>">
-            <button type="submit" class="btn">Next</button>
-        </form>
-    <% } %>
-</div>
-<%- include('footer')%>
-<script>
 
-    
-function confirmCancelOrder(orderId) {
+    <div class="pagination">
+        <% if (hasPreviousPage) { %>
+            <form action="/admin/orders" method="get" style="display:inline;">
+                <input type="hidden" name="page" value="<%= previousPage %>">
+                <button type="submit" class="btn">Previous</button>
+            </form>
+            <% } %>
 
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to cancel this order?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep it',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/admin/cancelOrder/${orderId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({}) 
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json(); 
+                <% for (let i=1; i <=totalPages; i++) { %>
+                    <form action="/admin/orders" method="get" style="display:inline;">
+                        <input type="hidden" name="page" value="<%= i %>">
+                        <button type="submit" class="btn <%= i === currentPage ? 'active' : '' %>">
+                            <%= i %>
+                        </button>
+                    </form>
+                    <% } %>
+
+                        <% if (hasNextPage) { %>
+                            <form action="/admin/orders" method="get" style="display:inline;">
+                                <input type="hidden" name="page" value="<%= nextPage %>">
+                                <button type="submit" class="btn">Next</button>
+                            </form>
+                            <% } %>
+    </div>
+    <%- include('footer')%>
+        <script>
+            //function to toggle between return form hide and show
+            function toggleReturnForm(orderId, productId) {
+                const form = document.getElementById(`returnForm-${productId}`);
+                if (form.style.display === "none") {
+                    form.style.display = "block";
                 } else {
-                    throw new Error('Failed to cancel the order');
+                    form.style.display = "none";
                 }
-            })
-            .then(data => {
-                Swal.fire(
-                    'Order Rejected! by Admin',
-                    data.message,
-                    'success'
-                ).then(() => {
-                    window.location.reload(); 
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire(
-                    'Error!',
-                    'There was a problem cancelling the order.',
-                    'error'
-                );
-            });
-        }
-    });
-}
-
-function confirmCancelProduct(orderId, productId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to cancel this product?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep it',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/admin/cancelProduct/${orderId}/${productId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({}) 
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();  
-                } else {
-                    throw new Error('Failed to cancel the product');
-                }
-            })
-            .then(data => {
-                Swal.fire(
-                    'Cancelled!',
-                    'The product has been successfully cancelled.',
-                    'success'
-                ).then(() => {
-                    window.location.reload();  
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire(
-                    'Error!',
-                    'There was a problem cancelling the product.',
-                    'error'
-                );
-            });
-        }
-    });
-}
-
-
-document.addEventListener('DOMContentLoaded', function()  {
-
-    // Change status modal functionality
-    const changeStatusLinks = document.querySelectorAll('.change-status');
-    changeStatusLinks.forEach(link => {
-        link.addEventListener('click', (event) => {
-            event.preventDefault(); 
-            const orderId = link.getAttribute('data-order-id');
-
-            // Set the order ID in a custom attribute or variable if needed
-            document.getElementById('confirmChangeStatus').setAttribute('data-order-id', orderId);
-
-            // Show the modal
-            const changeStatusModal = new bootstrap.Modal(document.getElementById('changeStatusModal'));
-            changeStatusModal.show();
-        });
-    });
-
-    // Confirm status change
-    document.getElementById('confirmChangeStatus').addEventListener('click', () => {
-        const orderId = document.getElementById('confirmChangeStatus').getAttribute('data-order-id');
-        const selectedStatus = document.getElementById('orderStatusSelect').value;
-
-        // Submit the status change form
-        fetch(`/admin/changeStatus/${orderId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ status: selectedStatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Failed to change status');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-// -----------------------> Change status of Product
 
-    document.querySelectorAll('.change-item-status').forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault();
-            
-            const orderId = this.getAttribute('data-order-id');
-            const productId = this.getAttribute('data-item-id');
-            
-            document.getElementById('orderId').value = orderId;
-            document.getElementById('productId').value = productId;
+            //function for return confirmation
+            function submitReturnDecision(event) {
+                event.preventDefault(); 
 
-            console.log('Order ID:', orderId); 
-            console.log('Product ID:', productId); 
-            
-            var modal = new bootstrap.Modal(document.getElementById('changeProductStatusModal'));
-            modal.show();
-        });
-    });
+                const form = event.target; 
+                const returnDecision = form.returnDecision.value; 
+                const orderId = form.action.split('/')[3]; 
+                const productId = form.action.split('/')[4]; 
 
-    // form submission for changing product status
-
-    document.getElementById('changeProductStatusForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        console.log('Form submitted'); 
-
-
-        const orderId = document.getElementById('orderId').value;
-        const productId = document.getElementById('productId').value;
-        const newStatus = document.getElementById('newStatus').value;
-
-        fetch(`/admin/changeProductStatus/${orderId}/${productId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ newStatus: newStatus })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+               
                 Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-                showConfirmButton: true
-            }).then(() => {
-                window.location.reload();
-            });
-            } else {
-                Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: data.message,
-                showConfirmButton: true
-            });
+                    title: 'Confirm Action',
+                    text: `Are you sure you want to ${returnDecision} the return request?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, submit it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/returnProduct/${orderId}/${productId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ returnDecision }), 
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok ' + response.statusText);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                Swal.fire('Success!', data.message, 'success'); 
+                            
+                                location.reload(); // Reload the page to see updated status
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire('Error!', 'There was an error processing your request.', 'error');
+                            });
+                    }
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
 
 
 
-});
+            function confirmCancelOrder(orderId) {
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to cancel this order?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/cancelOrder/${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({})
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                } else {
+                                    throw new Error('Failed to cancel the order');
+                                }
+                            })
+                            .then(data => {
+                                Swal.fire(
+                                    'Order Rejected! by Admin',
+                                    data.message,
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was a problem cancelling the order.',
+                                    'error'
+                                );
+                            });
+                    }
+                });
+            }
+
+            function confirmCancelProduct(orderId, productId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to cancel this product?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/cancelProduct/${orderId}/${productId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({})
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                } else {
+                                    throw new Error('Failed to cancel the product');
+                                }
+                            })
+                            .then(data => {
+                                Swal.fire(
+                                    'Cancelled!',
+                                    'The product has been successfully cancelled.',
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was a problem cancelling the product.',
+                                    'error'
+                                );
+                            });
+                    }
+                });
+            }
 
 
-</script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Change status modal functionality
+                const changeStatusLinks = document.querySelectorAll('.change-status');
+                changeStatusLinks.forEach(link => {
+                    link.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const orderId = link.getAttribute('data-order-id');
+
+                        // Set the order ID in a custom attribute or variable if needed
+                        document.getElementById('confirmChangeStatus').setAttribute('data-order-id', orderId);
+
+                        // Show the modal
+                        const changeStatusModal = new bootstrap.Modal(document.getElementById('changeStatusModal'));
+                        changeStatusModal.show();
+                    });
+                });
+
+                // Confirm status change
+                document.getElementById('confirmChangeStatus').addEventListener('click', () => {
+                    const orderId = document.getElementById('confirmChangeStatus').getAttribute('data-order-id');
+                    const selectedStatus = document.getElementById('orderStatusSelect').value;
+
+                    // Submit the status change form
+                    fetch(`/admin/changeStatus/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: selectedStatus })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Failed to change status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+                // -----------------------> Change status of Product
+
+                document.querySelectorAll('.change-item-status').forEach(link => {
+                    link.addEventListener('click', function (event) {
+                        event.preventDefault();
+
+                        const orderId = this.getAttribute('data-order-id');
+                        const productId = this.getAttribute('data-item-id');
+
+                        document.getElementById('orderId').value = orderId;
+                        document.getElementById('productId').value = productId;
+
+                        console.log('Order ID:', orderId);
+                        console.log('Product ID:', productId);
+
+                        var modal = new bootstrap.Modal(document.getElementById('changeProductStatusModal'));
+                        modal.show();
+                    });
+                });
+
+                // form submission for changing product status
+
+                document.getElementById('changeProductStatusForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    console.log('Form submitted');
+
+
+                    const orderId = document.getElementById('orderId').value;
+                    const productId = document.getElementById('productId').value;
+                    const newStatus = document.getElementById('newStatus').value;
+
+                    fetch(`/admin/changeProductStatus/${orderId}/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ newStatus: newStatus })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: data.message,
+                                    showConfirmButton: true
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: data.message,
+                                    showConfirmButton: true
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+
+
+
+            });
+
+
+        </script>
