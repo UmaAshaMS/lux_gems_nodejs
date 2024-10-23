@@ -1,0 +1,323 @@
+<style>
+    .Container {
+        border-radius: 10px;
+        display: flex;
+        padding: 20px;
+        flex-direction: column;
+        flex: 1;
+        align-items: left;
+        gap: 20px;
+    }
+
+    .SideBar .btn {
+        display: block;
+        width: 150px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+
+
+    .SideBar a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .reportButtons {
+        align-self: flex-end;
+        margin-bottom: 20px;
+    }
+
+
+    .btn {
+        width: 100px;
+    }
+
+    .italianno-regular {
+        font-family: "Italianno", cursive;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 50px;
+        color: #caaf7a;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: column;
+        font-size: 42px;
+        align-items: center;
+        margin-left: 85px;
+    }
+
+    .Search form {
+        display: flex;
+    }
+
+    .form-control {
+        width: 500px;
+    }
+
+    .searchBtn {
+        flex: 2;
+        width: 10px;
+        color: white;
+        border: 2px;
+    }
+
+    .searchCategory {
+        display: flex;
+        flex-direction: row;
+        border: 1px;
+        border-radius: 4px;
+        margin-top: 2%;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: row;
+        margin-top: 10px;
+    }
+
+
+
+
+    .SideBar {
+        width: 250px;
+        margin: 20px;
+        background-color: #caaf7a;
+        color: white;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        border-radius: 10px;
+    }
+
+    .MainContent {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .reportButtons {
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        height: auto;
+        border-collapse: collapse;
+    }
+</style>
+
+
+
+<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Category<span>.</span></a>
+        <div class="collapse navbar-collapse  d-flex flex-grow-1 justify-content-between align-items-center"
+            id="navbars">
+            <div class='Search'>
+                <div class="searchCategory">
+                    <form method="GET" action="/admin/Category" class="mb-4">
+                        <input type="text" name="searchQuery" placeholder="Search" class="form-control"
+                            value="<%= searchQuery %>">
+                        <button type="submit" class="btn btn-white mt-2 searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+            <!-- Button to Open the Modal -->
+            <form method="GET" action="">
+
+                <button type="button" class="btn AddCategory" data-bs-toggle="modal" data-bs-target="#categoryModal"
+                    style="margin-right: 0%;">
+                    Add Category
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="Container">
+    <div class='SideBar'>
+        <a href="/admin/home"><button class="btn btn-dark">Dashboard</button></a>
+        <a href="/admin/salesReport"><button class="btn btn-dark">Sales Report</button></a>
+        <a href="/admin/Category"><button class="btn btn-dark">Category</button></a>
+        <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+        <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+        <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+        <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+        <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
+        <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+        <form action="/admin/logout" method="POST">
+            <button type="submit" class="btn btn-dark">Logout</button>
+        </form>
+    </div>
+
+    <div class="MainContent">
+        <div class="reportButtons">
+            <form id="reportForm">
+                <label for="reportRange">Select Report Range:</label>
+                <select id="reportRange" onchange="toggleDateInputs()">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="custom">Custom Date Range</option>
+                </select>
+
+                <div id="customDateInputs" style="display:inline;">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate">
+
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" name="endDate">
+                
+                    <select id="format">
+                        <option value="PDF">PDF</option>
+                    <option value="EXCEL">EXCEL</option>
+                    </select>
+                </div>
+                <button type="button" onclick="generateReport()">Generate Report</button>
+                <button type="button" >Download</button>
+            </form>
+        </div>
+
+        <table id="salesReportTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Order Date</th>
+                    <th>Products</th>
+                    <th>Quantity</th>
+                    <th>Payment</th>
+                    <th>Coupon</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% salesData.forEach((order, index)=> { %>
+                    <tr>
+                        <td scope="row">
+                            <%= order._id.toString().slice(0, 5) %>
+                        </td>
+                        <td>
+                            <%= order.address.fullName %>
+                        </td>
+                        <td>
+                            <%= new Date(order.orderDate).toLocaleDateString() %>
+                        </td>
+                        <td>
+                            <% order.items.forEach((item)=> { %>
+                                <%= item.productName %>
+                                    <% }) %>
+                        </td>
+                        <td>
+                            <% order.items.forEach((item)=> { %>
+                                <%= item.quantity %>
+                                    <% }) %>
+                        </td>
+                        <td>
+                            <%= order.paymentMethod %>
+                        </td>
+                        <td>No coupon</td>
+                        <td>
+                            <%= order.totalAmount %>
+                        </td>
+                        <td>
+                            <%= order.status %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('footer') %>
+
+    <script>
+        function toggleDateInputs() {
+            const reportRange = document.getElementById('reportRange').value;
+            const customDateInputs = document.getElementById('customDateInputs');
+            customDateInputs.style.display = reportRange === 'custom' ? 'inline' : 'none';
+        }
+
+        async function generateReport() {
+            console.log('report')
+    const reportRange = document.getElementById('reportRange').value;
+    const format = document.getElementById('format').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    // console.log(endDate)
+    console.log(document.getElementById('reportRange'), document.getElementById('format'), document.getElementById('startDate'), document.getElementById('endDate'));
+
+
+    // Validation
+    if (reportRange === 'custom' && (!startDate || !endDate)) {
+        
+        swal("Error", "Please select both start and end dates for custom range.", "error");
+        return;
+    }
+    console.log('after return');
+    // swal({
+    //     title: "Generating Report",
+    //     text: "Please wait while we generate your report.",
+    //     icon: "info",
+    //     buttons: false,
+    //     closeOnClickOutside: false,
+    // });
+    console.log('Before try');
+    try {
+        console.log('try block entered');
+
+        const response = await fetch('/admin/generateReport', {
+            
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reportRange,
+                startDate,
+                endDate,
+                format,
+            }),
+        });
+
+        console.log('Fetch response received:', response);
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales_report.${format.toLowerCase()}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // Show success message
+        swal("Success", "Your report has been generated and is downloading.", "success");
+    } catch (error) {
+        console.error('Error during report generation:', error);
+
+        // Show error message
+        swal("Error", "There was a problem generating the report: " + error.message, "error");
+    } 
+}
+
+    </script>

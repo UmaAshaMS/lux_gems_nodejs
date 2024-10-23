@@ -1,45 +1,106 @@
 <%-include('./layout/header')%>
-<%- include('./layout/navbar')%>
-<%-include('./layout/category_navbar') %>
+    <%- include('./layout/navbar')%>
+        <%-include('./layout/category_navbar') %>
 
-<body>
-    <div class="ProductContainer">
-        <div class="container">
-            <div class="product-row">
 
-                <% product.forEach((prod)=> {%>
-                    <div class="product-item">
-                        <!-- Discount Badge -->
-                        <% if (!prod.stock) { %>
-                            <div class="stock-badge">
-                                Out Of Stock
-                            </div>
-                            <% } %>
+            <body>
+                <div class="ProductContainer">
 
-                                <% if (prod.productDiscount) { %>
-                                    <div class="discount-badge">
-                                        <%= prod.productDiscount %>% OFF
+
+                    <br>
+
+
+                    <div class="container">
+                        <div class="product-row">
+
+                            <% product.forEach((prod)=> {%>
+                                <div class="product-item">
+                                    <!-- Discount Badge -->
+                                    <% if (!prod.stock) { %>
+                                        <div class="stock-badge">
+                                            Out Of Stock
+                                        </div>
+                                        <% } %>
+
+                                            <% if (prod.productDiscount) { %>
+                                                <div class="discount-badge">
+                                                    <%= prod.productDiscount %>% OFF
+                                                </div>
+                                                <% } %>
+
+
+                                                    <!-- Clickable Image -->
+                                                    <a href="/productDetails/<%= prod._id %>">
+                                                        <img src="/<%= prod.productImage[0] %>"
+                                                            class="img-fluid product-thumbnail"
+                                                            alt="<%= prod.productName %>">
+                                                    </a>
+                                                    <h3 class="product-title">
+                                                        <%= prod.productName %>
+                                                    </h3>
+                                                    <span></span><strong class="product-price"><i
+                                                            class="fas fa-rupee-sign"></i>
+                                                        <%= prod.productPrice %>
+                                                    </strong>
+
+
+                                                    <h4><a href="#"><i class='fas fa-heart' style="color:red"></i></a>
+                                                        <a href="/cart/add/<%= prod._id%>"><i
+                                                                class="fas fa-shopping-cart"
+                                                                style="color:black"></i></a>
+                                                    </h4>
+                                </div>
+                                <% })%>
+
+                                    <button id="toggleFilterBtn" onclick="toggleFilter()">Show Filter</button>
+                                    <div id="filterContainer" style="display: none">
+                                        <h5>Filter Options</h5>
+
+                                        <div>
+                                            <label>
+                                                <input type="checkbox" id="showOutOfStock" checked> Show Out of Stock
+                                                Products
+                                            </label>
+                                        </div>
+
+                                        <h5 >Sort By</h5>
+                                        <div >
+
+                                            <select id="sortOptions" onchange="applyFilters()">
+                                                <option value="popularity">Popularity</option>
+                                                <option value="priceLowToHigh">Price: Low to High</option>
+                                                <option value="priceHighToLow">Price: High to Low</option>
+                                                <option value="averageRatings">Average Ratings</option>
+                                                <option value="featured">Featured</option>
+                                                <option value="newArrivals">New Arrivals</option>
+                                                <option value="aToZ">A to Z</option>
+                                                <option value="zToA">Z to A</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <button id="applyFilters" class="btn btn-success"
+                                                onclick="applyFilters()">Apply Filters</button>
+                                        </div>
+
                                     </div>
-                                    <% } %>
 
 
-                                        <!-- Clickable Image -->
-                                        <a href="/productDetails/<%= prod._id %>">
-                                            <img src="/<%= prod.productImage[0] %>" class="img-fluid product-thumbnail"
-                                                alt="<%= prod.productName %>">
-                                        </a>
-                                        <h3 class="product-title">
-                                            <%= prod.productName %>
-                                        </h3>
-                                        <span></span><strong class="product-price"><i class="fas fa-rupee-sign"></i>
-                                            <%= prod.productPrice %>
-                                        </strong>
+                                    <%-include('footer') %>
 
 
-                                        <h4><a href="#"><i class='fas fa-heart' style="color:red"></i></a>
-                                            <a href="/cart/add/<%= prod._id%>"><i class="fas fa-shopping-cart" style="color:black"></i></a>
-                                        </h4>
-                    </div>
-                <% })%>
+                                        <script>
+                                            function toggleFilter() {
+                                                const filterContainer = document.getElementById('filterContainer');
+                                                const toggleButton = document.getElementById('toggleFilterBtn');
 
-<%-include('footer') %>
+                                                if (filterContainer.style.display === 'none') {
+                                                    filterContainer.style.display = 'inline';
+                                                    toggleButton.textContent = 'Hide Filter';
+                                                } else {
+                                                    filterContainer.style.display = 'none';
+                                                    toggleButton.textContent = 'Show Filter';
+                                                }
+                                            }
+
+                                        </script>

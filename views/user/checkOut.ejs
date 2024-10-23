@@ -202,7 +202,7 @@
                         </div>
                         <div class="modal-body">
                             <% if (userAddress && userAddress.address && userAddress.address.length> 0) { %>
-                                <% userAddress.address.forEach((address)=> { %>
+                                <% userAddress.address.forEach((address, index)=> { %>
                                     <div class="address-item d-flex align-items-start mb-3">
                                         <input type="radio" name="address"
                                             onclick="updateSelectedAddress('<%= address._id %>')"
@@ -317,9 +317,9 @@
                 console.log('hloo')
                 const paymentOptions = document.getElementsByName('paymentMethod')
                 // console.log(paymentOptions)
-                const userAddress = '<%- JSON.stringify(userAddress) %>';
+                const userAddress = <% - JSON.stringify(userAddress) %>;
 
-                console.log('USER ADDRESS',userAddress)
+                console.log('USER ADDRESS', userAddress)
 
                 function updateSelectedAddress(addressId) {
                     document.getElementById("selectedAddress").value = addressId;
@@ -346,14 +346,13 @@
                         modalInstance.hide();
                     }
                 }
-                
+
 
                 function editAddress(addressId) {
-                    const addressess = JSON.parse('<%- JSON.stringify(userAddress.address) %>');
-                    console.log('ADDRESS',addressess)
-                    // const address = userAddress.find(addr => addr._id === addressId);
+                    const addresses = JSON.parse('<%- JSON.stringify(userAddress.address) %>');
+                    console.log('ADDRESS', addresses)
                     const address = addresses.find(addr => addr._id === addressId);
-                    console.log('ADDRESS of the id',address)
+                    console.log('ADDRESS of the id', address)
 
 
                     if (address) {
@@ -367,6 +366,9 @@
                         document.getElementById('state').value = userAddress.state || '';
                         document.getElementById('country').value = userAddress.country || '';
 
+                        document.getElementById('addressId').value = addressId;
+
+
                         // Show the modal (Bootstrap modal)
                         const modal = new bootstrap.Modal(document.getElementById('editAddressModal'));
                         modal.show();
@@ -375,10 +377,85 @@
                     }
                 }
 
+                document.getElementById('editAddressForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const addressData = {
+                        id: document.getElementById('addressId').value,
+                        fullName: document.getElementById('fullName').value,
+                        phoneNumber: document.getElementById('phoneNumber').value,
+                        addressLine1: document.getElementById('addressLine1').value,
+                        addressLine2: document.getElementById('addressLine2').value,
+                        city: document.getElementById('city').value,
+                        pinCode: document.getElementById('pinCode').value,
+                        state: document.getElementById('state').value,
+                        country: document.getElementById('country').value,
+                    };
+
+                    fetch(`/admin/editAddressCheckout/${addressId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(addressData),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                updateAddressInUI(addressData);
+
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+                                modal.hide();
+
+                                alert('Address updated successfully!');
+                            } else {
+                                alert('Failed to update address: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while updating the address.');
+                        });
+                });
+
+                function updateAddressInUI(addressData) {
+                    const addressRow = document.getElementById(`address-${addressData.id}`);
+                    if (addressRow) {
+                        addressRow.querySelector('.fullName').innerText = addressData.fullName;
+                        addressRow.querySelector('.phoneNumber').innerText = addressData.phoneNumber;
+                        addressRow.querySelector('.addressLine1').innerText = addressData.addressLine1;
+                        addressRow.querySelector('.addressLine2').innerText = addressData.addressLine2;
+                        addressRow.querySelector('.city').innerText = addressData.city;
+                        addressRow.querySelector('.pinCode').innerText = addressData.pinCode;
+                        addressRow.querySelector('.state').innerText = addressData.state;
+                        addressRow.querySelector('.country').innerText = addressData.country;
+                    }
+                }
 
                 function deleteAddress(addressId) {
-                    // Logic for deleting an address
+                    if (confirm('Are you sure you want to delete this address?')) {
+                        fetch(`/admin/deleteAddressCheckout/${addressId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+
+                                    alert('Address deleted successfully!');
+                                } else {
+                                    alert('Failed to delete address: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while deleting the address.');
+                            });
+                    }
                 }
+
 
                 document.getElementById('applyCouponBtn').addEventListener('click', async () => {
                     const couponCode = document.getElementById('couponCode').value;

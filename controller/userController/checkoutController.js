@@ -4,6 +4,7 @@ const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const couponSchema = require('../../model/couponSchema')
 const { ObjectId } = require('mongodb')
+const addressSchema = require('../../model/addressSchema')
 
 
 const applyCoupon = async (req, res) => {
@@ -222,8 +223,16 @@ const addNewAddressPost = async(req,res) => {
     }
 
     const deleteAddressCheckout = async(req,res) => {
+        console.log('Reached delete address checkout')
         try{
+            const addressId = req.params.id;
+            const result = await addressSchema.findByIdAndDelete(addressId);
 
+        if (!result) {
+            return res.status(404).json({ success: false, message: 'Address not found.' });
+        }
+
+        res.json({ success: true, message: 'Address deleted successfully.' });
         }
         catch(error){
             console.log(`Error in deleting address in checkout: ${error}`)

@@ -76,6 +76,10 @@ admin.get('getOffer/:id', checkAdminLogin, adminOfferController.offerById)
 admin.put('/editOffer/:id', checkAdminLogin, adminOfferController.editOffer)
 admin.delete('/deleteOffer/:id', checkAdminLogin, adminOfferController.deleteOffer)
 
+//Sales Report
+admin.get('/salesReport', checkAdminLogin, adminDashboardControl.salesReport)
+admin.post('/generateReport' ,checkAdminLogin, adminDashboardControl.generateReport)
+
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)
 

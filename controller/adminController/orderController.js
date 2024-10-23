@@ -193,9 +193,13 @@ const returnProduct = async(req,res) => {
     
         try {
             const { orderId, productId } = req.params;
+            console.log(req.params)
+            console.log(orderId)
             const { returnDecision } = req.body; 
     
             const order = await orderSchema.findById(orderId);
+            console.log('order is : ', order)
+
             const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
     
             if (itemIndex === -1) {
@@ -210,10 +214,11 @@ const returnProduct = async(req,res) => {
             } else if ( returnDecision === 'Reject') {
                 order.items[itemIndex].status = 'Rejected'; 
             }
+            console.log('Order after changing status : ',order)
     
             await order.save();
 
-            return res.status(200).json({ message: `Return ${returnDecision === 'approve' ? 'approved' : 'rejected'} successfully.` });
+            return res.status(200).json({ message: `Return ${returnDecision === 'Accept' ? 'approved' : 'rejected'} successfully.` });
         } catch (error) {
             console.error("Error in returnProduct:", error); 
             return res.status(500).json({ message: 'Internal server error.' });

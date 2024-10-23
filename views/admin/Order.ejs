@@ -210,6 +210,7 @@
         <div class="Container">
             <div class='SideBar'>
                 <a href="/admin/home"><button class="btn btn-dark"> Dashboard</button></a>
+                <a href="/admin/salesReport"><button class="btn btn-dark"> Sales Report</button></a>
                 <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
                 <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
                 <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
@@ -276,12 +277,14 @@
                                                                 </span>
                                                                 <div id="returnForm-<%= item.productId %>"
                                                                     style="display:none; margin-top: 10px;">
-                                                                    <p>Reason for return : <%= item.returnReason %>
+                                                                    <p id="ReturnReason">Reason for return : <%=
+                                                                            item.returnReason %>
                                                                     </p>
                                                                     <!-- Dropdown to accept or reject the return request -->
                                                                     <form
-                                                                        action="/admin/returnProduct/<%= order._id %>/<%= item.productId %>"
-                                                                        method="POST"
+                                                                        action="/admin/returnProduct/<%= order._id%>/<%= item.productId  %>"
+                                                                        method="POST" data-order-id="<%= order._id %>"
+                                                                        data-product-id="<%= item.productId %>"
                                                                         onsubmit="submitReturnDecision(event)">
                                                                         <select name="returnDecision"
                                                                             class="form-select" required>
@@ -290,7 +293,7 @@
                                                                             <option value="Reject">Reject</option>
                                                                         </select>
                                                                         <button type="submit"
-                                                                            class="btn btn-primary">Submit</button>
+                                                                            class="btn btn-dark">Submit</button>
                                                                     </form>
                                                                 </div>
                                                                 <% } %>
@@ -427,16 +430,19 @@
                 }
             }
 
-            //function for return confirmation
+            // function for return confirmation
             function submitReturnDecision(event) {
-                event.preventDefault(); 
+                event.preventDefault();
 
-                const form = event.target; 
-                const returnDecision = form.returnDecision.value; 
-                const orderId = form.action.split('/')[3]; 
-                const productId = form.action.split('/')[4]; 
+                const form = event.target;
 
-               
+                const orderId = form.getAttribute('data-order-id');
+                const productId = form.getAttribute('data-product-id');
+                const returnDecision = form.returnDecision.value;
+
+                console.log('Order ID:', orderId);
+                console.log('Product ID:', productId);
+
                 Swal.fire({
                     title: 'Confirm Action',
                     text: `Are you sure you want to ${returnDecision} the return request?`,
@@ -447,23 +453,29 @@
                     confirmButtonText: 'Yes, submit it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch(`/admin/returnProduct/${orderId}/${productId}`, {
+                        const URL = `/admin/returnProduct/${orderId}/${productId}`;
+                        fetch(URL, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ returnDecision }), 
+                            body: JSON.stringify({ returnDecision }) 
                         })
                             .then(response => {
+                                console.log('Response:', response);
+
                                 if (!response.ok) {
-                                    throw new Error('Network response was not ok ' + response.statusText);
+                                    throw new Error('Error in response: ' + response.statusText);
                                 }
                                 return response.json();
                             })
                             .then(data => {
-                                Swal.fire('Success!', data.message, 'success'); 
-                            
-                                location.reload(); // Reload the page to see updated status
+                                console.log('Data:', data);
+                                Swal.fire('Success!', data.message, 'success')
+                                .then(() => {
+                                    window.location.reload();
+                                });
+                                
                             })
                             .catch(error => {
                                 console.error('Error:', error);
@@ -472,6 +484,7 @@
                     }
                 });
             }
+
 
 
 
