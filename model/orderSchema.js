@@ -33,6 +33,9 @@ const schema = new mongoose.Schema(
             quantity : {
                 type : Number
             },
+            discount : {
+                type: Number
+            },
             status: {
                 type: String, 
                 enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Rejected', 'Return Under Process', ], 
@@ -54,6 +57,13 @@ const schema = new mongoose.Schema(
     },
     totalAmount: {
         type: Number, 
+    },
+    couponDiscount : {
+        type : Number,
+        default : 0
+    },
+    couponId : {
+        type: String
     },
     isArchived : {
         type:Boolean,
