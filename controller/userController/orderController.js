@@ -6,13 +6,14 @@ const orderSchema = require('../../model/orderSchema')
 const walletSchema = require('../../model/walletSchema')
 const { ObjectId } = require('mongodb')
 const mongoose = require('mongoose');
+const { refund } = require('paypal-rest-sdk')
 
 
 
 const placeOrder = async (req, res) => {
     console.log('place order reached......')
     try {
-        const userId = req.session.user; 
+        const userId = req.session.user;
         const cart = req.session.cart;
         const { addressToSend, selectedPaymentOption } = req.body;
         console.log(req.body)
@@ -26,14 +27,14 @@ const placeOrder = async (req, res) => {
 
 
         // Check if total amount exceeds ₹1000 for COD
-        if (parseInt(selectedPaymentOption) === 0 && totalAmount > 1000) { 
+        if (parseInt(selectedPaymentOption) === 0 && totalAmount > 1000) {
             return res.status(400).json({ message: 'Cash on Delivery is not available for orders above ₹1000.' });
         }
 
 
         // check wallet balance for WALLET PAY
-        if (parseInt(selectedPaymentOption) === 2) { 
-            const userWallet = await walletSchema.findOne({ userId: new ObjectId(userId) }); 
+        if (parseInt(selectedPaymentOption) === 2) {
+            const userWallet = await walletSchema.findOne({ userId: new ObjectId(userId) });
             if (!userWallet || userWallet.balance < totalAmount) {
                 return res.status(400).json({ message: 'Insufficient wallet balance to place this order.' });
             }
@@ -43,14 +44,20 @@ const placeOrder = async (req, res) => {
         const order = new orderSchema({
             userId: new ObjectId(userId),
             address: addressToSend,
-            items: cart.cartItems.map(item => ({
-                productId: item.productId._id,
-                productName: item.productId.productName,
-                productPrice: item.productId.productPrice,
-                productImage: item.productId.productImage[0],
-                quantity: item.quantity
-            })),
-            paymentMethod: selectedPaymentOption, 
+            items: cart.cartItems.map(item => {
+                const originalPrice = item.productId.productPrice;
+                const discount = item.productId.productDiscount || 0;  
+                const discountedPrice = originalPrice - (originalPrice * (discount / 100));
+                
+                return {
+                    productId: item.productId._id,
+                    productName: item.productId.productName,
+                    productPrice: discountedPrice.toFixed(2),  // Adjusted price after discount
+                    productImage: item.productId.productImage[0],
+                    quantity: item.quantity
+                };
+            }),
+            paymentMethod: selectedPaymentOption,
             totalAmount: totalAmount
         });
 
@@ -63,11 +70,11 @@ const placeOrder = async (req, res) => {
             const quantity = item.quantity;
             await productSchema.updateOne(
                 { _id: productId },
-                { $inc: { stock: -quantity } } 
+                { $inc: { stock: -quantity } }
             );
         });
 
-       
+
         await Promise.all(updateStockPromises);
 
         await cartSchema.deleteOne({ userId: new ObjectId(userId) });
@@ -82,8 +89,8 @@ const placeOrder = async (req, res) => {
 };
 
 
-const orderConfirmed = async(req,res) => {
-    try{
+const orderConfirmed = async (req, res) => {
+    try {
         const user = req.session.user
         const orderId = req.params.orderId;
 
@@ -96,17 +103,19 @@ const orderConfirmed = async(req,res) => {
         const expectedDeliveryDate = new Date(orderDate);
         expectedDeliveryDate.setDate(orderDate.getDate() + 10);
 
-        res.render('user/orderConfirmation', {title:'Order Confirmation', user, order, category, 
-        expectedDeliveryDate: expectedDeliveryDate.toDateString()})
+        res.render('user/orderConfirmation', {
+            title: 'Order Confirmation', user, order, category,
+            expectedDeliveryDate: expectedDeliveryDate.toDateString()
+        })
     }
-    catch(error){
+    catch (error) {
         console.log(`Error in loading order confirmation page, ${error}`)
     }
 }
 
 const cancelOrder = async (req, res) => {
     try {
-        const { orderId, itemId } = req.params; 
+        const { orderId, itemId } = req.params;
 
         const order = await orderSchema.findById(orderId).populate('items.productId');
 
@@ -127,7 +136,7 @@ const cancelOrder = async (req, res) => {
             const quantity = Number(itemToCancel.quantity);
             const stock = Number(product.stock) || 0;
             if (!isNaN(quantity)) {
-                product.stock = stock + quantity; 
+                product.stock = stock + quantity;
                 await product.save();
             } else {
                 console.error(`Invalid quantity for item: ${itemToCancel.productId._id}`);
@@ -142,7 +151,7 @@ const cancelOrder = async (req, res) => {
             order.status = 'Cancelled';
         }
 
-        await order.save(); 
+        await order.save();
 
         res.status(200).json({ success: true, message: 'Item marked as cancelled successfully' });
     } catch (error) {
@@ -153,7 +162,7 @@ const cancelOrder = async (req, res) => {
 
 
 
-const returnOrder = async(req, res) => {
+const returnOrder = async (req, res) => {
     try {
         const { orderId, productId } = req.params;
         const { returnReason } = req.body;
@@ -162,44 +171,22 @@ const returnOrder = async(req, res) => {
         const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
 
         if (itemIndex === -1) {
-            return res.status(404).json({message:'Product Not found'}).render('pageNotFound',{ title: 'Page Not Found'});
+            return res.status(404).json({ message: 'Product Not found' }).render('pageNotFound', { title: 'Page Not Found' });
         }
 
         // Update the status of the product in the order to 'Return Under Process'
         order.items[itemIndex].status = 'Return Under Process';
         order.items[itemIndex].returnReason = returnReason;
 
-        if (order.paymentMethod === 1) {
-            // console.log('Initiating PayPal refund...');
-            const refundAmount = order.items[itemIndex].price * order.items[itemIndex].quantity;
-
-            const wallet = await walletSchema.findById(order.userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            wallet.balance += refundAmount;
-
-        } else if (order.paymentMethod === 2) {
-            const refundAmount = order.items[itemIndex].price * order.items[itemIndex].quantity;
-
-            const wallet = await walletSchema.findById(order.userId);
-            if (!user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            wallet.balance += refundAmount;
-        }
-
         await order.save();
 
-        return res.status(200).json({ success:true, message: 'Return request submitted. Waiting for admin approval.' });
+        return res.status(200).json({ success: true, message: 'Return request submitted. Waiting for admin approval.' });
     } catch (error) {
+        console.log('Error in returning product', error)
         return res.status(500).json({ message: 'Internal server error.' });
+
     }
 }
-
-
-
-
 
 
 

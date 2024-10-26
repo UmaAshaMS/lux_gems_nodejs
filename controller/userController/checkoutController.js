@@ -5,71 +5,131 @@ const categorySchema = require('../../model/categorySchema')
 const couponSchema = require('../../model/couponSchema')
 const { ObjectId } = require('mongodb')
 const addressSchema = require('../../model/addressSchema')
+const paypal = require('@paypal/checkout-server-sdk');
 
+
+
+// const applyCoupon = async (req, res) => {
+//     const { couponCode } = req.body;
+//     console.log('------------------coupon code', req.body);
+
+//     try {
+//         const coupon = await couponSchema.findOne({ couponCode: couponCode });
+//         console.log('Coupon Found:', coupon);
+
+//         if (!coupon) {
+//             return res.status(400).json({ message: 'Invalid coupon code.' });
+//         }
+
+//         const discount = coupon.discount;
+//         const discountType = coupon.discountType;
+
+//         // Get current subtotal from session
+//         const subtotal = req.session.cart.subtotal || 0;
+//         let promotionAmount = req.session.cart.promotionAmount || 0; // Initialize promotion amount from session
+//         let totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount; // Calculate initial total
+
+//         // Check if the subtotal meets the minimum amount required for the coupon
+//         if (coupon.minimumAmount && subtotal < coupon.minimumAmount) {
+//             return res.status(400).json({ message: `Minimum amount of ₹${coupon.minimumAmount} is required to apply this coupon.` });
+//         }
+
+//         // Calculate potential promotion amount based on discount type
+//         let newPromotionAmount = 0;
+//         if (discountType === 'Percentage') {
+//             // Calculate percentage discount
+//             newPromotionAmount = (subtotal * discount) / 100; 
+//         } else if (discountType === 'Fixed Amount') {
+//             // Use fixed amount discount
+//             newPromotionAmount = discount; 
+//         }
+
+//         console.log('-------------New Promotion Amount:', newPromotionAmount);
+
+//         // Check if applying this coupon keeps the total above zero
+//         const potentialTotalAmount = totalAmount - newPromotionAmount;
+
+//         if (potentialTotalAmount < 0) {
+//             return res.status(400).json({ message: 'Applying this coupon will result in a total below zero.' });
+//         }
+
+//         // Add new promotion amount to the total promotion amount
+//         promotionAmount += newPromotionAmount;
+
+//         // Store the updated promotion amount in session
+//         req.session.cart.promotionAmount = promotionAmount;
+
+//         // Recalculate the total amount here after applying the coupon
+//         totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount;
+
+//         // Send the discount amount back to the client
+//         res.json({ discount: promotionAmount, totalAmount });
+//     } catch (error) {
+//         console.error('Error applying coupon:', error);
+//         return res.status(500).json({ message: 'Internal server error.' });
+//     }
+// }
 
 const applyCoupon = async (req, res) => {
-    const { couponCode } = req.body;
-    console.log('------------------coupon code', req.body);
-
     try {
-        const coupon = await couponSchema.findOne({ couponCode: couponCode });
-        console.log('Coupon Found:', coupon);
+        const { couponCode } = req.body; 
+        const userId = req.session.user;
 
+        // Fetch the user's cart
+        const cart = await cartSchema.findOne({ userId: userId }).populate('product.productId');
+        if (!cart) {
+            return res.status(400).json({ message: 'Cart not found.' });
+        }
+
+        // Calculate the total price of the cart
+        let totalPrice = cart.product.reduce((total, item) => {
+            return total + (item.price * item.quantity);
+        }, 0);
+
+        // Validate the coupon
+        const coupon = await couponSchema.findOne({ code: couponCode });
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid coupon code.' });
         }
 
-        const discount = coupon.discount;
-        const discountType = coupon.discountType;
-
-        // Get current subtotal from session
-        const subtotal = req.session.cart.subtotal || 0;
-        let promotionAmount = req.session.cart.promotionAmount || 0; // Initialize promotion amount from session
-        let totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount; // Calculate initial total
-
-        // Check if the subtotal meets the minimum amount required for the coupon
-        if (coupon.minimumAmount && subtotal < coupon.minimumAmount) {
-            return res.status(400).json({ message: `Minimum amount of ₹${coupon.minimumAmount} is required to apply this coupon.` });
+        // Check if the coupon is expired
+        if (new Date() > coupon.expiryDate) {
+            return res.status(400).json({ message: 'Coupon has expired.' });
         }
 
-        // Calculate potential promotion amount based on discount type
-        let newPromotionAmount = 0;
-        if (discountType === 'Percentage') {
-            // Calculate percentage discount
-            newPromotionAmount = (subtotal * discount) / 100; 
-        } else if (discountType === 'Fixed Amount') {
-            // Use fixed amount discount
-            newPromotionAmount = discount; 
+        // Calculate the discount amount
+        let discountAmount = 0;
+        if (coupon.discountType === 'percentage') {
+            discountAmount = (totalPrice * (coupon.discountAmount / 100)).toFixed(2);
+        } else if (coupon.discountType === 'fixed') {
+            discountAmount = coupon.discountAmount;
         }
 
-        console.log('-------------New Promotion Amount:', newPromotionAmount);
-
-        // Check if applying this coupon keeps the total above zero
-        const potentialTotalAmount = totalAmount - newPromotionAmount;
-
-        if (potentialTotalAmount < 0) {
-            return res.status(400).json({ message: 'Applying this coupon will result in a total below zero.' });
+        // Ensure the discount does not exceed the total price
+        if (discountAmount > totalPrice) {
+            discountAmount = totalPrice;
         }
 
-        // Add new promotion amount to the total promotion amount
-        promotionAmount += newPromotionAmount;
+        // Calculate final amount after discount
+        const finalAmount = (totalPrice - discountAmount).toFixed(2);
 
-        // Store the updated promotion amount in session
-        req.session.cart.promotionAmount = promotionAmount;
+        // Respond with the calculated amounts
+        res.status(200).json({ 
+            message: 'Coupon applied successfully.', 
+            totalPrice: totalPrice, 
+            discountAmount: discountAmount, 
+            finalAmount: finalAmount 
+        });
 
-        // Recalculate the total amount here after applying the coupon
-        totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount;
-
-        // Send the discount amount back to the client
-        res.json({ discount: promotionAmount, totalAmount });
     } catch (error) {
-        console.error('Error applying coupon:', error);
-        return res.status(500).json({ message: 'Internal server error.' });
+        console.error(`Error applying coupon: ${error}`);
+        res.status(500).json({ message: 'An error occurred while applying the coupon.' });
     }
-}
+};
 
 
 const checkout = async (req, res) => {
+    console.log('Reached checkout')
     try {
         const userId = req.session.user;
         const category = await categorySchema.find({ isBlocked: 0 });
@@ -131,7 +191,7 @@ const checkout = async (req, res) => {
         req.session.address = defaultAddress || null;
 
         // console.log('------------Session:',req.session)
-
+        // console.log(process.env.PAYPAL_CLIENT_ID.trim())
         res.render('user/checkOut', {
             title: 'Checkout',
             user: req.session.user,
@@ -143,7 +203,8 @@ const checkout = async (req, res) => {
             selectedAddress: req.session.address,
             subtotal,
             deliveryCharge,
-            promotionAmount 
+            promotionAmount,
+            paypalClientId: process.env.PAYPAL_CLIENT_ID.trim() 
         });
     } catch (error) {
         console.error(`Error in rendering checkout page: ${error}`);
@@ -238,7 +299,64 @@ const addNewAddressPost = async(req,res) => {
             console.log(`Error in deleting address in checkout: ${error}`)
         }
     }
+const renderPaypal = async(req,res) => {
 
+    const environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
+    const client = new paypal.core.PayPalHttpClient(environment);
+
+    try{
+        const userDetails = await userSchema.findById(req.session.user);
+        console.log(userDetails)
+        const cart = await cartSchema.findOne({ userId: req.session.user })
+
+        console.log('cart',cart)
+
+        const totalAmount = cart.product.reduce((acc, item) => {
+            return acc + item.price * item.quantity;
+        }, 0);
+
+        const deliveryCharge = totalAmount < 2000 ? 100 : 0;
+        const finalAmount = totalAmount + deliveryCharge;
+
+        console.log('Total amiunt', totalAmount)
+        console.log('Final amount', finalAmount)
+
+
+
+        if (!cart) {
+            return res.status(400).json({ error: "Cart not found" });
+        }
+
+        const request = new paypal.orders.OrdersCreateRequest();
+        request.prefer("return=representation");
+        request.requestBody({
+            intent: "CAPTURE",
+            purchase_units: [{
+                amount: {
+                    currency_code: "USD",
+                    value: finalAmount.toFixed(2)
+                },
+                description: "Purchase from LUXGEMS"
+            }],
+            application_context: {
+                brand_name: "LUXGEMS",
+                return_url: "http://localhost:5000/payment-success",
+                cancel_url: "http://localhost:5000/payment-cancel"
+            }
+        });
+        const order = await client.execute(request);
+        return res.status(200).json({
+            success: "PayPal order created",
+            orderID: order.result.id,
+            totalAmount: cart.payableAmount
+        });
+
+    }
+    catch(error){
+        console.error(`Error in rendering PayPal: ${JSON.stringify(error)}`);
+
+    }
+}
 
 module.exports = {
     applyCoupon,
@@ -248,5 +366,6 @@ module.exports = {
     addNewAddressPost,
     editAdressCheckout,
     deleteAddressCheckout,
+    renderPaypal
 
 }

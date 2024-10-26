@@ -84,9 +84,12 @@
                                             value="1">
                                         <label class="form-check-label" for="upiOption">
                                             <strong>UPI (via PayPal)</strong>
+
                                         </label>
                                         <div class="mt-2">
-                                            <input type="text" class="form-control" placeholder="Enter UPI ID">
+                                            <!-- <input type="text" class="form-control" placeholder="Enter UPI ID"> -->
+                                            <div id="paypal-button-container"></div>
+
                                         </div>
                                     </div>
                                     <div class="form-check mb-3">
@@ -144,7 +147,8 @@
                                                     <li class="list-group-item">
                                                         <strong>Total: Rs <%= cart.product.reduce((total, item)=> total
                                                                 + ((item.productId.productPrice -
-                                                                (item.productId.productDiscount / 100)) *
+                                                                (item.productId.productDiscount / 100) *
+                                                                item.productId.productPrice) *
                                                                 item.quantity), 0).toFixed(2) %></strong>
                                                     </li>
                                                     <li class="list-group-item">
@@ -311,13 +315,17 @@
                 </div>
             </div>
 
-
             <!-- Script for Checkout -->
+            <script src="https://www.paypal.com/sdk/js?client-id=<%=paypalClientId%>&currency=USD"></script>
             <script>
+
+
                 console.log('hloo')
                 const paymentOptions = document.getElementsByName('paymentMethod')
-                // console.log(paymentOptions)
+                console.log(paymentOptions)
+                // const userAddress = <% - JSON.stringify(userAddress) %>;
                 const userAddress = <%- JSON.stringify(userAddress) %>;
+
 
                 console.log('USER ADDRESS', userAddress)
 
@@ -519,7 +527,7 @@
                         console.log('event triggered')
                     }
 
-                    // console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
+                    console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
 
@@ -603,6 +611,66 @@
                             console.log(`error on paying using cod`)
                         })
                     }
+
+                    //if the option is PAYPAL
+                    if (parseInt(selectedPaymentOption) === 1) {
+                        const URL = '/renderPaypal';
+                        fetch(URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ totalAmount: orderTotal })
+                        })
+                            .then((res) => res.json())
+                            .then((data) => {
+                                if (data.orderID) {
+                                    paypal.Buttons({
+                                        createOrder: function () {
+                                            return data.orderID;
+                                        },
+                                        onApprove: function (data, actions) {
+                                            return fetch('/placeOrder', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+
+                                                body: JSON.stringify({
+                                                    selectedAddressOption: addressToSend,
+                                                    selectedPaymentOption: selectedPaymentOption,
+                                                    paypalOrderID: data.orderID
+                                                })
+                                            })
+                                                .then((res) => res.json())
+                                                .then((data) => {
+                                                    if (data.success) {
+                                                        window.location.href = `/orderConfirmed/${data.orderId}`;
+                                                    } else if (data.error) {
+                                                        Swal.fire({
+                                                            icon: 'warning',
+                                                            title: 'Error',
+                                                            text: data.error
+                                                        });
+                                                    }
+                                                })
+                                                .catch((err) => {
+                                                    console.error('Error processing payment with PayPal', err);
+                                                });
+                                        },
+                                        onCancel: function () {
+                                            window.location.href = '/payment-cancel';
+                                        }
+                                    }).render('#paypal-button-container');
+                                } else {
+                                    console.error('No order ID returned from server.');
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Error fetching PayPal order', err);
+                            });
+                    }
+
 
                     //if the option is WALLET
                     if (parseInt(selectedPaymentOption) === 2) {

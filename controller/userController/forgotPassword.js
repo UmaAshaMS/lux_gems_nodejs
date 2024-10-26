@@ -25,7 +25,7 @@ const ForgotPasswordpost = async (req, res) => {
         if (email.isBlocked) {
             req.flash('error', 'User blocked by admin')
             console.log('User blockedd by admin')
-            return res.redirect('user/login')
+            return res.redirect('/login')
         }
         const otp = generateOTP()
         sendOTP(req.body.email, otp)
@@ -38,7 +38,7 @@ const ForgotPasswordpost = async (req, res) => {
         req.session.otpTime = Date.now() + (5 * 60 * 1000); // OTP valid for 5 minutes
         req.session.email = req.body.email
 
-        res.redirect('user/ForgotPasswordOtp')
+        res.redirect('/ForgotPasswordOtp')
     }
     catch (err) {
         console.error('Error in submitting forgot password page', err)
@@ -72,7 +72,7 @@ const ForgotPasswordOtpPost = (req, res) => {
         } else {
             req.flash('error', 'An error ocuured. Please retry.')
             console.log('An error ocuured. Please retry.')
-            res.redirect('user/Forgot-Password')
+            res.redirect('/Forgot-Password')
         }
     } catch (error) {
         console.log(`Error in forgot otp verification ${error}`)
@@ -91,7 +91,7 @@ const resendOTPforgotPassword = async(req, res) => {
         req.session.otpTime = Date.now() + (5 * 60 * 1000); // OTP valid for 5 minutes
 
         req.flash('success', 'OTP resent successfully');
-        res.redirect('user/forgotPasswordOtp'); // Redirect to password recovery OTP pag
+        res.redirect('/forgotPasswordOtp'); // Redirect to password recovery OTP pag
     } catch (error) {
         console.log(`Error while resending OTP: ${error}`);
         res.status(500).send('Internal Server Error');
@@ -120,11 +120,11 @@ const resetPasswordPost = async(req, res) => {
         if (update) {
             req.flash('success', 'Password updated successfully')
             console.log('Password updated successfully.')
-            res.redirect('user/login')
+            res.redirect('/login')
         } else {
         req.flash('error', 'Error in setting new password.')
         console.log('Error in setting new password.')
-        res.redirect('user/login')
+        res.redirect('/login')
         }
     } catch (error) {
         console.log(`Error in reset password post ${error}`)

@@ -18,10 +18,108 @@ const cart = async (req, res) => {
     }
 }
 
+// const addToCart = async (req, res) => {
+//     try {
+//         const user = req.session.user || null;
+//         const productId = req.params.productId
+
+//         // Check if the user is authenticated
+//         if (!user) {
+//             return res.status(401).json({ message: 'User not authenticated. Please log in to add items to your cart.' });
+//         }
+
+//         // Validate the productId
+//         if (!ObjectId.isValid(productId)) {
+//             return res.status(400).json({ message: 'Invalid Product ID' });
+//         }
+
+//         const productAvailability = await productSchema.findOne({
+//             _id: new ObjectId(productId),
+//             isActive: true,
+//             stock: { $gt: 0 },
+//         });
+
+//         if (!productAvailability) {
+//             return res.status(400).json({ message: 'Product is out of stock or not available' });
+//         }
+
+//         // Find the cart for the user
+//         let cart = await cartSchema.findOne({ userId: new ObjectId(user) });
+
+//         if (cart) {
+//             // Check if the product already exists in the cart
+//             const existingProduct = cart.product.find((item) => {
+//                 return item && item.productId && item.productId.equals(new ObjectId(productId));
+
+//             });
+
+//             if (existingProduct) {
+//                 // Check if the existing quantity exceeds the allowed maximum
+//                 if (existingProduct.quantity > 8) {
+//                     return res.status(400).json({ message: 'Maximum quantity of 8 reached for this product.' });
+//                 }
+
+//                 // Check if adding one more will exceed the stock available
+//                 if (existingProduct.quantity + 1 >= productAvailability.stock) {
+//                     return res.status(400).json({ message: 'Insufficient stock to add more of this product.' });
+//                 }
+
+//                 // If the product exists, increase the quantity
+//                 existingProduct.quantity += 1;
+//             } else {
+//                 // If the product does not exist, add it as a new item
+//                 const newCartItem = {
+//                     productId: new ObjectId(productId),
+//                     productName: productAvailability.productName,
+//                     quantity: 1,
+//                     price: productAvailability.productPrice,
+//                     category: productAvailability.productCategory,
+
+//                 };
+
+
+//                 if (productAvailability.productDiscount) {
+//                     const discountAmount = (productAvailability.productDiscount / 100) * productAvailability.productPrice; 
+//                     existingProduct.productPrice = (productAvailability.productPrice - discountAmount).toFixed(2);
+//                 }
+
+//                 cart.product.push(newCartItem);
+//             }
+//         } else {
+//             // Create a new cart if none exists for the user
+//             const newCartItem = {
+//                 productId: new ObjectId(productId),
+//                 productName: productAvailability.productName,
+//                 quantity: 1,
+//                 price: productAvailability.productPrice,
+//                 category: productAvailability.productCategory,
+
+//             };
+//             if (productAvailability.productDiscount) {
+//                 const discountAmount = (productAvailability.productDiscount / 100) * productAvailability.productPrice; 
+//                 newCartItem.productPrice = (productAvailability.productPrice - discountAmount).toFixed(2);
+//             }
+
+//             cart = new cartSchema({
+//                 userId: new ObjectId(user),
+//                 product: [newCartItem],
+//             });
+//         }
+
+//         // Save the updated cart
+//         await cart.save();
+
+//         res.status(200).json({ message: 'Product added to cart successfully.' });
+//     } catch (error) {
+//         console.error(`Error in adding product to cart: ${error}`);
+//         res.status(500).json({ message: 'An error occurred while adding the product to the cart.' });
+//     }
+// };
+
 const addToCart = async (req, res) => {
     try {
         const user = req.session.user || null;
-        const productId = req.params.productId
+        const productId = req.params.productId;
 
         // Check if the user is authenticated
         if (!user) {
@@ -50,45 +148,51 @@ const addToCart = async (req, res) => {
             // Check if the product already exists in the cart
             const existingProduct = cart.product.find((item) => {
                 return item && item.productId && item.productId.equals(new ObjectId(productId));
-
             });
 
             if (existingProduct) {
                 // Check if the existing quantity exceeds the allowed maximum
-                if (existingProduct.quantity > 8) {
-                    return res.status(400).json({ message: 'Maximum quantity of 8 reached for this product.' });
+                if (existingProduct.quantity >= 10) {
+                    return res.status(400).json({ message: 'Maximum quantity of 10 reached for this product.' });
                 }
 
                 // Check if adding one more will exceed the stock available
-                if (existingProduct.quantity + 1 >= productAvailability.stock) {
+                if (existingProduct.quantity + 1 > productAvailability.stock) {
                     return res.status(400).json({ message: 'Insufficient stock to add more of this product.' });
                 }
 
                 // If the product exists, increase the quantity
                 existingProduct.quantity += 1;
+
+                // Calculate the new price if there's a discount
+                if (productAvailability.productDiscount) {
+                    const discountAmount = (productAvailability.productDiscount / 100) * productAvailability.productPrice; 
+                    existingProduct.price = (productAvailability.productPrice - discountAmount).toFixed(2); // Change 'productPrice' to 'price'
+                }
+
             } else {
                 // If the product does not exist, add it as a new item
+                const discountAmount = productAvailability.productDiscount ? (productAvailability.productDiscount / 100) * productAvailability.productPrice : 0;
                 const newCartItem = {
                     productId: new ObjectId(productId),
                     productName: productAvailability.productName,
                     quantity: 1,
-                    price: productAvailability.productPrice,
+                    price: (productAvailability.productPrice - discountAmount).toFixed(2), // Ensure you use 'price' here
                     category: productAvailability.productCategory,
-
                 };
+
                 cart.product.push(newCartItem);
             }
         } else {
             // Create a new cart if none exists for the user
+            const discountAmount = productAvailability.productDiscount ? (productAvailability.productDiscount / 100) * productAvailability.productPrice : 0;
             const newCartItem = {
                 productId: new ObjectId(productId),
                 productName: productAvailability.productName,
                 quantity: 1,
-                price: productAvailability.productPrice,
+                price: (productAvailability.productPrice - discountAmount).toFixed(2), // Ensure you use 'price' here
                 category: productAvailability.productCategory,
-
             };
-
             cart = new cartSchema({
                 userId: new ObjectId(user),
                 product: [newCartItem],
@@ -104,6 +208,9 @@ const addToCart = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while adding the product to the cart.' });
     }
 };
+
+
+
 
 const removeFromCart = async (req, res) => {
     try {
@@ -182,6 +289,12 @@ const updateQuantity = async (req, res) => {
         // Check if new quantity is valid
         if (newQuantity < 1) {
             return res.status(400).json({ success: false, message: 'Quantity cannot be less than 1' });
+        }
+
+        // Set a maximum limit for the quantity in the cart
+        const maxQuantity = 10;
+        if (newQuantity > maxQuantity) {
+            return res.status(400).json({ success: false, message: `Quantity cannot exceed ${maxQuantity}` });
         }
 
         if (newQuantity >= product.stock) {

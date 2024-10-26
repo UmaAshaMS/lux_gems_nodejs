@@ -86,6 +86,7 @@ user.get('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddress
 user.post('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddressPost)
 user.post('/editAddressCheckout/:addressId',checkUserLogin, checkoutController.editAdressCheckout)
 user.delete('/deleteAddressCheckout/:addressId', checkUserLogin, checkoutController.deleteAddressCheckout)
+user.post('/renderPaypal', checkUserLogin, checkoutController.renderPaypal)
 
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )

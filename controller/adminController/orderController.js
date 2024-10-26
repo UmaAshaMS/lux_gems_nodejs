@@ -1,6 +1,10 @@
 const orderSchema = require('../../model/orderSchema')
 const productSchema = require('../../model/productSchema')
 const walletSchema = require('../../model/walletSchema')
+const { ObjectId } = require('mongodb');
+const mongoose = require('mongoose')
+
+
 
 const order = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
@@ -72,10 +76,10 @@ const cancelOrder = async (req, res) => {
         if (order.paymentMethod === 1) {
             const refundAmount = order.items.reduce((total, item) => total + item.quantity * item.price, 0);
 
-            const wallet = await walletSchema.findOne({user : order.userId});
+            const wallet = await walletSchema.findOne({ user: order.userId });
             if (wallet) {
-                wallet.balance += refundAmount; 
-                await wallet.save(); 
+                wallet.balance += refundAmount;
+                await wallet.save();
             } else {
                 return res.status(404).json({ message: 'User wallet not found' });
             }
@@ -90,10 +94,10 @@ const cancelOrder = async (req, res) => {
     }
 };
 
-const cancelProduct = async(req,res) => {
+const cancelProduct = async (req, res) => {
     try {
         const { orderId, productId } = req.params;
-        
+
         const order = await orderSchema.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
@@ -108,7 +112,7 @@ const cancelProduct = async(req,res) => {
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
-        product.stock += order.items[itemIndex].quantity; 
+        product.stock += order.items[itemIndex].quantity;
         await product.save();
 
         order.items[itemIndex].status = 'Cancelled';
@@ -122,11 +126,11 @@ const cancelProduct = async(req,res) => {
     }
 }
 
-const changeProductStatus = async(req,res) => {
-    try{
+const changeProductStatus = async (req, res) => {
+    try {
 
-        const {orderId, productId} = req.params
-        const {newStatus} = req.body
+        const { orderId, productId } = req.params
+        const { newStatus } = req.body
 
         const order = await orderSchema.findById(orderId)
         if (!order) {
@@ -135,23 +139,23 @@ const changeProductStatus = async(req,res) => {
 
         const product = order.items.find(item => item.productId.toString() === productId);
 
-         if (!product) {
-             return res.status(404).json({ success: false, message: 'Product not found in the order' });
-         }
- 
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found in the order' });
+        }
+
         product.status = newStatus;
- 
+
         const allItemsSameStatus = order.items.every(i => i.status === newStatus);
 
         if (allItemsSameStatus) {
             order.status = newStatus;
         }
-        await order.save();        
-        
+        await order.save();
+
         return res.status(200).json({ success: true, message: 'Product status updated successfully' });
 
     }
-    catch(error){
+    catch (error) {
         console.log('Error in changing product status:', error)
     }
 
@@ -160,9 +164,9 @@ const changeProductStatus = async(req,res) => {
 
 const changeOrderStatus = async (req, res) => {
     try {
-        const { orderId } = req.params; 
+        const { orderId } = req.params;
         const { status } = req.body;
-        
+
         const order = await orderSchema.findById(orderId);
 
         if (!order) {
@@ -189,43 +193,67 @@ const changeOrderStatus = async (req, res) => {
     }
 }
 
-const returnProduct = async(req,res) => {
-    
-        try {
-            const { orderId, productId } = req.params;
-            console.log(req.params)
-            console.log(orderId)
-            const { returnDecision } = req.body; 
-    
-            const order = await orderSchema.findById(orderId);
-            console.log('order is : ', order)
+const returnProduct = async (req, res) => {
 
-            const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
-    
-            if (itemIndex === -1) {
-                return res.status(404).json({ message: 'Product not found in the order' }).render('pageNotFound',{ title: 'Page Not Found'});
-            }
-    
-            // If admin approves the return
-            if (returnDecision === 'Accept') {
-                order.items[itemIndex].status = 'Returned';
-    
-                await productSchema.findByIdAndUpdate(productId, { $inc: { stock: order.items[itemIndex].quantity } });
-            } else if ( returnDecision === 'Reject') {
-                order.items[itemIndex].status = 'Rejected'; 
-            }
-            console.log('Order after changing status : ',order)
-    
-            await order.save();
+    try {
+        const { orderId, productId } = req.params;
+        console.log(req.params)
+        console.log(orderId)
+        const { returnDecision } = req.body;
 
-            return res.status(200).json({ message: `Return ${returnDecision === 'Accept' ? 'approved' : 'rejected'} successfully.` });
-        } catch (error) {
-            console.error("Error in returnProduct:", error); 
-            return res.status(500).json({ message: 'Internal server error.' });
+        const order = await orderSchema.findById(orderId);
+        console.log('order is : ', order)
+
+        const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Product not found in the order' }).render('pageNotFound', { title: 'Page Not Found' });
         }
+
+        // If admin approves the return
+        if (returnDecision === 'Accept') {
+            order.items[itemIndex].status = 'Returned';
+
+            await productSchema.findByIdAndUpdate(productId, { $inc: { stock: order.items[itemIndex].quantity } });
+
+            const refundAmount = order.items[itemIndex].productPrice * order.items[itemIndex].quantity;
+            console.log('Refund amount : ', refundAmount)
+
+            console.log('User Id : ', order.userId.toString())
+            let wallet = await walletSchema.findOne({ userID: order.userId.toString() });
+            console.log('Wallet info : ', wallet)
+
+            if (!wallet) {
+                // Create a new wallet if it doesn't exist
+                wallet = new walletSchema({
+                    userID: order.userId,
+                    balance: 0, 
+                    transaction: []
+                });
+                await wallet.save();
+                console.log('New wallet created for the user:', wallet);
+            }
     
+            // Update wallet balance with refund amount
+            wallet.balance += refundAmount;
+            await wallet.save();
+            console.log('wallet balance', wallet.balance)
+
+        } else if (returnDecision === 'Reject') {
+            order.items[itemIndex].status = 'Rejected';
+        }
+        console.log('Order after changing status : ', order)
+
+        await order.save();
+
+        return res.status(200).json({ message: `Return ${returnDecision === 'Accept' ? 'approved' : 'rejected'} successfully.` });
+    } catch (error) {
+        console.error("Error in returnProduct:", error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+
 }
- 
+
 module.exports = {
     order,
     orderDetails,

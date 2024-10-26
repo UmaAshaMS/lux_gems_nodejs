@@ -286,8 +286,8 @@ const wallet = async (req, res) => {
     try {
         const user = req.session.user
         const category = await categorySchema.find()
-        const wallet = await walletSchema.find()
-        res.render('user/Wallet', { title: 'Wallet', user, category, wallet })
+        const wallet = await walletSchema.findOne({userID:user})
+        res.render('user/Wallet', { title: 'Wallet', user, category, wallet : wallet || { balance: 0 } })
 
     }
     catch (error) {
