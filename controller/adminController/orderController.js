@@ -197,12 +197,10 @@ const returnProduct = async (req, res) => {
 
     try {
         const { orderId, productId } = req.params;
-        console.log(req.params)
-        console.log(orderId)
         const { returnDecision } = req.body;
 
         const order = await orderSchema.findById(orderId);
-        console.log('order is : ', order)
+        // console.log('order is : ', order)
 
         const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
 
@@ -216,10 +214,19 @@ const returnProduct = async (req, res) => {
 
             await productSchema.findByIdAndUpdate(productId, { $inc: { stock: order.items[itemIndex].quantity } });
 
-            const refundAmount = order.items[itemIndex].productPrice * order.items[itemIndex].quantity;
-            console.log('Refund amount : ', refundAmount)
 
-            console.log('User Id : ', order.userId.toString())
+            const discount = order.items[itemIndex].discount || 0
+            const originalPrice = order.items[itemIndex].productPrice
+            const quantity = order.items[itemIndex].quantity
+            // const discountedPrice = originalPrice - (originalPrice * (discount / 100));
+
+
+            let refundAmount = originalPrice * quantity;
+
+            if (order.totalAmount < 2000) {
+                refundAmount += 100; 
+            }
+
             let wallet = await walletSchema.findOne({ userID: order.userId.toString() });
             console.log('Wallet info : ', wallet)
 

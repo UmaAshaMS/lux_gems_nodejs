@@ -34,10 +34,14 @@ const placeOrder = async (req, res) => {
 
         // check wallet balance for WALLET PAY
         if (parseInt(selectedPaymentOption) === 2) {
-            const userWallet = await walletSchema.findOne({ userId: new ObjectId(userId) });
+            const userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
             if (!userWallet || userWallet.balance < totalAmount) {
                 return res.status(400).json({ message: 'Insufficient wallet balance to place this order.' });
             }
+            
+            userWallet.balance -= totalAmount;
+            await userWallet.save();
+
         }
 
         // order details
@@ -52,8 +56,9 @@ const placeOrder = async (req, res) => {
                 return {
                     productId: item.productId._id,
                     productName: item.productId.productName,
-                    productPrice: discountedPrice.toFixed(2),  // Adjusted price after discount
+                    productPrice: discountedPrice.toFixed(2), 
                     productImage: item.productId.productImage[0],
+                    discount : discount,
                     quantity: item.quantity
                 };
             }),
@@ -159,7 +164,6 @@ const cancelOrder = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
-
 
 
 const returnOrder = async (req, res) => {

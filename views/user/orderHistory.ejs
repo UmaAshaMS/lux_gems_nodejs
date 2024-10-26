@@ -96,7 +96,11 @@
                     <p><strong>Order ID:</strong> <%= order._id %></p>
                     <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                     <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
-                    <p><strong>Payment Method:</strong> <%=order.paymentMethod   %></p>
+                    <p><strong>Payment Method:</strong>  <% let paymentMethod; switch (order.paymentMethod) { case '0' : paymentMethod='COD' ; break;
+                        case '2' : paymentMethod='Wallet' ; break; case '1' : paymentMethod='PayPal' ; break;
+                        default: paymentMethod='Unknown Payment Method' ; } %>
+
+                        <%= paymentMethod %> </p>
                     <p><strong>Order status : </strong><%= order.status  %></p>
                     <h4>Items in this order:</h4>
                     

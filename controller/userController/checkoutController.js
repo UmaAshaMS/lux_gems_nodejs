@@ -3,6 +3,7 @@ const cartSchema = require('../../model/cartSchema')
 const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const couponSchema = require('../../model/couponSchema')
+const walletSchema = require('../../model/walletSchema')
 const { ObjectId } = require('mongodb')
 const addressSchema = require('../../model/addressSchema')
 const paypal = require('@paypal/checkout-server-sdk');
@@ -138,6 +139,9 @@ const checkout = async (req, res) => {
             select: 'productName productPrice productImage productDiscount'
         });
 
+        const userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
+
+
         // Check if cart exists
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
@@ -204,7 +208,8 @@ const checkout = async (req, res) => {
             subtotal,
             deliveryCharge,
             promotionAmount,
-            paypalClientId: process.env.PAYPAL_CLIENT_ID.trim() 
+            paypalClientId: process.env.PAYPAL_CLIENT_ID.trim(),
+            wallet : userWallet 
         });
     } catch (error) {
         console.error(`Error in rendering checkout page: ${error}`);
