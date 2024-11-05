@@ -151,20 +151,30 @@
                 <% if (item.productId.productImage && item.productId.productImage.length > 0) { %>
                     <img src="<%= item.productId.productImage[0].replace(/\\/g, '/') %>" alt="Product Image">
                 <% } %>
+                
                 <div class="cart-item-info">
                     <h4><%= item.productId.productName %></h4>
-                    <p><i class="fas fa-rupee-sign"></i> <%= item.price.toFixed(2) %></p>
+                    
+                    <% if (!item.productId.isActive) { %>
+                        <!-- Display as unavailable if the product is blocked -->
+                        <p class="unavailable" style="color: red;">This product is currently unavailable.</p>
+                    <% } else { %>
+                        <p><i class="fas fa-rupee-sign"></i> <%= item.price.toFixed(2) %></p>
+                    <% } %>
                 </div>
-               
+                
                 <div class="cart-item-actions">
                     <button onclick="removeFromWishlist('<%= item.productId._id %>')">
                         <i class="fas fa-trash-alt"></i> 
                     </button>
                 </div>
-
-                <button  class="addToCart" onclick="addToCart('<%= item.productId._id %>')">
-                    Add to Cart
-                  </button>
+                
+                <% if (item.productId.isActive) { %>
+                    <!-- Only show "Add to Cart" if the product is available -->
+                    <button class="addToCart" onclick="addToCart('<%= item.productId._id %>')">
+                        Add to Cart
+                    </button>
+                <% } %>
             </div>
         <% }) %>
     <% } else { %>

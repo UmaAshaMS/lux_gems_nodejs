@@ -1,0 +1,197 @@
+<style>
+    .Container {
+        border-radius: 10px;
+        display: flex;
+        gap: 50px;
+        padding: 20px;
+    }
+
+    .SideBar .btn {
+        display: block;
+        width: 150px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .SideBar {
+        width: 250px;
+        margin: 20px;
+        background-color: #caaf7a;
+        color: white;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .SideBar a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .Category-container {
+        display: flex;
+        flex: 2;
+        justify-content: center;
+    }
+
+    .btn {
+        width: 100px;
+    }
+
+    .italianno-regular {
+        font-family: "Italianno", cursive;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 50px;
+        color: #caaf7a;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: column;
+        font-size: 42px;
+        align-items: center;
+        margin-left: 85px;
+    }
+
+    .Search form {
+        display: flex;
+    }
+
+    .form-control {
+        width: 500px;
+    }
+
+    .searchBtn {
+        flex: 2;
+        width: 10px;
+        color: white;
+        border: 2px;
+    }
+
+    .AddCoupon {
+        background-color: #caaf7a;
+        color: black;
+        font-weight: 700;
+        width: 200px;
+        align-items: end;
+        align-self: flex-end;
+        margin-right: 0%;
+        transition: background-color 0.3s ease;
+        margin-top: 0%;
+        margin-right: 0%;
+        justify-content: center;
+    }
+
+    .AddCoupon:hover,
+    .AddCoupon:focus,
+    .AddCoupon:active {
+        background-color: #b49569;
+        color: black;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .table {
+        margin-top: 0%;
+        width: 900px;
+        text-align: center;
+    }
+</style>
+
+
+<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Edit Offers<span>.</span></a>
+        <div class="collapse navbar-collapse  d-flex flex-grow-1 justify-content-between align-items-center"
+            id="navbars">
+            <div class='Search'>
+                <div class="searchProducts">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="Container">
+    <div class='SideBar'>
+        <a href="/admin/home"><button class="btn btn-dark">  Dashboard</button></a>
+        <a href="/admin/salesReport"><button class="btn btn-dark"> Sales Report</button></a>
+        <a href="/admin/Category"><button class="btn btn-dark"> Category</button></a>
+        <a href="/admin/Products"><button class="btn btn-dark">Products</button></a>
+        <a href="/admin/Customers"><button class="btn btn-dark">Customers</button></a>
+        <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
+        <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
+        <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
+        <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+        <form action="/admin/logout" method="POST">
+            <button type="submit" class="btn btn-dark">Logout</button>
+        </form>
+    </div>
+    
+
+    <div class="container mt-5">
+        <h2>Edit Offer</h2>
+        <form id="offerForm">
+            <div class="mb-3">
+                <label for="offerTitle" class="form-label">Offer Title</label>
+                <input type="text" class="form-control" id="offerTitle" value ="<%=offers.offerTitle  %>"required>
+            </div>
+            <div class="mb-3">
+                <label for="offerType" class="form-label">Offer Type</label>
+                <input type="text" class="form-control" id="offerType" value = " <%= offers.offerType  %>"required>
+            </div>
+            <div class="mb-3">
+                <label for="referenceId" class="form-label">Offer For</label>
+                <input type="text" class="form-control" id="referenceId" value="<%= referenceName   %>"required>
+            </div>
+            <div class="mb-3">
+                <label for="discountPercent" class="form-label">Discount Percent</label>
+                <input type="number" class="form-control" id="discountPercent"  value="<%= offers.discountPercent  %>"required>
+            </div>
+            <button type="button" class="btn btn-dark" onclick="submitEditOfferForm()">Save Changes</button>
+        </form>
+    </div>
+
+
+
+    <script>
+         function submitEditOfferForm() {
+            const offerId = '<%= offerId %>';  // Use the offer ID dynamically if available
+            const updatedOfferData = {
+                offerTitle: document.getElementById('offerTitle').value,
+                offerType: document.getElementById('offerType').value,
+                referenceId: document.getElementById('referenceId').value,
+                discountPercent: document.getElementById('discountPercent').value,
+            };
+
+            fetch(`/editOfferPost/${offerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedOfferData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Offer updated successfully!');
+                        window.location.href = '/offers'; 
+                    } else {
+                        alert('Error updating offer.');
+                    }
+                })
+                .catch(error => console.error('Error updating offer:', error));
+        }
+
+        const offerId = '<%= offerId %>';  
+        loadOfferDetails(offerId);
+
+    </script>

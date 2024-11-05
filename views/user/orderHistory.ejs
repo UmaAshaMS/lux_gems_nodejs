@@ -96,9 +96,30 @@
                     <p><strong>Order ID:</strong> <%= order._id %></p>
                     <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
                     <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
-                    <p><strong>Payment Method:</strong>  <% let paymentMethod; switch (order.paymentMethod) { case '0' : paymentMethod='COD' ; break;
-                        case '2' : paymentMethod='Wallet' ; break; case '1' : paymentMethod='PayPal' ; break;
-                        default: paymentMethod='Unknown Payment Method' ; } %>
+                    <p><strong>Delivery Charges : </strong> 
+                        <% if (order.totalAmount > 2000) { %>
+                            Free
+                        <% } else { %>
+                            Rs 100
+                        <% } %>
+                    </p>
+                    <% if (order.couponDiscount && order.couponDiscount > 0) { %>
+                        <p><strong>Coupon Discount:</strong> -Rs <%= order.couponDiscount.toFixed(2) %></p>
+                    <% } else { %>
+                        <p><strong>Coupon Discount:</strong> Not Applied</p>
+                    <% } %>
+                    
+                    <p><strong>Payment Method:</strong>  
+                        <% let paymentMethod; 
+                        switch (order.paymentMethod) 
+                        {
+                            case '0' : paymentMethod='COD' ; break;
+                            case '2' : paymentMethod='Wallet' ; break; 
+                            case '1' : paymentMethod='PayPal' ; break; 
+                            case '3' : paymentMethod='Instamojo';break;
+                            case '4' : paymentMethod='Razorpay' ; break;
+                            default: paymentMethod='Unknown Payment Method' ; 
+                        } %>
 
                         <%= paymentMethod %> </p>
                     <p><strong>Order status : </strong><%= order.status  %></p>
@@ -130,6 +151,12 @@
                                         <strong>The item cannot be be returned. </strong>
                                     <% } %>
 
+                                    <!-- <% if(item.status === 'Delivered') { %>
+                                        <a id="download-button" onclick="downloadInvoice('<%= order._id %>')" data-order-id="<%=order._id  %>" target="_blank">
+                                        <button style="background-color: #555;"> Download Invoice </button>
+                                        </a>
+                                    <% } %> -->
+
                                 <% if(item.status === 'Delivered' && item.status !== 'Returned'){ %>
                                     <% if (!item.returnWindowClosed) { %>
                                     <form action="/returnOrder/<%= order._id %>/<%= item.productId %>" method="POST" style="display:inline;">
@@ -149,6 +176,12 @@
                     <% }) %>
                     
                     <a class="btn" href="/orderConfirmed/<%= order._id %>">Order Details</a>
+
+                    <% if (order.items.some(item => item.status === 'Delivered')) { %>
+                        <a id="download-button" onclick="downloadInvoice('<%= order._id %>')" data-order-id="<%= order._id %>" target="_blank">
+                            <button class="btn"style="background-color: #555;">Download Invoice</button>
+                        </a>
+                    <% } %>
                 </div>
             </div>
         <% }) %>
@@ -156,7 +189,7 @@
     <a class="btn" href="/all-products">Continue Shopping</a>
 </div>
 
-//Return modal form
+<!-- Return modal form -->
 <div class="modal fade" id="returnProductModal" tabindex="-1" aria-labelledby="returnProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -303,5 +336,34 @@ function submitReturnForm() {
             });
         });
     });
+
+    const downloadInvoice = async(orderId) => {
+
+        try {
+        const response = await fetch(`downloadInvoice/${orderId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/pdf',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to download invoice');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice_${orderId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading invoice:', error);
+        alert('Failed to download invoice.');
+    }
+    }
 
 </script>

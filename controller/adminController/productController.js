@@ -67,6 +67,7 @@ const addProductPost = async (req, res) => {
             // If product exists, send an error response or flash a message
             console.log(res.locals.error, res.locals.success)
             req.flash('error', 'A product with this name already exists in the selected collection.');
+            res.status(400).json({message:'Product already Exists'})
             console.log('Product exists')
             return res.redirect('/admin/addProduct');
         }
@@ -84,11 +85,10 @@ const addProductPost = async (req, res) => {
         });
 
         await productDetails.save();
-        console.log("Product Added")
-        req.flash('success', 'Product added successfully')
+        res.status(200).json({message:'New Product Added'})
+        // console.log("Product Added")
 
-        console.log('new product saved in db')
-        // Redirect to the product list page
+        // console.log('new product saved in db')
         res.redirect('/admin/Products');
     }
     catch (err) {

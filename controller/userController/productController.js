@@ -3,6 +3,8 @@ const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 
 const AllproductsRender  = async(req,res) => {
+    const searchQuery = req.query.query || ''; 
+
     // Retrieve non-blocked categories
     const categories = await categorySchema.find({ isBlocked: 0 });
 
@@ -19,7 +21,8 @@ const AllproductsRender  = async(req,res) => {
         res.render('user/AllProducts',{title:'Products', 
         category: categories,
         product: products,
-        user})
+        user,
+        searchQuery})
     }
     catch(err){
         console.error('Error:' , err)

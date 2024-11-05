@@ -213,9 +213,107 @@
         </div>
 
 
+        <div>
+            <label for="reportRange">Select Range:</label>
+            <select id="reportRange">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+                <option value="custom">Custom</option>
+            </select>
+            <input type="date" id="startDate" style="display: none;">
+            <input type="date" id="endDate" style="display: none;">
+            <button id="fetchChartData">Generate Chart</button>
+        </div>
+
+        <canvas id="myChart" width="400" height="200"></canvas>
+
+        
+
 
 
 
 
         <!-- <%-include('footer') %> -->
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.getElementById('fetchChartData').addEventListener('click', async () => {
+    const reportRange = document.getElementById('reportRange').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    const requestBody = { reportRange };
+    if (reportRange === 'custom') {
+        // Include startDate and endDate only for custom range
+        requestBody.startDate = startDate;
+        requestBody.endDate = endDate;
+    }
+try{
+    const response = await fetch('/admin/salesChart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify( requestBody)
+    });
+
+    if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const chartData = await response.json();
+        console.log(chartData); // Log the received chart data
+        renderChart(chartData); // Call a function to render the chart
+    } catch (error) {
+        console.error('Error in chart data fetch:', error);
+    }
+});
+
+
+// function renderChart(data) {
+//     const ctx = document.getElementById('salesChart').getContext('2d');
+//     new Chart(ctx, {
+//         type: 'bar',
+//         data: {
+//             labels: data.labels,
+//             datasets: data.datasets
+//         },
+//         options: { responsive: true, scales: { y: { beginAtZero: true } } }
+//     });
+// }
+
+function renderChart(data) {
+
+    let myChart;
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    if (myChart) {
+        myChart.destroy();
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'bar', 
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Sales',
+                data: data.sales, 
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+</script>

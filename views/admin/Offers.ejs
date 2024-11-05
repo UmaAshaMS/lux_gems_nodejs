@@ -235,7 +235,11 @@
                     </td>
                     <td>
                         <% if (offers.offerType === 'product') { %>
-                            <%= offers.referenceId.productName %> 
+                            <% if (offers.referenceId) { %>
+                                <%= offers.referenceId.productName %>
+                            <% } else { %>
+                                <span style="color: red;">Product not found</span>
+                            <% } %>
                         <% } else if (offers.offerType === 'category') { %>
                             <%= offers.referenceId.name %> 
                         <% } else if (offers.offerType === 'referral') { %>
@@ -254,8 +258,7 @@
                     </td>
                     <td>
                         <div class="d-flex justify-content-center align-items-center">
-                            <button class="btn btn-warning me-2" data-bs-toggle="modal"
-                                    data-bs-target="#editOfferModal"
+                            <button class="btn btn-warning me-2" 
                                     onclick="editOffer('<%= offers._id %>')">Edit
                             </button>
                             <button class="btn btn-dark me-2" onclick="deleteOffer('<%= offers._id %>')">
@@ -305,9 +308,11 @@
     </div>
 </div>
 
-  
-
 <script>
+
+function editOffer(offerId) {
+    window.location.href = `/admin/editOffer/${offerId}`; 
+}
     function toggleReferenceDropdown() {
         const offerType = document.getElementById('offerType').value;
         const referenceIdSelect = document.getElementById('referenceId');
@@ -459,71 +464,71 @@ async function deleteOffer(offerId) {
     }
 }
 
-function editOffer(offerId) {
-    // Fetch offer details to populate the modal
-    fetch(`/admin/getOffer/${offerId}`, {
-        method: 'GET',
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data) {
-            // Populate modal form fields with offer details
-            document.getElementById('editOfferId').value = data._id;
-            document.getElementById('offerTitle').value = data.offerTitle;
-            document.getElementById('offerType').value = data.offerType;
-            document.getElementById('referenceId').value = data.referenceId;
-            document.getElementById('discountPercent').value = data.discountPercent;
+// function editOffer(offerId) {
+//     // Fetch offer details to populate the modal
+//     fetch(`/admin/getOffer/${offerId}`, {
+//         method: 'GET',
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data) {
+//             // Populate modal form fields with offer details
+//             document.getElementById('editOfferId').value = data._id;
+//             document.getElementById('offerTitle').value = data.offerTitle;
+//             document.getElementById('offerType').value = data.offerType;
+//             document.getElementById('referenceId').value = data.referenceId;
+//             document.getElementById('discountPercent').value = data.discountPercent;
 
-            // Show the modal
-            $('#editOfferModal').modal('show');
-        } else {
-            alert("Offer not found.");
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+//             // Show the modal
+//             $('#editOfferModal').modal('show');
+//         } else {
+//             alert("Offer not found.");
+//         }
+//     })
+//     .catch(error => console.error('Error:', error));
+// }
 
-function submitEditOfferForm() {
-    const offerId = document.getElementById('editOfferId').value;
-    const offerTitle = document.getElementById('offerTitle').value;
-    const offerType = document.getElementById('offerType').value;
-    const referenceId = document.getElementById('referenceId').value;
-    const discountPercent = document.getElementById('discountPercent').value;
+// function submitEditOfferForm() {
+//     const offerId = document.getElementById('editOfferId').value;
+//     const offerTitle = document.getElementById('offerTitle').value;
+//     const offerType = document.getElementById('offerType').value;
+//     const referenceId = document.getElementById('referenceId').value;
+//     const discountPercent = document.getElementById('discountPercent').value;
 
-    fetch(`/admin/editOffer/${offerId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            offerTitle: offerTitle,
-            offerType: offerType,
-            referenceId: referenceId,
-            discountPercent: discountPercent
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Offer updated successfully!');
+//     fetch(`/admin/editOffer/${offerId}`, {
+//         method: 'PUT',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({
+//             offerTitle: offerTitle,
+//             offerType: offerType,
+//             referenceId: referenceId,
+//             discountPercent: discountPercent
+//         })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.success) {
+//             alert('Offer updated successfully!');
 
-            // Update the offer in the table without reloading the page
-            const row = document.querySelector(`tr[data-id="${offerId}"]`);
-            if (row) {
-                row.querySelector('.offer-title').textContent = offerTitle;
-                row.querySelector('.offer-type').textContent = offerType;
-                row.querySelector('.reference-id').textContent = referenceId;
-                row.querySelector('.discount-percent').textContent = discountPercent;
-            }
+//             // Update the offer in the table without reloading the page
+//             const row = document.querySelector(`tr[data-id="${offerId}"]`);
+//             if (row) {
+//                 row.querySelector('.offer-title').textContent = offerTitle;
+//                 row.querySelector('.offer-type').textContent = offerType;
+//                 row.querySelector('.reference-id').textContent = referenceId;
+//                 row.querySelector('.discount-percent').textContent = discountPercent;
+//             }
 
-            // Hide the modal
-            $('#editOfferModal').modal('hide');
-        } else {
-            alert(data.message || 'Error updating offer.');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+//             // Hide the modal
+//             $('#editOfferModal').modal('hide');
+//         } else {
+//             alert(data.message || 'Error updating offer.');
+//         }
+//     })
+//     .catch(error => console.error('Error:', error));
+// }
 
 
 

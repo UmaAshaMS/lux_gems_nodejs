@@ -132,7 +132,9 @@
                                         <a class="address-card-link text-success" style="cursor:pointer" onclick="setAsDefault('<%= index %>')"><i
                                                 class="fas fa-check"></i>
                                             Set as Default</a>
-                                            <% } %>
+                                            <% } else { %>
+                                                <strong>Default Address</strong>
+                                                <% } %>
                                     </div>
                                 </div>
                             </div>
@@ -284,8 +286,8 @@ async function setAsDefault(index) {
                 icon: 'success',
                 confirmButtonText: 'OK',
 
-            })
-            // window.location.reload();
+            }).then( ()=>  { window.location.reload()
+        });
         } else {
             alert('Failed to set default address.');
         }

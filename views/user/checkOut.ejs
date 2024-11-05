@@ -64,6 +64,8 @@
                                         <button class="btn btn-outline-secondary" type="button"
                                             id="applyCouponBtn">Apply</button>
                                     </div>
+                                    <div class="tooltip-trigger" id="availableCouponsTooltip">Available Coupons</div>
+
                                     <div id="couponFeedback"></div>
                                 </div>
                             </div>
@@ -72,13 +74,31 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">Payment Options</h5>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
+                                            id="razorpayOption" value="4">
+                                        <label class="form-check-label" for="razorpayOption">
+                                            <strong>Razorpay</strong>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
+                                            id="instamojoOption" value="3">
+                                        <label class="form-check-label" for="instamojoOption">
+                                            <strong>Instamojo</strong>
+                                        </label>
+                                    </div>
+
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="radio" name="paymentMethod"
                                             id="walletOption" value="2">
                                         <label class="form-check-label" for="walletOption">
-                                            <strong>Wallet</strong> <span>(Balance : <%=wallet.balance  %>)</span>
+                                            <strong>Wallet</strong> <span>(Balance : <%=wallet.balance %>)</span>
                                         </label>
                                     </div>
+
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
                                             value="1">
@@ -92,6 +112,7 @@
 
                                         </div>
                                     </div>
+
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="codOption"
                                             value="0">
@@ -139,13 +160,15 @@
                                                         <span>Total: <strong>Rs <%= ((productItem.productId.productPrice
                                                                     - (productItem.productId.productDiscount / 100) *
                                                                     productItem.productId.productPrice) *
-                                                                    productItem.quantity).toFixed(2) %></strong></span>
+                                                                    productItem.quantity).toFixed(2) %>
+                                                            </strong></span>
                                                     </div>
                                                 </li>
                                                 <% }); %>
 
                                                     <li class="list-group-item">
-                                                        <strong>Total: Rs <%= cart.product.reduce((total, item)=> total
+                                                        <strong>Total: Rs <%= cart.product.reduce((total, item)=>
+                                                                total
                                                                 + ((item.productId.productPrice -
                                                                 (item.productId.productDiscount / 100) *
                                                                 item.productId.productPrice) *
@@ -158,7 +181,8 @@
                                                                 <span class="text-success">(Free delivery for orders
                                                                     above ₹2000)</span>
                                                                 <% } else { %>
-                                                                    <span class="text-warning">(Delivery charge applies
+                                                                    <span class="text-warning">(Delivery charge
+                                                                        applies
                                                                         for orders below ₹2000)</span>
                                                                     <% } %>
                                                     </li>
@@ -169,7 +193,8 @@
                                                         </span>
                                                     </li>
                                                     <li class="list-group-item">
-                                                        <h4 style="color:rgb(139, 12, 12)"><strong>Order Total:</strong>
+                                                        <h4 style="color:rgb(139, 12, 12)"><strong>Order
+                                                                Total:</strong>
                                                             Rs <span id="OrderTotal">
                                                                 <%= (subtotal + deliveryCharge -
                                                                     promotionAmount).toFixed(2) %>
@@ -316,13 +341,18 @@
             </div>
 
             <!-- Script for Checkout -->
+
             <script src="https://www.paypal.com/sdk/js?client-id=<%=paypalClientId%>&currency=USD"></script>
+            <script src="https://js.instamojo.com/v1/checkout.js"></script>
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
             <script>
 
 
                 console.log('hloo')
                 const paymentOptions = document.getElementsByName('paymentMethod')
                 console.log(paymentOptions)
+
                 // const userAddress = <% - JSON.stringify(userAddress) %>;
                 const userAddress = <%- JSON.stringify(userAddress) %>;
 
@@ -466,57 +496,46 @@
 
 
                 document.getElementById('applyCouponBtn').addEventListener('click', async () => {
-                    const couponCode = document.getElementById('couponCode').value;
-                    const couponFeedback = document.getElementById('couponFeedback');
+    const couponCode = document.getElementById('couponCode').value;
+    const couponFeedback = document.getElementById('couponFeedback');
 
-                    try {
-                        // Make a POST request to apply the coupon
-                        const response = await fetch('/applyCoupon', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ couponCode }),
-                        });
+    console.log(couponCode);
 
-                        const result = await response.json();
+    try {
+        // Make a POST request to apply the coupon
+        const response = await fetch('/applyCoupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ couponCode }),
+        });
 
-                        if (response.ok) {
-                            // Update the feedback message on successful coupon application
-                            couponFeedback.innerHTML = `<span class="text-success">Coupon applied successfully! Discount: ₹${result.discount.toFixed(2)}</span>`;
-                            updateOrderSummary(result.totalAmount, result.discount);
+        const result = await response.json();
 
-                        } else {
-                            // Show error message if the coupon application failed
-                            couponFeedback.innerHTML = `<span class="text-danger">${result.message}</span>`;
-                        }
-                    } catch (error) {
-                        couponFeedback.innerHTML = `<span class="text-danger">Error applying coupon. Please try again.${error}.</span>`;
-                        console.error('Error applying coupon:', error);
-                    }
-                });
+        if (response.ok) {
+            // Update the feedback message on successful coupon application
+            couponFeedback.innerHTML = `<span class="text-success">Coupon applied successfully! Discount: ₹${result.discountAmount}</span>`;
+            updateOrderSummary(result.orderTotal, result.discountAmount); 
 
-                // function updateOrderSummary(totalAmount, discount) {
-                //     // Update the promotion amount
-                //     const promotionAmountElement = document.getElementById('promotionAmount');
-                //     if (promotionAmountElement) {
-                //         promotionAmountElement.innerHTML = ` ${discount.toFixed(2)}`;
-                //     }
+        } else {
+            // Show error message if the coupon application failed
+            couponFeedback.innerHTML = `<span class="text-danger">${result.message}</span>`;
+            setTimeout(() => {
+            couponFeedback.innerHTML = '';
+            }, 5000);
+        }
+    } catch (error) {
+        couponFeedback.innerHTML = `<span class="text-danger">Error applying coupon. Please try again. ${error}.</span>`;
+        console.error('Error applying coupon:', error);
+    }
+});
 
-                //     // Update the order total
-                //     const orderTotalElement = document.getElementById('OrderTotal');;
-                //     if (orderTotalElement) {
-                //         orderTotalElement.innerHTML = ` ${totalAmount.toFixed(2)}`;
-                //     }
-                // }
-
-
-
-
-
-
-
-
+function updateOrderSummary(orderTotal, discountAmount) {
+    // Update the displayed values for order total and promotion amount
+    document.getElementById('OrderTotal').innerText = `₹${orderTotal}`;
+    document.getElementById('promotionAmount').innerText = `- ₹${discountAmount}`; // Assuming you have an element to display the discount
+}
 
 
 
@@ -527,7 +546,13 @@
                         console.log('event triggered')
                     }
 
-                    console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
+                    document.getElementById('applyCouponBtn').addEventListener('click', function() {
+        // Access the coupon code value when the button is clicked
+        const couponCode = document.getElementById('couponCode').value;
+        console.log(couponCode); // Log the coupon code to the console
+    });
+
+                    // console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
 
@@ -581,6 +606,8 @@
                     }
 
                     const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+                    const couponCode = document.getElementById('couponCode').value;
+
 
                     //if the option is COD
                     if (parseInt(selectedPaymentOption) === 0) {
@@ -590,7 +617,7 @@
                             headers: {
                                 "Content-Type": "application/json"
                             },
-                            body: JSON.stringify({ addressToSend, selectedPaymentOption })
+                            body: JSON.stringify({ addressToSend, selectedPaymentOption, couponCode })
 
                         }).then((res) => {
 
@@ -680,7 +707,7 @@
                             headers: {
                                 "Content-Type": "application/json"
                             },
-                            body: JSON.stringify({ addressToSend, selectedPaymentOption })
+                            body: JSON.stringify({ addressToSend, selectedPaymentOption, couponCode })
 
                         }).then((res) => {
 
@@ -702,5 +729,154 @@
                         })
                     }
 
+
+
+                    if (parseInt(selectedPaymentOption) === 3) {
+                        console.log('Initiating payment via Instamojo');
+
+                        fetch('/renderInstamojo', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ totalAmount: orderTotal })
+                        })
+                            .then((res) => res.json())
+                            .then((data) => {
+                                if (data.paymentUrl) {
+                                    window.location.href = data.paymentUrl;
+                                    window.addEventListener('message', (event) => {
+                                        if (event.data.status === 'success') {
+                                            fetch('/placeOrder', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    addressToSend: addressToSend,
+                                                    selectedPaymentOption: selectedPaymentOption,
+                                                    orderId: event.data.orderId ,
+                                                    couponCode
+                                                })
+                                            })
+                                                .then((res) => res.json())
+                                                .then((orderData) => {
+                                                    if (orderData.success) {
+                                                        window.location.href = `/orderConfirmed/${orderData.orderId}`;
+                                                    } else {
+                                                        Swal.fire({
+                                                            icon: 'error',
+                                                            title: 'Error',
+                                                            text: orderData.message || 'Failed to place order.'
+                                                        });
+                                                        console.error('Order placement failed.');
+                                                    }
+                                                })
+                                                .catch((err) => {
+                                                    console.error('Error placing order', err);
+                                                });
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Failed to initiate Instamojo payment.'
+                                    });
+                                    console.error('No payment URL returned from server.');
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Error during payment initiation', err);
+                            });
+                    }
+
+
+                    if (parseInt(selectedPaymentOption) === 4) {
+    console.log('Initiating payment via Razorpay');
+
+    fetch('/renderRazorpay', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ totalAmount: orderTotal }) 
+    })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.orderId) {
+                const options = {
+                    key: "rzp_test_eOmJ744HMbCtga",
+                    amount: orderTotal , 
+                    currency: 'INR',
+                    name: 'Your Company Name',
+                    description: 'Purchase Description',
+                    order_id: data.orderId, // This is the Razorpay order ID created on the server
+                    handler: function (response) {
+                        // Handle success response
+                        fetch('/placeOrder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                addressToSend: addressToSend,
+                                selectedPaymentOption: selectedPaymentOption,
+                                orderId: response.razorpay_order_id, // Razorpay order ID
+                                paymentId: response.razorpay_payment_id, // Razorpay payment ID
+                                couponCode: couponCode
+                            })
+                        })
+                        .then((res) => res.json())
+                        .then((orderData) => {
+                            if (orderData.success) {
+                                window.location.href = `/orderConfirmed/${orderData.orderId}`;
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: orderData.message || 'Failed to place order.'
+                                });
+                                console.error('Order placement failed.');
+                            }
+                        })
+                        .catch((err) => {
+                            console.error('Error placing order', err);
+                        });
+                    },
+                    // prefill: {
+                    //     name: 'Customer Name',
+                    //     email: 'customer@example.com',
+                    //     contact: '9999999999'
+                    // },
+                    theme: {
+                        color: '#F37254'
+                    }
+                };
+
+                const razorpayInstance = new Razorpay(options);
+                razorpayInstance.open(); // Open the Razorpay payment popup
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to initiate Razorpay payment.'
+                });
+                console.error('No order ID returned from server.');
+            }
+        })
+        .catch((err) => {
+            console.error('Error during payment initiation', err);
+        });
+}
+
                 }
+
+
+
+            
+
+
             </script>
+
+           

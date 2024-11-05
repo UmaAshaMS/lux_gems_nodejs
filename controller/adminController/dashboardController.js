@@ -7,12 +7,9 @@ const fs = require('fs');
 
 
 const home = async (req, res) => {
-
     try {
-
-        const orders = await orderSchema.find()
+        const orders = await orderSchema.find({status:'Delivered'})
         const totalOrders = orders.length
-
 
         let overallOrderAmount = 0;
         let overallDiscount = 0;
@@ -20,8 +17,8 @@ const home = async (req, res) => {
         orders.forEach(order => {
             overallOrderAmount += order.totalAmount;
         
-            if (order.coupon && order.coupon.discount) {
-                overallDiscount += order.coupon.discount; // Assuming `order.coupon.discount` holds discount value
+            if (order.couponDiscount) {
+                overallDiscount += order.couponDiscount; 
             }
         });
 
@@ -41,19 +38,6 @@ const salesReport = async (req, res) => {
     try {
         const searchQuery = req.query.searchQuery || ''
         const salesData = await orderSchema.find()
-        // const totalOrders = salesData.length
-
-
-        // let overallOrderAmount = 0;
-        // let overallDiscount = 0;
-
-        // salesData.forEach(order => {
-        //     overallOrderAmount += order.totalAmount;
-        
-        //     if (order.coupon && order.coupon.discount) {
-        //         overallDiscount += order.coupon.discount; // Assuming `order.coupon.discount` holds discount value
-        //     }
-        // });
         res.render('admin/salesReport', { title: 'SalesReport', searchQuery, salesData, 
       })
     }
@@ -64,7 +48,6 @@ const salesReport = async (req, res) => {
 }
 
 const generateReport = async (req, res) => {
-    console.log('Reached generate report section');
     const { reportRange, startDate, endDate } = req.body;
     let filter = {};
     const currentDate = new Date();
@@ -118,8 +101,6 @@ const generateReport = async (req, res) => {
         const totalSales = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalOrders = orders.length;
 
-        console.log(reportRange)
-
         if (reportRange === 'custom' && (!startDate || !endDate)) {
             res.status(400).json({ message: 'Please select both end date and start date!' })
         }
@@ -149,9 +130,7 @@ const generateReport = async (req, res) => {
 
 
 const downloadReport = async (req, res) => {
-    console.log('Reached download report');
     const { reportRange, startDate, endDate, format } = req.body;
-    console.log(req.body)
 
     let normalizedFormat = format.toUpperCase();
     if (normalizedFormat === 'XLSX') {
@@ -261,9 +240,256 @@ const downloadReport = async (req, res) => {
 };
 
 
+// const salesChart = async (req, res) => {
+//     console.log('REached chart data')
+//     const { reportRange, startDate, endDate } = req.body;
+//     console.log('Request body:', req.body);
+
+//     let filter = {};
+//     const currentDate = new Date();
+
+//     console.log('Filter conditions:', filter);
+
+
+//     switch (reportRange) {
+//         case 'daily':
+//             filter.orderDate = {
+//                 $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
+//                 $lte: new Date()
+//             };
+//             break;
+//         case 'weekly':
+//             const startOfWeek = new Date(currentDate);
+//             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+//             filter.orderDate = {
+//                 $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
+//                 $lte: new Date()
+//             };
+//             break;
+//         case 'monthly':
+//             const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+//             filter.orderDate = {
+//                 $gte: new Date(startOfMonth.setHours(0, 0, 0, 0)),
+//                 $lte: new Date()
+//             };
+//             break;
+//         case 'yearly':
+//             const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+//             filter.orderDate = {
+//                 $gte: new Date(startOfYear.setHours(0, 0, 0, 0)),
+//                 $lte: new Date()
+//             };
+//             break;
+//         case 'custom':
+//             if (startDate && endDate) {
+//                 filter.orderDate = {
+//                     $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+//                     $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+//                 };
+//             } else {
+//                 return res.status(400).json({ message: "Please provide both start and end dates for custom range." });
+//             }
+//             break;
+//         default:
+//             return res.status(400).json({ message: "Invalid report range selected." });
+//     }
+
+//     console.log('Filter conditions:', filter);
+
+
+//     try {
+//         // Fetch orders based on the filter
+//         const orders = await orderSchema.find(filter);
+//         console.log('Orders fetched:', orders); // Log the fetched orders
+
+
+//         // Initialize the sales data to build the chart dataset
+//         const salesData = {};
+//         orders.forEach(order => {
+//             // Group by date based on the filter (e.g., by day, week, month)
+//             const dateKey = new Date(order.orderDate).toISOString().split('T')[0];
+//             salesData[dateKey] = (salesData[dateKey] || 0) + order.totalAmount;
+//         });
+
+//         // Prepare data for Chart.js
+//         const labels = Object.keys(salesData);
+//         const datasets = [
+//             {
+//                 label: 'Total Sales',
+//                 data: labels.map(date => salesData[date]),
+//                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
+//                 borderColor: 'rgba(75, 192, 192, 1)',
+//                 borderWidth: 1,
+//             }
+//         ];
+
+//         res.status(200).json({ labels, datasets });
+//     } catch (error) {
+//         console.error(`Error generating sales chart data: ${error}`);
+//         res.status(500).json({ message: "Internal Server Error" });
+//     }
+// };
+
+
+const salesChart = async (req, res) => {
+    console.log('Reached chart data');
+    const { reportRange, startDate, endDate } = req.body;
+
+    console.log(req.body)
+
+    let filter = {};
+    const currentDate = new Date();
+
+    // Determine the date range based on the report type
+    switch (reportRange) {
+        case 'daily':
+            filter.orderDate = {
+                $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
+                $lte: new Date()
+            };
+            break;
+        case 'weekly':
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            filter.orderDate = {
+                $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
+                $lte: new Date()
+            };
+            break;
+        case 'monthly':
+            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            filter.orderDate = {
+                $gte: new Date(startOfMonth.setHours(0, 0, 0, 0)),
+                $lte: new Date()
+            };
+            break;
+        case 'yearly':
+            const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+            filter.orderDate = {
+                $gte: new Date(startOfYear.setHours(0, 0, 0, 0)),
+                $lte: new Date()
+            };
+            break;
+        case 'custom':
+            if (startDate && endDate) {
+                filter.orderDate = {
+                    $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
+                    $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+                };
+            } else {
+                return res.status(400).json({ message: "Please provide both start and end dates for custom range." });
+            }
+            break;
+        default:
+            return res.status(400).json({ message: "Invalid report range selected." });
+    }
+    console.log('Filter conditions:', filter);
+
+    try {
+        // Fetch orders based on the filter
+        const orders = await orderSchema.find(filter);
+        console.log('Orders fetched:', orders);
+
+        // Initialize the sales data to build the chart dataset
+        const salesData = {};
+
+        orders.forEach(order => {
+            let dateKey;
+
+            // Group data based on reportRange
+            switch (reportRange) {
+                case 'daily':
+                    // Group by hour
+                    const orderDate = new Date(order.orderDate);
+                    dateKey = `${orderDate.getHours()}:00`; // Hourly format
+                    break;
+                case 'weekly':
+                    // Group by day of the week
+                    dateKey = new Date(order.orderDate).toLocaleDateString(); // Date format
+                    break;
+                case 'monthly':
+                    // Group by week in the month
+                    const weekNumber = Math.ceil(new Date(order.orderDate).getDate() / 7);
+                    dateKey = `Week ${weekNumber}`;
+                    break;
+                case 'yearly':
+                    // Group by month
+                    dateKey = new Date(order.orderDate).toLocaleString('default', { month: 'long' });
+                    break;
+            }
+
+            // Sum the total amount for each group
+            salesData[dateKey] = (salesData[dateKey] || 0) + order.totalAmount;
+        });
+
+
+        const labels = [];
+        const data = [];
+
+        switch (reportRange) {
+            case 'daily':
+                for (let i = 0; i < 24; i++) {
+                    const hourLabel = `${i}:00`;
+                    labels.push(hourLabel);
+                    data.push(salesData[hourLabel] || 0);
+                }
+                break;
+            case 'weekly':
+                const startOfWeek = new Date(currentDate);
+                startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+                for (let i = 0; i < 7; i++) {
+                    const dayLabel = new Date(startOfWeek);
+                    dayLabel.setDate(startOfWeek.getDate() + i);
+                    const dayString = dayLabel.toLocaleDateString();
+                    labels.push(dayString);
+                    data.push(salesData[dayString] || 0);
+                }
+                break;
+                case 'monthly':
+                    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        const date = new Date(startOfMonth);
+                        date.setDate(i);
+                        const weekNumber = `Week ${Math.ceil(i / 7)}`;
+                        labels.push(weekNumber);
+                        data.push(salesData[weekNumber] || 0);
+                    }
+                    break;
+                case 'yearly':
+                    const months = Array.from({ length: 12 }, (_, i) => 
+                        new Date(currentDate.getFullYear(), i).toLocaleString('default', { month: 'long' })
+                    );
+                    months.forEach(month => {
+                        labels.push(month);
+                        data.push(salesData[month] || 0);
+                    });
+                    break;
+            }
+
+
+        res.status(200).json({ labels, datasets  : [
+            {
+                label: 'Total Sales',
+                data: data,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            }
+        ]});
+    } catch (error) {
+        console.error(`Error generating sales chart data: ${error}`);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+
+
 module.exports = {
     home,
     salesReport,
     generateReport,
     downloadReport,
+    salesChart,
 }

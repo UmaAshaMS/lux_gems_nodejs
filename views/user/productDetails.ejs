@@ -1,7 +1,17 @@
 <%-include('./layout/header')%>
     <%- include('./layout/navbar')%>
         <%-include('./layout/category_navbar') %>
-
+<style>
+    .rec-prodName  {
+   
+    overflow: hidden;         
+    text-overflow: ellipsis;    
+   
+    display: block;             
+   
+    margin: 0;              
+}
+</style>
 
             <body>
                 <div class="container product-details">
@@ -81,7 +91,7 @@
                                             </h4>
 
                                         </a>
-                                        <p><strong>
+                                        <p class="rec-prodName"><strong>
                                                 <%= rec.productName %>
                                             </strong></p>
                                         <p><strong>Price:</strong> <i class="fas fa-rupee-sign"></i>
@@ -93,6 +103,8 @@
                         </div>
                     </div>
                 </div>
+                <%-include('footer') %>
+
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         function changeImage(imageSrc) {

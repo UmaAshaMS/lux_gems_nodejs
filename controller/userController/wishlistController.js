@@ -14,6 +14,13 @@ const wishlist = async(req, res) => {
         .populate('product.productId')
         .populate('product.categoryid') 
 
+        if (wishlist && wishlist.product) {
+            wishlist.product = wishlist.product.filter(item => item.productId !== null);
+
+            await wishlist.save();
+        }
+
+
         res.render('user/wishlist',{title:'Wishlist', user, category, wishlist})
     }
     catch(error){

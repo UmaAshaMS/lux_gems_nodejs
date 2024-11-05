@@ -7,73 +7,13 @@ const walletSchema = require('../../model/walletSchema')
 const { ObjectId } = require('mongodb')
 const addressSchema = require('../../model/addressSchema')
 const paypal = require('@paypal/checkout-server-sdk');
-
-
-
-// const applyCoupon = async (req, res) => {
-//     const { couponCode } = req.body;
-//     console.log('------------------coupon code', req.body);
-
-//     try {
-//         const coupon = await couponSchema.findOne({ couponCode: couponCode });
-//         console.log('Coupon Found:', coupon);
-
-//         if (!coupon) {
-//             return res.status(400).json({ message: 'Invalid coupon code.' });
-//         }
-
-//         const discount = coupon.discount;
-//         const discountType = coupon.discountType;
-
-//         // Get current subtotal from session
-//         const subtotal = req.session.cart.subtotal || 0;
-//         let promotionAmount = req.session.cart.promotionAmount || 0; // Initialize promotion amount from session
-//         let totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount; // Calculate initial total
-
-//         // Check if the subtotal meets the minimum amount required for the coupon
-//         if (coupon.minimumAmount && subtotal < coupon.minimumAmount) {
-//             return res.status(400).json({ message: `Minimum amount of ₹${coupon.minimumAmount} is required to apply this coupon.` });
-//         }
-
-//         // Calculate potential promotion amount based on discount type
-//         let newPromotionAmount = 0;
-//         if (discountType === 'Percentage') {
-//             // Calculate percentage discount
-//             newPromotionAmount = (subtotal * discount) / 100; 
-//         } else if (discountType === 'Fixed Amount') {
-//             // Use fixed amount discount
-//             newPromotionAmount = discount; 
-//         }
-
-//         console.log('-------------New Promotion Amount:', newPromotionAmount);
-
-//         // Check if applying this coupon keeps the total above zero
-//         const potentialTotalAmount = totalAmount - newPromotionAmount;
-
-//         if (potentialTotalAmount < 0) {
-//             return res.status(400).json({ message: 'Applying this coupon will result in a total below zero.' });
-//         }
-
-//         // Add new promotion amount to the total promotion amount
-//         promotionAmount += newPromotionAmount;
-
-//         // Store the updated promotion amount in session
-//         req.session.cart.promotionAmount = promotionAmount;
-
-//         // Recalculate the total amount here after applying the coupon
-//         totalAmount = subtotal + req.session.cart.deliveryCharge - promotionAmount;
-
-//         // Send the discount amount back to the client
-//         res.json({ discount: promotionAmount, totalAmount });
-//     } catch (error) {
-//         console.error('Error applying coupon:', error);
-//         return res.status(500).json({ message: 'Internal server error.' });
-//     }
-// }
+const axios = require('axios');
+const Razorpay = require("razorpay");
+require('dotenv').config();
 
 const applyCoupon = async (req, res) => {
     try {
-        const { couponCode } = req.body; 
+        const { couponCode } = req.body;
         const userId = req.session.user;
 
         // Fetch the user's cart
@@ -82,29 +22,55 @@ const applyCoupon = async (req, res) => {
             return res.status(400).json({ message: 'Cart not found.' });
         }
 
+        console.log('Cart : ', cart)
+
         // Calculate the total price of the cart
         let totalPrice = cart.product.reduce((total, item) => {
             return total + (item.price * item.quantity);
         }, 0);
 
+        console.log('Total price in the cart : ',totalPrice)
+
         // Validate the coupon
-        const coupon = await couponSchema.findOne({ code: couponCode });
+        const coupon = await couponSchema.findOne({ couponCode: couponCode.trim() });
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid coupon code.' });
         }
+
+        console.log('Coupon details: ', coupon); 
+
 
         // Check if the coupon is expired
         if (new Date() > coupon.expiryDate) {
             return res.status(400).json({ message: 'Coupon has expired.' });
         }
 
+        const deliveryCharge = totalPrice < 2000 ? 100 : 0;
+
+        // Add delivery charge to order total
+        totalPrice += deliveryCharge;
+
+        // Check if the minimum amount requirement is met
+        if (totalPrice < coupon.minimumAmount) {
+            return res.status(400).json({ message: `A minimum of ${coupon.minimumAmount} is required to use this coupon.` });
+        }
+
+        // Check if the usage limit has been reached
+        if (coupon.usageLimit <= 0) {
+            return res.status(400).json({ message: 'Coupon usage limit has been reached.' });
+        }
+
         // Calculate the discount amount
         let discountAmount = 0;
-        if (coupon.discountType === 'percentage') {
-            discountAmount = (totalPrice * (coupon.discountAmount / 100)).toFixed(2);
-        } else if (coupon.discountType === 'fixed') {
-            discountAmount = coupon.discountAmount;
+        console.log('Discounttype of couopn : ',coupon.discountType)
+        console.log('Discount  : ', coupon.discount)
+        if (coupon.discountType === 'Percentage') {
+            discountAmount = (totalPrice * (coupon.discount / 100));
+        } else if (coupon.discountType === 'Fixed Amount') {
+            discountAmount = coupon.discount;
         }
+
+        console.log('Discount amount : ',discountAmount)
 
         // Ensure the discount does not exceed the total price
         if (discountAmount > totalPrice) {
@@ -112,14 +78,26 @@ const applyCoupon = async (req, res) => {
         }
 
         // Calculate final amount after discount
-        const finalAmount = (totalPrice - discountAmount).toFixed(2);
+        let orderTotal = totalPrice - discountAmount;
+        console.log('Order amount:', orderTotal)
+
+       
+        console.log('Final order amount (including delivery charge if applicable):', orderTotal);
+
+        // Decrement the usage limit and save the updated coupon
+        // coupon.usageLimit -= 1;
+        // await coupon.save();
+
+        req.session.cart.promotionAmount = discountAmount; // Store discount amount in session
+
 
         // Respond with the calculated amounts
-        res.status(200).json({ 
-            message: 'Coupon applied successfully.', 
-            totalPrice: totalPrice, 
-            discountAmount: discountAmount, 
-            finalAmount: finalAmount 
+        res.status(200).json({
+            cart,
+            message: 'Coupon applied successfully.',
+            totalPrice: totalPrice.toFixed(2),
+            discountAmount: discountAmount.toFixed(2),
+            orderTotal: orderTotal.toFixed(2)
         });
 
     } catch (error) {
@@ -127,6 +105,7 @@ const applyCoupon = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while applying the coupon.' });
     }
 };
+
 
 
 const checkout = async (req, res) => {
@@ -209,6 +188,7 @@ const checkout = async (req, res) => {
             deliveryCharge,
             promotionAmount,
             paypalClientId: process.env.PAYPAL_CLIENT_ID.trim(),
+            instamojoApiKey: process.env.INSTAMOJO_API_KEY.trim(),
             wallet : userWallet 
         });
     } catch (error) {
@@ -314,14 +294,14 @@ const renderPaypal = async(req,res) => {
         console.log(userDetails)
         const cart = await cartSchema.findOne({ userId: req.session.user })
 
-        console.log('cart',cart)
+        // console.log('cart',cart)
 
         const totalAmount = cart.product.reduce((acc, item) => {
             return acc + item.price * item.quantity;
         }, 0);
 
         const deliveryCharge = totalAmount < 2000 ? 100 : 0;
-        const finalAmount = totalAmount + deliveryCharge;
+        const finalAmount = (totalAmount + deliveryCharge).toFixed(2);
 
         console.log('Total amiunt', totalAmount)
         console.log('Final amount', finalAmount)
@@ -339,7 +319,7 @@ const renderPaypal = async(req,res) => {
             purchase_units: [{
                 amount: {
                     currency_code: "USD",
-                    value: finalAmount.toFixed(2)
+                    value: finalAmount
                 },
                 description: "Purchase from LUXGEMS"
             }],
@@ -358,10 +338,124 @@ const renderPaypal = async(req,res) => {
 
     }
     catch(error){
-        console.error(`Error in rendering PayPal: ${JSON.stringify(error)}`);
+        console.error(`Error in rendering PayPal: ${error}`);
 
     }
 }
+
+const renderInstamojo = async(req,res) => {
+
+        try {
+            const userDetails = await userSchema.findById(req.session.user);
+            const cart = await cartSchema.findOne({ userId: req.session.user });
+    
+            if (!cart) {
+                return res.status(400).json({ error: "Cart not found" });
+            }
+    
+            const totalAmount = cart.product.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            const deliveryCharge = totalAmount < 2000 ? 100 : 0;
+            const finalAmount = (totalAmount + deliveryCharge).toFixed(2);
+
+            console.log('-------------',finalAmount)
+    
+            // Create Instamojo payment request
+            const instamojoResponse = await axios.post(
+                // 'https://test.instamojo.com/api/1.1/payment-requests/',
+                // 'https://test.instamojo.com/',
+                // 'https://test.instamojo.com/api/1.1/',
+                'https://test.instamojo.com/v2/payment_requests/',
+
+
+
+                {
+                    purpose: "Purchase from LUXGEMS",
+                    amount: finalAmount,
+                    buyer_name: userDetails.name,
+                    email: userDetails.email,
+                    phone: userDetails.phone,
+                    redirect_url: "http://localhost:5000/payment-success",
+                    webhook: "http://localhost:5000/payment-webhook" 
+                },
+                {
+                    headers: {
+                        // "X-Api-Key": process.env.INSTAMOJO_API_KEY,
+                        "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN
+                    }
+                }
+            );
+
+            console.log(instamojoResponse.data);
+
+    
+            if (instamojoResponse.data && instamojoResponse.data.payment_request) {
+                const paymentUrl = instamojoResponse.data.payment_request.longurl;
+                return res.status(200).json({
+                    success: "Instamojo payment URL created",
+                    paymentUrl: paymentUrl
+                });
+            } else {
+                return res.status(500).json({ error: "Failed to create Instamojo payment request" });
+            }
+    }
+    catch(error){
+        console.log(`Error in rendering instamojo page : ${error}`)
+    }
+    
+}
+
+
+const renderRazorpay = async (req, res) => {
+    console.log('Reached razor pay')
+    try {
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_SECRET_KEY
+        });
+
+        console.log(process.env.RAZORPAY_KEY_ID, process.env.RAZORPAY_SECRET_KEY);
+
+        const userDetails = await userSchema.findById(req.session.user);
+        const cart = await cartSchema.findOne({ userId: req.session.user });
+
+        if (!cart) {
+            return res.status(400).json({ error: "Cart not found" });
+        }
+
+        // Calculate total amount with delivery charge
+        const totalAmount = cart.product.reduce((acc, item) => {
+            return acc + item.price * item.quantity;
+        }, 0);
+
+        const deliveryCharge = totalAmount < 2000 ? 100 : 0;
+        const finalAmount = (totalAmount + deliveryCharge).toFixed(2) * 100;
+
+        console.log('Total amount:', totalAmount);
+        console.log('Final amount in paise:', finalAmount);
+
+        // Create Razorpay order
+        const options = {
+            amount: finalAmount,
+            currency: "INR",
+            receipt: `receipt_order_${Math.random() * 1000}`,
+            payment_capture: 1 // Auto-captures the payment
+        };
+
+        const order = await razorpay.orders.create(options);
+
+        return res.status(200).json({
+            success: "Razorpay order created",
+            orderId: order.id,
+            amount: order.amount, 
+            currency: order.currency,
+            keyId: process.env.RAZORPAY_KEY_ID
+        });
+
+    } catch (error) {
+        console.error(`Error in rendering Razorpay: ${error}`);
+        res.status(500).json({ error: "Failed to create Razorpay order" });
+    }
+};
 
 module.exports = {
     applyCoupon,
@@ -371,6 +465,8 @@ module.exports = {
     addNewAddressPost,
     editAdressCheckout,
     deleteAddressCheckout,
-    renderPaypal
+    renderPaypal,
+    renderInstamojo,
+    renderRazorpay
 
 }

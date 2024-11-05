@@ -73,13 +73,17 @@ admin.put('/unblockCoupon/:id',checkAdminLogin, adminCouponController.unblockCou
 admin.get('/Offers', checkAdminLogin, adminOfferController.offers)
 admin.post('/addOffer',checkAdminLogin, adminOfferController.addOfferPost)
 admin.get('getOffer/:id', checkAdminLogin, adminOfferController.offerById)
-admin.put('/editOffer/:id', checkAdminLogin, adminOfferController.editOffer)
+admin.get('/editOffer/:id', checkAdminLogin, adminOfferController.editOffer)
+admin.post('/editOfferPost/:id', checkAdminLogin, adminOfferController.editOfferPost)
 admin.delete('/deleteOffer/:id', checkAdminLogin, adminOfferController.deleteOffer)
 
 //Sales Report
 admin.get('/salesReport', checkAdminLogin, adminDashboardControl.salesReport)
 admin.post('/generateReport' ,checkAdminLogin, adminDashboardControl.generateReport)
 admin.post('/downloadReport', checkAdminLogin, adminDashboardControl.downloadReport)
+
+//Sales chart
+admin.post('/salesChart', checkAdminLogin, adminDashboardControl.salesChart)
 
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)

@@ -83,7 +83,6 @@ const addOfferPost = async (req, res) => {
                 return res.status(404).json({ message: 'Product not found' });
             }
 
-
             // Add new product offer
             const newOffer = new offerSchema({
                 offerTitle,
@@ -107,9 +106,9 @@ const addOfferPost = async (req, res) => {
     }
 };
 
-const editOffer = async(req,res) => {
-        try {
-            const { offerTitle, offerType, referenceId, discountPercent } = req.body;
+const editOfferPost = async(req,res) => {
+    try{
+        const { offerTitle, offerType, referenceId, discountPercent } = req.body;
     
             // Validate required fields
             if (!offerTitle || !offerType || !referenceId || !discountPercent) {
@@ -130,12 +129,29 @@ const editOffer = async(req,res) => {
             res.status(200).json({ message: 'Offer updated successfully!' });
     }
     catch(error){
-        console.log(`Error in editing an offer, ${error}`)
+        console.log('Error in editing offer page: ', error)
     }
 }
 
+const editOffer = async(req,res) => {
+        try {
+            const offerId = req.params.id
 
+            const offers = await offerSchema.findById(offerId).populate('referenceId')
+            const products = await productSchema.find({isActive:true})
+            const category = await categorySchema.find({isBlocked:false})
 
+            const searchQuery = req.query.searchQuery || ''
+
+        let referenceName = offers.referenceId ? offers.referenceId.name : 'Unknown';
+        console.log(referenceName);  
+
+            res.render('admin/editOffer', {title:'Edit Offer', offers, searchQuery, products, category, offerId, referenceName})
+    }
+    catch(error){
+        console.log(`Error in  rendering edit offer, ${error}`)
+    }
+}
 
 const deleteOffer = async(req,res) => {
     try{
@@ -167,6 +183,7 @@ module.exports = {
     offers,
     addOfferPost,
     editOffer,
+    editOfferPost,
     deleteOffer,
     offerById,
 }

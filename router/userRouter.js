@@ -87,12 +87,15 @@ user.post('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddres
 user.post('/editAddressCheckout/:addressId',checkUserLogin, checkoutController.editAdressCheckout)
 user.delete('/deleteAddressCheckout/:addressId', checkUserLogin, checkoutController.deleteAddressCheckout)
 user.post('/renderPaypal', checkUserLogin, checkoutController.renderPaypal)
+user.post('/renderInstamojo',checkUserLogin, checkoutController.renderInstamojo)
+user.post('/renderRazorPay', checkUserLogin, checkoutController.renderRazorpay)
 
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
 user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfirmed)
 user.post('/cancelOrder/:orderId/:itemId', checkUserLogin, orderController.cancelOrder)
 user.post('/returnOrder/:orderId/:productId',checkUserLogin, orderController.returnOrder)
+user.get('/downloadInvoice/:orderId', checkUserLogin, orderController.downloadInvoice)
 
 // Logout
 user.post('/logout', userLoginControl.logout);
