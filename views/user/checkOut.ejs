@@ -77,6 +77,14 @@
 
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="radio" name="paymentMethod"
+                                            id="walletOption" value="2">
+                                        <label class="form-check-label" for="walletOption">
+                                            <strong>Wallet</strong> <span>(Balance : <%=wallet.balance %>)</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod"
                                             id="razorpayOption" value="4">
                                         <label class="form-check-label" for="razorpayOption">
                                             <strong>Razorpay</strong>
@@ -91,19 +99,13 @@
                                         </label>
                                     </div>
 
-                                    <div class="form-check mb-3">
-                                        <input class="form-check-input" type="radio" name="paymentMethod"
-                                            id="walletOption" value="2">
-                                        <label class="form-check-label" for="walletOption">
-                                            <strong>Wallet</strong> <span>(Balance : <%=wallet.balance %>)</span>
-                                        </label>
-                                    </div>
+                                    
 
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="radio" name="paymentMethod" id="upiOption"
                                             value="1">
                                         <label class="form-check-label" for="upiOption">
-                                            <strong>UPI (via PayPal)</strong>
+                                            <strong>PayPal</strong>
 
                                         </label>
                                         <div class="mt-2">
@@ -606,7 +608,9 @@ function updateOrderSummary(orderTotal, discountAmount) {
                     }
 
                     const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+                    console.log('Order Total ready for payment : no change needed', orderTotal)
                     const couponCode = document.getElementById('couponCode').value;
+                    console.log('Coupon code :',couponCode)
 
 
                     //if the option is COD
@@ -791,7 +795,7 @@ function updateOrderSummary(orderTotal, discountAmount) {
                             });
                     }
 
-
+                    // RAZORPAY
                     if (parseInt(selectedPaymentOption) === 4) {
     console.log('Initiating payment via Razorpay');
 
@@ -800,7 +804,7 @@ function updateOrderSummary(orderTotal, discountAmount) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ totalAmount: orderTotal }) 
+        body: JSON.stringify({ totalAmount: orderTotal , couponCode}) 
     })
         .then((res) => res.json())
         .then((data) => {
@@ -809,8 +813,8 @@ function updateOrderSummary(orderTotal, discountAmount) {
                     key: "rzp_test_eOmJ744HMbCtga",
                     amount: orderTotal , 
                     currency: 'INR',
-                    name: 'Your Company Name',
-                    description: 'Purchase Description',
+                    name: 'LUXGEMS',
+                    description: 'Jewellery Purchase',
                     order_id: data.orderId, // This is the Razorpay order ID created on the server
                     handler: function (response) {
                         // Handle success response
@@ -849,6 +853,19 @@ function updateOrderSummary(orderTotal, discountAmount) {
                     //     email: 'customer@example.com',
                     //     contact: '9999999999'
                     // },
+
+                    modal: {
+                        ondismiss: function() {
+                            // Handle modal dismissal, which indicates a payment failure
+                            updateOrderStatusToPending(data.orderId); // Update order status to pending
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Payment Failed',
+                                text: 'Your payment was not completed. You can retry from your orders page.',
+                            });
+                        }
+                    },
+                    
                     theme: {
                         color: '#F37254'
                     }

@@ -171,32 +171,91 @@ const setDefaultAddress = async (req, res) => {
     }
 }
 
+// const orderHistory = async (req, res) => {
+//     try {
+//         const category = await categorySchema.find();
+//         const user = req.session.user
+//         const {status} = req.query
+
+//         let orders;
+//         if(status){
+//             const orders = await orderSchema.find({userId:user, status}).sort({ createdAt: -1 });
+//         }
+//         else{
+//             const orders = await orderSchema.find({userId: user}).sort({ createdAt: -1 });
+//         }
+
+//         const orderDetails = orders.map(order => {
+//             const orderDate = new Date(order.orderDate);
+//             const expectedDeliveryDate = new Date(orderDate);
+//             expectedDeliveryDate.setDate(orderDate.getDate() + 10);
+
+//             const returnPolicyDays = 7;
+
+//             // Calculate the return date
+//             const returnDate = new Date(expectedDeliveryDate);
+//             returnDate.setDate(expectedDeliveryDate.getDate() + returnPolicyDays);
+
+//             const formattedReturnDate = returnDate.toDateString();
+
+//             const currentDate = new Date();
+//             const returnWindowClosed = currentDate > returnDate;
+
+//             return {
+//                 ...order.toObject(), 
+//                 expectedDeliveryDate: expectedDeliveryDate.toDateString(),
+//                 formattedReturnDate,
+//                 returnWindowClosed,
+//                 returnDate
+//             };
+//         });
+
+//         res.render('user/orderHistory', {
+//             title: 'Order History',
+//             category,
+//             user,
+//             orders: orderDetails,
+//             selectedStatus: status,
+            
+//         })
+//     }
+//     catch (error) {
+//         console.log(`Error in rendering order history page, ${error}`)
+//     }
+// }
+
 const orderHistory = async (req, res) => {
     try {
         const category = await categorySchema.find();
-        const orders = await orderSchema.find({userId: req.session.user}).sort({ createdAt: -1 });
-        const user = req.session.user
+        const user = req.session.user;
+        const { status } = req.query;
+
+        let orders;  // Declare orders outside the if block to ensure it's accessible
+
+        if (status) {
+            orders = await orderSchema.find({ userId: user, status }).sort({ createdAt: -1 });
+        } else {
+            orders = await orderSchema.find({ userId: user }).sort({ createdAt: -1 });
+        }
 
         const orderDetails = orders.map(order => {
             const orderDate = new Date(order.orderDate);
             const expectedDeliveryDate = new Date(orderDate);
             expectedDeliveryDate.setDate(orderDate.getDate() + 10);
 
-            // Define the return policy (e.g., 7 days for returns)
             const returnPolicyDays = 7;
 
             // Calculate the return date
             const returnDate = new Date(expectedDeliveryDate);
             returnDate.setDate(expectedDeliveryDate.getDate() + returnPolicyDays);
 
-            // Format the return date
             const formattedReturnDate = returnDate.toDateString();
 
             const currentDate = new Date();
             const returnWindowClosed = currentDate > returnDate;
 
             return {
-                ...order.toObject(), // Convert Mongoose document to plain object
+                ...order.toObject(),
                 expectedDeliveryDate: expectedDeliveryDate.toDateString(),
                 formattedReturnDate,
                 returnWindowClosed,
@@ -204,19 +263,19 @@ const orderHistory = async (req, res) => {
             };
         });
 
-
         res.render('user/orderHistory', {
             title: 'Order History',
             category,
             user,
             orders: orderDetails,
-            
-        })
+            selectedStatus: status,
+        });
+    } catch (error) {
+        console.log(`Error in rendering order history page, ${error}`);
     }
-    catch (error) {
-        console.log(`Error in rendering order history page, ${error}`)
-    }
-}
+};
+
+
 
 const editProfile = async (req, res) => {
     try {

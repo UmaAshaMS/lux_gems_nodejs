@@ -11,6 +11,7 @@
 
 .order-card {
     border: 1px solid #ddd;
+    background-color: white;
     border-radius: 8px;
     padding: 20px;
     margin: 10px 0;
@@ -19,13 +20,13 @@
 
 .product-details {
     display: flex;
-    align-items: center; /* Align items vertically in the center */
-    margin-bottom: 10px; /* Spacing between each product */
+    align-items: center; 
+    margin-bottom: 10px;
 }
 
 .product-image {
-    flex-shrink: 0; /* Prevents image from shrinking */
-    margin-right: 20px; /* Spacing between image and details */
+    flex-shrink: 0; 
+    margin-right: 20px; 
 }
 
 .product-image img {
@@ -35,8 +36,8 @@
 }
 
 .product-info {
-    flex-grow: 1; /* Takes up available space next to the image */
-    margin-right: 20px; /* Space between details and buttons */
+    flex-grow: 1; 
+    margin-right: 20px; 
 }
 
 .product-info p {
@@ -73,6 +74,9 @@
 .return-order:hover {
     background-color: #218838;
 }
+.order-tabs a{
+    text-decoration: none;
+}
 
 </style>
 
@@ -86,11 +90,21 @@
 </div>
 <h4>Order History</h4>
 
+
+
 <div class="Orders">
+    <div class="order-tabs">
+        <a href="/orderHistory" class="<%= !selectedStatus ? 'active' : '' %>">All Orders</a> |
+        <a href="/orderHistory?status=Returned" class="<%= selectedStatus === 'Returned' ? 'active' : '' %>">Returned</a> |
+        <a href="/orderHistory?status=Delivered" class="<%= selectedStatus === 'Delivered' ? 'active' : '' %>">Delivered</a> |
+        <a href="/orderHistory?status=Pending" class="<%= selectedStatus === 'Pending' ? 'active' : '' %>">Pending</a> 
+    </div>
     <% if (orders.length === 0) { %>
         <p>You have no previous orders.</p>
     <% } else { %>
+        
         <% orders.forEach(order => { %>
+
             <div class="order-card">
                 <div class="order-details">
                     <p><strong>Order ID:</strong> <%= order._id %></p>

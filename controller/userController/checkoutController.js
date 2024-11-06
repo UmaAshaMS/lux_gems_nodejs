@@ -168,8 +168,7 @@ const checkout = async (req, res) => {
         req.session.cart.subtotal = subtotal;
         req.session.cart.deliveryCharge = deliveryCharge;
 
-        // Access promotionAmount safely
-        const promotionAmount = req.session.cart.promotionAmount || 0.00; 
+        req.session.cart.promotionAmount  = 0.00; 
 
         req.session.address = defaultAddress || null;
 
@@ -186,7 +185,7 @@ const checkout = async (req, res) => {
             selectedAddress: req.session.address,
             subtotal,
             deliveryCharge,
-            promotionAmount,
+            promotionAmount : req.session.cart.promotionAmount,
             paypalClientId: process.env.PAYPAL_CLIENT_ID.trim(),
             instamojoApiKey: process.env.INSTAMOJO_API_KEY.trim(),
             wallet : userWallet 
@@ -406,14 +405,11 @@ const renderInstamojo = async(req,res) => {
 
 
 const renderRazorpay = async (req, res) => {
-    console.log('Reached razor pay')
     try {
         const razorpay = new Razorpay({
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_SECRET_KEY
         });
-
-        console.log(process.env.RAZORPAY_KEY_ID, process.env.RAZORPAY_SECRET_KEY);
 
         const userDetails = await userSchema.findById(req.session.user);
         const cart = await cartSchema.findOne({ userId: req.session.user });
@@ -427,18 +423,32 @@ const renderRazorpay = async (req, res) => {
             return acc + item.price * item.quantity;
         }, 0);
 
+        let discountAmount = 0
+        const couponCode = req.body.couponCode
+        if(couponCode){
+            const coupon = await couponSchema.findOne({couponCode : couponCode })
+            if(coupon){
+                if(coupon.discountType ==="Fixed Amount"){
+                    discountAmount = coupon.discount
+                }
+                else if(coupon.discountType === "Percentage"){
+                    discountAmount = totalAmount * (coupon.discount / 100)
+                }
+            }
+        }
+        else{
+            res.status(400).json({message:'Invalid Coupon Code'})
+        }
+        
         const deliveryCharge = totalAmount < 2000 ? 100 : 0;
-        const finalAmount = (totalAmount + deliveryCharge).toFixed(2) * 100;
-
-        console.log('Total amount:', totalAmount);
-        console.log('Final amount in paise:', finalAmount);
+        const finalAmount = (totalAmount + deliveryCharge - discountAmount).toFixed(2) * 100;
 
         // Create Razorpay order
         const options = {
             amount: finalAmount,
             currency: "INR",
             receipt: `receipt_order_${Math.random() * 1000}`,
-            payment_capture: 1 // Auto-captures the payment
+            payment_capture: 1 
         };
 
         const order = await razorpay.orders.create(options);

@@ -21,8 +21,6 @@ const placeOrder = async (req, res) => {
         const userId = req.session.user;
         const cart = req.session.cart;
         const { addressToSend, selectedPaymentOption, couponCode } = req.body;
-        console.log(req.body)
-
 
         if (!cart || !cart.cartItems || cart.cartItems.length === 0) {
             return res.status(400).json({ message: 'No items in cart to place an order.' });
@@ -341,5 +339,4 @@ module.exports = {
     cancelOrder,
     returnOrder,
     downloadInvoice
-
 }

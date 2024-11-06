@@ -38,7 +38,7 @@ const schema = new mongoose.Schema(
             },
             status: {
                 type: String, 
-                enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Rejected', 'Return Under Process', ], 
+                enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Rejected', 'Return Under Process', 'Payment Pending' ], 
                 default: 'Pending' 
             },
             returnReason: String,
