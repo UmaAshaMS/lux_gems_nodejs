@@ -11,6 +11,25 @@ const axios = require('axios');
 const Razorpay = require("razorpay");
 require('dotenv').config();
 
+
+const getAvailableCoupon = async(req,res) => {
+    try {
+        const { orderAmount } = req.body; 
+
+        const applicableCoupons = await couponSchema.find({
+            minOrderAmount: { $lte: orderAmount },  
+            usageLimit: { $gt: 0 } 
+        });
+
+        // Respond with the applicable coupons
+        res.json({ applicableCoupons });
+    } catch (error) {
+        console.error('Error fetching applicable coupons:', error);
+        res.status(500).json({ message: 'Error fetching coupons' });
+    }
+}
+
+
 const applyCoupon = async (req, res) => {
     try {
         const { couponCode } = req.body;
@@ -468,6 +487,7 @@ const renderRazorpay = async (req, res) => {
 };
 
 module.exports = {
+    getAvailableCoupon,
     applyCoupon,
     checkout,
     updateDefaultAddress,

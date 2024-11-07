@@ -3,6 +3,7 @@ const orderSchema = require('../../model/orderSchema')
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
+const { order } = require('paypal-rest-sdk');
 
 
 
@@ -22,11 +23,13 @@ const home = async (req, res) => {
             }
         });
 
+        
+
         res.render('admin/home', {
             title: 'Home',
             totalOrders,
             overallOrderAmount,
-            overallDiscount
+            overallDiscount,
         })
     }
     catch (err) {
@@ -239,98 +242,6 @@ const downloadReport = async (req, res) => {
     }
 };
 
-
-// const salesChart = async (req, res) => {
-//     console.log('REached chart data')
-//     const { reportRange, startDate, endDate } = req.body;
-//     console.log('Request body:', req.body);
-
-//     let filter = {};
-//     const currentDate = new Date();
-
-//     console.log('Filter conditions:', filter);
-
-
-//     switch (reportRange) {
-//         case 'daily':
-//             filter.orderDate = {
-//                 $gte: new Date(currentDate.setHours(0, 0, 0, 0)),
-//                 $lte: new Date()
-//             };
-//             break;
-//         case 'weekly':
-//             const startOfWeek = new Date(currentDate);
-//             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-//             filter.orderDate = {
-//                 $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
-//                 $lte: new Date()
-//             };
-//             break;
-//         case 'monthly':
-//             const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-//             filter.orderDate = {
-//                 $gte: new Date(startOfMonth.setHours(0, 0, 0, 0)),
-//                 $lte: new Date()
-//             };
-//             break;
-//         case 'yearly':
-//             const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
-//             filter.orderDate = {
-//                 $gte: new Date(startOfYear.setHours(0, 0, 0, 0)),
-//                 $lte: new Date()
-//             };
-//             break;
-//         case 'custom':
-//             if (startDate && endDate) {
-//                 filter.orderDate = {
-//                     $gte: new Date(new Date(startDate).setHours(0, 0, 0, 0)),
-//                     $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
-//                 };
-//             } else {
-//                 return res.status(400).json({ message: "Please provide both start and end dates for custom range." });
-//             }
-//             break;
-//         default:
-//             return res.status(400).json({ message: "Invalid report range selected." });
-//     }
-
-//     console.log('Filter conditions:', filter);
-
-
-//     try {
-//         // Fetch orders based on the filter
-//         const orders = await orderSchema.find(filter);
-//         console.log('Orders fetched:', orders); // Log the fetched orders
-
-
-//         // Initialize the sales data to build the chart dataset
-//         const salesData = {};
-//         orders.forEach(order => {
-//             // Group by date based on the filter (e.g., by day, week, month)
-//             const dateKey = new Date(order.orderDate).toISOString().split('T')[0];
-//             salesData[dateKey] = (salesData[dateKey] || 0) + order.totalAmount;
-//         });
-
-//         // Prepare data for Chart.js
-//         const labels = Object.keys(salesData);
-//         const datasets = [
-//             {
-//                 label: 'Total Sales',
-//                 data: labels.map(date => salesData[date]),
-//                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
-//                 borderColor: 'rgba(75, 192, 192, 1)',
-//                 borderWidth: 1,
-//             }
-//         ];
-
-//         res.status(200).json({ labels, datasets });
-//     } catch (error) {
-//         console.error(`Error generating sales chart data: ${error}`);
-//         res.status(500).json({ message: "Internal Server Error" });
-//     }
-// };
-
-
 const salesChart = async (req, res) => {
     console.log('Reached chart data');
     const { reportRange, startDate, endDate } = req.body;
@@ -483,6 +394,108 @@ const salesChart = async (req, res) => {
     }
 };
 
+const paymentMethodStats = async(req,res) => {
+    try{
+        
+
+    }
+    catch(error){
+        console.log(`Error in creating payment method pie chart`)
+    }
+}
+
+const trendingProducts = async(req,res) => {
+    const searchQuery = req.query.searchQuery || ''
+
+    try{
+        const topProducts = await orderSchema.aggregate([
+            { $unwind: "$items" }, 
+            {
+                $group: {
+                    _id: "$items.productId", 
+                    totalSold: { $sum: "$items.quantity" } 
+                }
+            },
+            {
+                $lookup: {
+                    from: "products", 
+                    localField: "_id", 
+                    foreignField: "_id",
+                    as: "productInfo" 
+                }
+            },
+            { $unwind: "$productInfo" }, 
+            { $sort: { totalSold: -1 } },
+            { $limit: 3 }, 
+            {
+                $project: {
+                    productId: "$_id", 
+                    productName: "$productInfo.productName", 
+                    productPrice: "$productInfo.productPrice",
+                    productImage:  { $arrayElemAt: ["$productInfo.productImage", 0] },
+                    totalSold: 1 
+                }
+            }
+        ]);
+
+        const topCategories = await orderSchema.aggregate([
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.productId", // Group by productId to sum sales
+                    totalSold: { $sum: "$items.quantity" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "products", 
+                    localField: "_id", 
+                    foreignField: "_id", 
+                    as: "productInfo"
+                }
+            },
+            { $unwind: "$productInfo" },
+            {
+                $lookup: {
+                    from: "categories", // Categories collection
+                    localField: "productInfo.productCategory", // Using the productCategory reference
+                    foreignField: "_id", 
+                    as: "categoryInfo"
+                }
+            },
+            { $unwind: "$categoryInfo" },
+            {
+                $group: {
+                    _id: "$categoryInfo._id", // Group by categoryId
+                    categoryName: { $first: "$categoryInfo.name" }, // Assuming the category has a 'name' field
+                    totalSold: { $sum: "$totalSold" }
+                }
+            },
+            { $sort: { totalSold: -1 } },
+            { $limit: 3 },
+            {
+                $project: {
+                    categoryId: "$_id", // The category ID
+                    categoryName: 1, // The category name
+                    totalSold: 1 // The total sold products in that category
+                }
+            }
+        ]);
+
+        console.log('Top Products obtained : ',topProducts)
+        console.log('Top category :', topCategories)
+        res.render('admin/trending', {
+            topProducts,
+            topCategories,
+            title: 'Trending Products', 
+            searchQuery,
+        })
+    }
+    catch(error){
+        console.log(`Error in getting trending products: ${error}`)
+    }
+}
+
 
 
 
@@ -492,4 +505,6 @@ module.exports = {
     generateReport,
     downloadReport,
     salesChart,
+    paymentMethodStats,
+    trendingProducts,
 }

@@ -227,8 +227,14 @@
                                     <% }) %>
                         </td>
                         <td>
-                            <% let paymentMethod; switch (order.paymentMethod) { case '0' : paymentMethod='COD' ; break;
-                                case '2' : paymentMethod='Wallet' ; break; case '1' : paymentMethod='PayPal' ; break;
+                            <% let paymentMethod; 
+                            switch (order.paymentMethod) 
+                            { 
+                                case '0' : paymentMethod='COD' ; break;
+                                case '2' : paymentMethod='Wallet' ; break; 
+                                case '1' : paymentMethod='PayPal' ; break;
+                                case '3' : paymentMethod='Instamojo'; break;
+                                case '4' : paymentMethod='Razorpay'; break;
                                 default: paymentMethod='Unknown Payment Method' ; } %>
 
                                 <%= paymentMethod %>

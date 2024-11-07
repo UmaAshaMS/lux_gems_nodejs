@@ -15,7 +15,8 @@ const schema=new mongoose.Schema({
             default: 0
         },
         orderId:{
-            type: String
+            type : mongoose.Schema.Types.ObjectId,
+            ref : 'order'
         },
         transactionType:{
             type: String,
@@ -25,7 +26,8 @@ const schema=new mongoose.Schema({
             type:Date,
             required: true,
             default:Date.now()
-        }
+        },
+        
     }]
   
 },{timestamps:true})

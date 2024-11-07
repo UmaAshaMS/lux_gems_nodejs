@@ -331,7 +331,7 @@ const rewards = async (req, res) => {
     try {
         const user = req.session.user
         const category = await categorySchema.find()
-        const coupons = await couponSchema.find()
+        const coupons = await couponSchema.find({ usageLimit: { $gte: 1 } })
 
 
         res.render('user/Rewards', { title: 'Rewards', user, category, coupons })
@@ -346,6 +346,9 @@ const wallet = async (req, res) => {
         const user = req.session.user
         const category = await categorySchema.find()
         const wallet = await walletSchema.findOne({userID:user})
+        if(!wallet){
+            return res.status(400).json({message:'User wallet not found'})
+        }
         res.render('user/Wallet', { title: 'Wallet', user, category, wallet : wallet || { balance: 0 } })
 
     }

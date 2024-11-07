@@ -3,8 +3,18 @@
 <%- include('./layout/category_navbar') %>
 
 <style>
+    .breadcrumbs {
+        font-size: 16px;
+        margin-bottom: 20px;
+        color: #555;
+    }
+
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
 .Orders {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto; 
     padding: 20px;
 }
@@ -78,6 +88,27 @@
     text-decoration: none;
 }
 
+.order-tabs a.active {
+        color: #007bff; /* Replace with your desired color */
+        font-weight: bold;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .label {
+        font-weight: bold;
+        width: 150px;
+    }
+
+    .value {
+        flex-grow: 1;
+        padding-left: 10px;
+    }
+
 </style>
 
 <div class="breadcrumbs mb-4">
@@ -97,7 +128,9 @@
         <a href="/orderHistory" class="<%= !selectedStatus ? 'active' : '' %>">All Orders</a> |
         <a href="/orderHistory?status=Returned" class="<%= selectedStatus === 'Returned' ? 'active' : '' %>">Returned</a> |
         <a href="/orderHistory?status=Delivered" class="<%= selectedStatus === 'Delivered' ? 'active' : '' %>">Delivered</a> |
-        <a href="/orderHistory?status=Pending" class="<%= selectedStatus === 'Pending' ? 'active' : '' %>">Pending</a> 
+        <a href="/orderHistory?status=Pending" class="<%= selectedStatus === 'Pending' ? 'active' : '' %>">Pending</a> |
+        <a href="/orderHistory?status=Cancelled" class="<%= selectedStatus === 'Cancelled' ? 'active' : '' %>">Cancelled</a> 
+ 
     </div>
     <% if (orders.length === 0) { %>
         <p>You have no previous orders.</p>
@@ -106,37 +139,65 @@
         <% orders.forEach(order => { %>
 
             <div class="order-card">
-                <div class="order-details">
-                    <p><strong>Order ID:</strong> <%= order._id %></p>
-                    <p><strong>Order Date:</strong> <%= order.createdAt.toDateString() %></p>
-                    <p><strong>Total Amount:</strong> Rs <%= order.totalAmount.toFixed(2) %></p>
-                    <p><strong>Delivery Charges : </strong> 
-                        <% if (order.totalAmount > 2000) { %>
-                            Free
-                        <% } else { %>
-                            Rs 100
-                        <% } %>
-                    </p>
-                    <% if (order.couponDiscount && order.couponDiscount > 0) { %>
-                        <p><strong>Coupon Discount:</strong> -Rs <%= order.couponDiscount.toFixed(2) %></p>
-                    <% } else { %>
-                        <p><strong>Coupon Discount:</strong> Not Applied</p>
-                    <% } %>
-                    
-                    <p><strong>Payment Method:</strong>  
-                        <% let paymentMethod; 
-                        switch (order.paymentMethod) 
-                        {
-                            case '0' : paymentMethod='COD' ; break;
-                            case '2' : paymentMethod='Wallet' ; break; 
-                            case '1' : paymentMethod='PayPal' ; break; 
-                            case '3' : paymentMethod='Instamojo';break;
-                            case '4' : paymentMethod='Razorpay' ; break;
-                            default: paymentMethod='Unknown Payment Method' ; 
-                        } %>
+               
 
-                        <%= paymentMethod %> </p>
-                    <p><strong>Order status : </strong><%= order.status  %></p>
+
+                    <div class="order-details">
+
+                        <table>
+                            <tr>
+                                <td><strong>Order ID:</strong></td>
+                                <td><%= order._id %></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order Date:</strong></td>
+                                <td><%= order.createdAt.toDateString() %></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Amount:</strong></td>
+                                <td>Rs <%= order.totalAmount.toFixed(2) %></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Delivery Charges:</strong></td>
+                                <td>
+                                    <% if (order.totalAmount > 2000) { %> 
+                                        Free 
+                                    <% } else { %> 
+                                        Rs 100 
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Coupon Discount:</strong></td>
+                                <td>
+                                    <% if (order.couponDiscount && order.couponDiscount > 0) { %> 
+                                        -Rs <%= order.couponDiscount.toFixed(2) %> 
+                                    <% } else { %> 
+                                        Not Applied 
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Payment Method:</strong></td>
+                                <td>
+                                    <% let paymentMethod; 
+                                    switch (order.paymentMethod) {
+                                        case '0': paymentMethod = 'COD'; break;
+                                        case '2': paymentMethod = 'Wallet'; break;
+                                        case '1': paymentMethod = 'PayPal'; break;
+                                        case '3': paymentMethod = 'Instamojo'; break;
+                                        case '4': paymentMethod = 'Razorpay'; break;
+                                        default: paymentMethod = 'Unknown Payment Method'; 
+                                    } %>
+                                    <%= paymentMethod %>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order Status:</strong></td>
+                                <td><%= order.status %></td>
+                            </tr>
+                        </table>
+                        
                     <h4>Items in this order:</h4>
                     
                     <% order.items.forEach(item => { %>

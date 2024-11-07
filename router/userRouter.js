@@ -77,7 +77,7 @@ user.delete('/wishlist/delete/:productId',checkUserLogin, wishlistcontroller.del
 user.post('/wishlist/addToCart/:productId',checkUserLogin, wishlistcontroller.addToCart)
 
 //Coupon
-
+user.post('/getAvailableCoupon', checkUserLogin, checkoutController.getAvailableCoupon)
 user.post('/applyCoupon', checkUserLogin, checkoutController.applyCoupon)
 
 //Checkout

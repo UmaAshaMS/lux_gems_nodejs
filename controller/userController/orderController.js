@@ -16,7 +16,7 @@ const PDFDocument = require('pdfkit');
 
 
 const placeOrder = async (req, res) => {
-    console.log('place order reached......')
+    // console.log('place order reached......')
     try {
         const userId = req.session.user;
         const cart = req.session.cart;
@@ -44,15 +44,23 @@ const placeOrder = async (req, res) => {
             return res.status(400).json({ message: 'Cash on Delivery is not available for orders above ₹1000.' });
         }
 
-
+        let userWallet;
         // check wallet balance for WALLET PAY
         if (parseInt(selectedPaymentOption) === 2) {
-            const userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
+            userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
             if (!userWallet || userWallet.balance < totalAmount) {
                 return res.status(400).json({ message: 'Insufficient wallet balance to place this order.' });
             }
 
             userWallet.balance -= totalAmount;
+
+            userWallet.transaction.push({
+                walletAmount: totalAmount,
+                transactionType : 'Debited',
+                transactionDate : new Date() 
+            })
+
+
             await userWallet.save();
 
         }
@@ -82,6 +90,12 @@ const placeOrder = async (req, res) => {
 
         // Save the order
         const savedOrder = await order.save();
+
+        // Save orderId in the last transaction
+        if (userWallet && parseInt(selectedPaymentOption) === 2) {
+            userWallet.transaction[userWallet.transaction.length - 1].orderId = savedOrder._id;
+            await userWallet.save(); 
+        }
 
         if (coupon) {
             coupon.usageLimit -= 1;
@@ -158,8 +172,8 @@ const cancelOrder = async (req, res) => {
         // Update the product stock
         const product = await productSchema.findById(itemToCancel.productId._id);
         if (product) {
-            const quantity = Number(itemToCancel.quantity);
-            const stock = Number(product.stock) || 0;
+            const quantity = itemToCancel.quantity;
+            const stock = product.stock || 0;
             if (!isNaN(quantity)) {
                 product.stock = stock + quantity;
                 await product.save();
@@ -172,13 +186,52 @@ const cancelOrder = async (req, res) => {
 
         itemToCancel.status = 'Cancelled';
 
-        if (order.items.every(item => item.status === 'Cancelled')) {
+        const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
+        if (allItemsCancelled) {
             order.status = 'Cancelled';
         }
 
         await order.save();
 
-        res.status(200).json({ success: true, message: 'Item marked as cancelled successfully' });
+        if(allItemsCancelled && (order.paymentMethod === '2' || order.paymentMethod === '4')){
+            const price = itemToCancel.productPrice;
+            const quantity = itemToCancel.quantity;
+            let refundAmount = Number(price * quantity);
+
+            // Calculate delivery charge if applicable
+            const calculatedDeliveryCharge = order.totalAmount < 2000 ? 100 : 0;
+
+            // Add delivery charge to refund if all items are cancelled
+            if (calculatedDeliveryCharge > 0) {
+                refundAmount += calculatedDeliveryCharge;
+            }
+
+            let wallet = await walletSchema.findOne({ userID: order.userId.toString() });
+
+            if (!wallet) {
+                // Create a new wallet if it doesn't exist
+                wallet = new walletSchema({
+                    userID: order.userId,
+                    balance: 0, 
+                    transaction: []
+                });
+                await wallet.save();
+            }
+
+            // Update wallet balance
+            wallet.balance += refundAmount;
+
+            wallet.transaction.push({
+                walletAmount: refundAmount,
+                orderId : orderId,
+                transactionType : 'Credited',
+                transactionDate : new Date() 
+            })
+
+            await wallet.save();
+        }
+
+        res.status(200).json({ success: true, message: 'The product is cancelled successfully from the order.' });
     } catch (error) {
         console.error(`Error canceling order item: ${error}`);
         res.status(500).json({ message: 'Internal Server Error' });

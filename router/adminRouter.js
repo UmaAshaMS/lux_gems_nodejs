@@ -85,6 +85,9 @@ admin.post('/downloadReport', checkAdminLogin, adminDashboardControl.downloadRep
 //Sales chart
 admin.post('/salesChart', checkAdminLogin, adminDashboardControl.salesChart)
 
+//Trending products
+admin.get('/trendingProducts', checkAdminLogin, adminDashboardControl.trendingProducts)
+
 //Admin Logout
 admin.post('/logout', adminLoginControl.logout)
 

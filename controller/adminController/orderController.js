@@ -200,7 +200,6 @@ const returnProduct = async (req, res) => {
         const { returnDecision } = req.body;
 
         const order = await orderSchema.findById(orderId);
-        // console.log('order is : ', order)
 
         const itemIndex = order.items.findIndex(item => item.productId.toString() === productId);
 
@@ -223,12 +222,17 @@ const returnProduct = async (req, res) => {
 
             let refundAmount = originalPrice * quantity;
 
-            if (order.totalAmount < 2000) {
-                refundAmount += 100; 
+            // Check if all other items in the order are already returned
+            const allOthersReturned = order.items.every((item, idx) => idx === itemIndex || item.status === 'Returned');
+
+            const calculatedDeliveryCharge = order.totalAmount < 2000 ? 100 : 0;
+ 
+            // Add delivery charge to refund if this is the last item being returned
+            if (allOthersReturned && calculatedDeliveryCharge > 0) {
+                refundAmount += calculatedDeliveryCharge;
             }
 
             let wallet = await walletSchema.findOne({ userID: order.userId.toString() });
-            console.log('Wallet info : ', wallet)
 
             if (!wallet) {
                 // Create a new wallet if it doesn't exist
@@ -238,18 +242,30 @@ const returnProduct = async (req, res) => {
                     transaction: []
                 });
                 await wallet.save();
-                console.log('New wallet created for the user:', wallet);
             }
     
-            // Update wallet balance with refund amount
+            // Update wallet balance
             wallet.balance += refundAmount;
+
+            wallet.transaction.push({
+                walletAmount: refundAmount,
+                orderId : orderId,
+                transactionType : 'Credited',
+                transactionDate : new Date() 
+            })
+
             await wallet.save();
-            console.log('wallet balance', wallet.balance)
 
         } else if (returnDecision === 'Reject') {
             order.items[itemIndex].status = 'Rejected';
         }
-        console.log('Order after changing status : ', order)
+
+        // Check if all items are marked as 'Returned'
+        const allReturned = order.items.every(item => item.status === 'Returned');
+
+        if (allReturned) {
+            order.status = 'Returned';  
+        }
 
         await order.save();
 

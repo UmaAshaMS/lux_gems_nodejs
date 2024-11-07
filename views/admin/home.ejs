@@ -176,7 +176,7 @@
                 <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
                 <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
                 <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
-                <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+                <a href="/admin/trendingProducts"><button class="btn btn-dark">Trending</button></a>
                 <form action="/admin/logout" method="POST">
                     <button type="submit" class="btn btn-dark">Logout</button>
                 </form>
@@ -213,6 +213,9 @@
         </div>
 
 
+        <h3 style="margin: auto;">Payment Methods Distribution</h3>
+        <canvas id="paymentChart"></canvas>
+
         <div>
             <label for="reportRange">Select Range:</label>
             <select id="reportRange">
@@ -241,6 +244,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
+
+
+
+
+
+
+
+
+
     document.getElementById('fetchChartData').addEventListener('click', async () => {
     const reportRange = document.getElementById('reportRange').value;
     const startDate = document.getElementById('startDate').value;

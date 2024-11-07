@@ -1,0 +1,263 @@
+<style>
+    .Container {
+        border-radius: 10px;
+        display: flex;
+        padding: 20px;
+        flex-direction: column;
+        flex: 1;
+        align-items: left;
+        gap: 20px;
+    }
+
+    .SideBar .btn {
+        display: block;
+        width: 150px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+
+
+    .SideBar a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .reportButtons {
+        align-self: flex-end;
+        margin-bottom: 20px;
+    }
+
+
+    .btn {
+        width: 100px;
+    }
+
+    .italianno-regular {
+        font-family: "Italianno", cursive;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 50px;
+        color: #caaf7a;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: column;
+        font-size: 42px;
+        align-items: center;
+        margin-left: 85px;
+    }
+
+    .Search form {
+        display: flex;
+    }
+
+    .form-control {
+        width: 500px;
+    }
+
+    .searchBtn {
+        flex: 2;
+        width: 10px;
+        color: white;
+        border: 2px;
+    }
+
+    .searchCategory {
+        display: flex;
+        flex-direction: row;
+        border: 1px;
+        border-radius: 4px;
+        margin-top: 2%;
+    }
+
+    .Search {
+        display: flex;
+        flex-direction: row;
+        margin-top: 10px;
+    }
+
+
+
+
+    .SideBar {
+        width: 250px;
+        margin: 20px;
+        background-color: #caaf7a;
+        color: white;
+        height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        border-radius: 10px;
+    }
+
+    .MainContent {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .reportButtons {
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 100%;
+        height: auto;
+        border-collapse: collapse;
+    }
+
+    /* Basic styling for trending products*/
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+/* Container for trending products */
+.trending-products {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.trending-products h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Product card styling */
+.product-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: inline-block;
+    margin: 10px;
+    width: 250px;
+    height: 450px;
+    transition: transform 0.2s ease;
+}
+
+.category-card {
+    padding-top: 1%;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: inline-block;
+    margin: 10px;
+    width: 250px;
+    height: 100px;
+    transition: transform 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Product image */
+.product-card img {
+    width: 100%;
+    height: 60%;
+    object-fit: cover;
+}
+
+/* Product info section */
+.product-info {
+    padding: 15px;
+    text-align: left;
+}
+
+.product-info h3 {
+    font-size: 1.25em;
+    margin: 0 0 10px;
+    color: #333;
+}
+
+.product-info p {
+    font-size: 0.9em;
+    color: #555;
+    margin: 5px 0;
+}
+
+.product-info .price {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.product-info .sales-count {
+    color: #3498db;
+    font-weight: bold;
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 600px) {
+    .product-card {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+</style>
+
+
+
+<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="navigation bar">
+
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand italianno-regular" href="#" style="font-size: 40px;">Trending Products<span>.</span></a>
+        <div class="collapse navbar-collapse  d-flex flex-grow-1 justify-content-between align-items-center"
+            id="navbars">
+            <div class='Search'>
+                <div class="searchCategory">
+                    <form method="GET" action="/admin/Category" class="mb-4">
+                        <input type="text" name="searchQuery" placeholder="Search" class="form-control"
+                            value="<%= searchQuery %>">
+                        <button type="submit" class="btn btn-white mt-2 searchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="trending-products">
+    <h2>Trending Products</h2>
+    <% topProducts.forEach((prod) => { %>
+        <div class="product-card">
+           
+            <img src= "/<%= prod.productImage %>" alt="Product Image">
+            <div class="product-info">
+                <h3><%=prod.productName%></h3>
+                <p>Price : <span class="price"><%=prod.productPrice  %></span></p>
+                <p>Sales : <span class="sales-count"><%=prod.totalSold  %></span> units sold</p>
+            </div>
+        </div>
+    <% }) %>
+
+    <h2>Trending Category</h2>
+    <% topCategories.forEach((cat) => { %>
+        <div class="category-card">
+            <h3><%= cat.categoryName %></h3>
+            <p>Sales: <span class="sales-count"><%= cat.totalSold %></span> items sold</p>
+        </div>
+    <% }) %>
+    
+    
+</div>
+
+<%- include('footer') %>
