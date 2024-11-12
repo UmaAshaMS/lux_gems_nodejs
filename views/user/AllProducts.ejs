@@ -60,6 +60,18 @@
                         <input class="form-check-input" type="checkbox" id="outOfStockCheckbox">
                         <label class="form-check-label" for="outOfStockCheckbox">Hide Out of Stock</label>
                       </div>
+
+                      <div class="mt-3">
+                        <h6>Category</h6>
+                        <select id="categorySelect" class="form-select">
+                            <option value="">Select Category</option>
+                            <% category.forEach(function(cat) { %>
+                                <option value="<%= cat._id %>" <%= cat._id === categoryId ? 'selected' : '' %> >
+                                    <%= cat.name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
                   
                       <!-- Sort Options -->
                       <div class="mt-3">

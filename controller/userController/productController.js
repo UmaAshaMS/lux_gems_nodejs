@@ -5,9 +5,16 @@ const orderSchema = require('../../model/orderSchema')
 
 const AllproductsRender  = async(req,res) => {
     const searchQuery = req.query.query || ''; 
+    const categoryId = req.query.category || '';
 
     // Retrieve non-blocked categories
     const categories = await categorySchema.find({ isBlocked: 0 });
+
+    if (categoryId) {
+        filterQuery.productCategory = categoryId;  // Filter by category
+    }
+
+
 
     // Retrieve products that are active and belong to non-blocked categories
     const products = await productSchema.find({
@@ -24,7 +31,10 @@ const AllproductsRender  = async(req,res) => {
         category: categories,
         product: products,
         user,
-        searchQuery})
+        searchQuery,
+        categoryId
+        
+    })
     }
     catch(err){
         console.error('Error:' , err)
@@ -85,13 +95,16 @@ const productCategory = async (req, res) => {
 };
 
 const filterProducts = async(req,res) => {
-    const { hideOutOfStock, sortOption } = req.body;
+    const { hideOutOfStock, sortOption, categoryId } = req.body;
 
     let query = {};
 
     // Filter out of stock products
     if (hideOutOfStock) {
         query.stock = { $gt: 0 };
+    }
+    if (categoryId) {
+        query.productCategory = categoryId; 
     }
 
     let products = await productSchema.find(query);
