@@ -10,7 +10,7 @@ const wishlist = async(req, res) => {
     try{
         const user = req.session.user
         const category = await categorySchema.find()
-        const wishlist = await wishlistSchema.findOne({ userId: new ObjectId(user)})
+        const wishlist = await wishlistSchema.findOne({ userId: user})
         .populate('product.productId')
         .populate('product.categoryid') 
 
@@ -19,7 +19,6 @@ const wishlist = async(req, res) => {
 
             await wishlist.save();
         }
-
 
         res.render('user/wishlist',{title:'Wishlist', user, category, wishlist})
     }
@@ -31,7 +30,7 @@ const wishlist = async(req, res) => {
 const addToWishlist = async (req, res) => {
     try {
         const user = req.session.user;
-        console.log('----------------- user id : ', user)
+        // console.log('----------------- user id : ', user)
         const productId = req.params.productId;
 
         if (!user) {
@@ -48,7 +47,8 @@ const addToWishlist = async (req, res) => {
             return res.status(400).json({ message: 'Product is out of stock or not available' });
         }
 
-        let wishlist = await wishlistSchema.findOne({ userId: new ObjectId(user) });
+        let wishlist = await wishlistSchema.findOne({ userId: user });
+        // console.log('wIDHLIST FOR USER:',wishlist)
 
         const newWishlistItem = {
             productId: new ObjectId(productId),
@@ -59,7 +59,7 @@ const addToWishlist = async (req, res) => {
 
         if (!wishlist) {
             wishlist = new wishlistSchema({
-                userId: new ObjectId(user._id),
+                userId: user,
                 product: [newWishlistItem],
             });
             await wishlist.save();

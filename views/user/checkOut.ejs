@@ -49,7 +49,7 @@
                                                 <% } else { %>
                                                     <p class="card-text">No default address available. Please add one.
                                                     </p>
-                                                    <a href="/addAddress" class="btn btn-primary">Add Address</a>
+                                                    <a href="/addAddressCheckout" class="btn btn-primary">Add Address</a>
                                                     <% } %>
                                 </div>
                             </div>
@@ -64,7 +64,9 @@
                                         <button class="btn btn-outline-secondary" type="button"
                                             id="applyCouponBtn">Apply</button>
                                     </div>
-                                    <div id="availableCoupons" onclick="fetchApplicableCoupons(subtotal + deliveryCharge)"> Available Coupons</div>
+                                    <div id="availableCoupons"
+                                        onclick="fetchApplicableCoupons(subtotal + deliveryCharge)"> Available Coupons
+                                    </div>
 
                                     <div id="couponFeedback"></div>
                                 </div>
@@ -75,12 +77,20 @@
                                 <div class="card-body">
                                     <h5 class="card-title">Payment Options</h5>
 
+                                    
+
                                     <div class="form-check mb-3">
-                                        <input class="form-check-input" type="radio" name="paymentMethod"
-                                            id="walletOption" value="2">
-                                        <label class="form-check-label" for="walletOption">
-                                            <strong>Wallet</strong> <span>(Balance : <%=wallet.balance %>)</span>
-                                        </label>
+                                        <% if (wallet && wallet.balance > 0) { %> <!-- Check if wallet exists and balance is greater than 0 -->
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption" value="2">
+                                            <label class="form-check-label" for="walletOption">
+                                                <strong>Wallet</strong> <span>(Balance : Rs.<%= wallet.balance %>)</span>
+                                            </label>
+                                        <% } else { %> <!-- If no wallet or balance is 0, show this alternative message -->
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="walletOption" disabled>
+                                            <label class="form-check-label" for="walletOption">
+                                                <strong>Wallet</strong> <span>(No wallet or insufficient balance)</span>
+                                            </label>
+                                        <% } %>
                                     </div>
 
                                     <div class="form-check mb-3">
@@ -576,16 +586,18 @@
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
 
+                    
                     const defaultAddress = {
-                        fullName: '<%= defaultAddress.fullName %>',
-                        addressLine1: '<%= defaultAddress.addressLine1 %>',
-                        addressLine2: '<%= defaultAddress.addressLine2 %>',
-                        city: '<%= defaultAddress.city %>',
-                        state: '<%= defaultAddress.state %>',
-                        country: '<%= defaultAddress.country %>',
-                        pincode: '<%= defaultAddress.pincode %>',
-                        phoneNumber: '<%= defaultAddress.phoneNumber %>'
+                        fullName: '<%= defaultAddress?.fullName || "N/A" %>',
+                        addressLine1: '<%= defaultAddress?.addressLine1 || "N/A" %>',
+                        addressLine2: '<%= defaultAddress?.addressLine2 || "N/A" %>',
+                        city: '<%= defaultAddress?.city || "N/A" %>',
+                        state: '<%= defaultAddress?.state || "N/A" %>',
+                        country: '<%= defaultAddress?.country || "N/A" %>',
+                        pincode: '<%= defaultAddress?.pincode || "N/A" %>',
+                        phoneNumber: '<%= defaultAddress?.phoneNumber || "N/A" %>'
                     };
+                    
 
                     let addressToSend;
 
@@ -817,125 +829,118 @@
                     if (parseInt(selectedPaymentOption) === 4) {
                         console.log('Initiating payment via Razorpay');
 
-                        fetch('/renderRazorpay', {
+                        // First, save the order as "payment pending" in the database
+                        fetch('/placeOrder', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ totalAmount: orderTotal, couponCode })
+                            body: JSON.stringify({
+                                addressToSend: addressToSend,
+                                selectedPaymentOption: selectedPaymentOption,
+                                status: 'payment pending',  // Set initial status as "payment pending"
+                                couponCode: couponCode
+                            })
                         })
-                            .then((res) => res.json())
-                            .then((data) => {
-                                if (data.orderId) {
+                            .then(res => res.json())
+                            .then(orderData => {
+                                console.log('OrderDAta received : ',orderData)
+                                if (orderData.success && orderData.orderId) {
+                                    // Now initiate Razorpay payment after saving order with pending status
                                     const options = {
                                         key: "rzp_test_eOmJ744HMbCtga",
-                                        amount: orderTotal,
+                                        amount: orderData.orderTotal * 100,
                                         currency: 'INR',
                                         name: 'LUXGEMS',
                                         description: 'Jewellery Purchase',
-                                        order_id: data.orderId, // Razorpay order ID created on the server
+                                        order_id: orderData.razorpayOrderId,
                                         handler: function (response) {
                                             // Handle success response
-                                            fetch('/placeOrder', {
+                                            fetch('/updateOrderPendingStatus', {
                                                 method: 'POST',
                                                 headers: {
                                                     'Content-Type': 'application/json',
                                                 },
                                                 body: JSON.stringify({
-                                                    addressToSend: addressToSend,
-                                                    selectedPaymentOption: selectedPaymentOption,
-                                                    orderId: response.razorpay_order_id, // Razorpay order ID
-                                                    paymentId: response.razorpay_payment_id, // Razorpay payment ID
-                                                    couponCode: couponCode
+                                                    orderId: orderData.orderId,
+                                                    paymentId: response.razorpay_payment_id,
+                                                    status: 'pending'  // Update status to "pedning- default"
                                                 })
                                             })
                                                 .then((res) => res.json())
-                                                .then((orderData) => {
-                                                    if (orderData.success) {
+                                                .then(result => {
+                                                    if (result.success) {
                                                         window.location.href = `/orderConfirmed/${orderData.orderId}`;
                                                     } else {
                                                         Swal.fire({
                                                             icon: 'error',
                                                             title: 'Error',
-                                                            text: orderData.message || 'Failed to place order.'
+                                                            text: 'Failed to update order status after payment.'
                                                         });
-                                                        console.error('Order placement failed.');
                                                     }
                                                 })
-                                                .catch((err) => {
-                                                    console.error('Error placing order', err);
-                                                });
+                                                .catch((err) => console.error('Error updating order status:', err));
                                         },
-                                        // prefill: {
-                                        //     name: 'Customer Name',
-                                        //     email: 'customer@example.com',
-                                        //     contact: '9999999999'
-                                        // },
-
                                         modal: {
                                             ondismiss: function () {
-                                                // Handle modal dismissal, which indicates a payment failure
-                                                updateOrderStatusToPending(data.orderId); // Update order status to pending
                                                 Swal.fire({
                                                     icon: 'warning',
                                                     title: 'Payment Failed',
                                                     text: 'Your payment was not completed. You can retry from your orders page.',
-                                                });
+                                                })
+                                                .then(() => {
+                                            // Redirect to the order confirmation page even if payment failed
+                                            window.location.href = `/orderConfirmed/${orderData.orderId}`;
+                                            });
                                             }
                                         },
-
                                         theme: {
                                             color: '#F37254'
                                         }
                                     };
-
                                     const razorpayInstance = new Razorpay(options);
                                     razorpayInstance.open();
                                 } else {
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',
-                                        text: 'Failed to initiate Razorpay payment.'
+                                        text: 'Failed to place order before payment initiation.'
                                     });
-                                    console.error('No order ID returned from server.');
                                 }
                             })
-                            .catch((err) => {
-                                console.error('Error during payment initiation', err);
-                            });
+                            .catch(err => console.error('Error during order placement:', err));
                     }
 
-                }
 
-                //function for showing available coupon in Checkout page
-                const orderAmount = subtotal + deliveryCharge
-                async function fetchApplicableCoupons(orderAmount) {
-                    try {
-                        const response = await fetch('/getApplicableCoupons', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderAmount })
-                        });
+                    //function for showing available coupon in Checkout page
+                    const orderAmount = subtotal + deliveryCharge
+                    async function fetchApplicableCoupons(orderAmount) {
+                        try {
+                            const response = await fetch('/getApplicableCoupons', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ orderAmount })
+                            });
 
-                        const data = await response.json();
-                        const couponsDiv = document.getElementById('availableCoupons');
+                            const data = await response.json();
+                            const couponsDiv = document.getElementById('availableCoupons');
 
-                        if (data.applicableCoupons.length > 0) {
-                            couponsDiv.innerHTML = data.applicableCoupons.map(coupon =>
-                                `<div class="coupon">
+                            if (data.applicableCoupons.length > 0) {
+                                couponsDiv.innerHTML = data.applicableCoupons.map(coupon =>
+                                    `<div class="coupon">
                         <p>Code: ${coupon.couponCode}</p>
                         <p>Discount: ₹${coupon.discountAmount}</p>
                     </div>`
-                            ).join('');
-                        } else {
-                            couponsDiv.innerHTML = '<p>No available coupons for this order amount.</p>';
+                                ).join('');
+                            } else {
+                                couponsDiv.innerHTML = '<p>No available coupons for this order amount.</p>';
+                            }
+                        } catch (error) {
+                            console.error('Error fetching coupons:', error);
                         }
-                    } catch (error) {
-                        console.error('Error fetching coupons:', error);
                     }
+
                 }
-
-
 
 
             </script>

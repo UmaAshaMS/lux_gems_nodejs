@@ -1,4 +1,4 @@
-<body>
+<!-- <body>
     <style>
         .Container {
             display: flex;
@@ -163,6 +163,23 @@
             font-weight: bold;
             color: #d89013;
         }
+
+        #salesChart {
+    width: 700px;  /* Maximum width of the chart */
+    height : 100px;
+    margin: 10px auto; /* Center the chart */
+}
+.chart-container {
+    width: 300px; /* Adjust width as needed */
+    height: 300px; /* Adjust height as needed */
+    margin: 20px auto; /* Center the chart */
+}
+
+#paymentChart {
+    width: 100% !important; /* Make it responsive within container */
+    height: 100% !important;
+}
+
     </style>
 
     <%-include('navbar.ejs') %>
@@ -212,121 +229,346 @@
             </div>
         </div>
 
-
-        <h3 style="margin: auto;">Payment Methods Distribution</h3>
-        <canvas id="paymentChart"></canvas>
-
-        <div>
-            <label for="reportRange">Select Range:</label>
-            <select id="reportRange">
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-                <option value="custom">Custom</option>
-            </select>
-            <input type="date" id="startDate" style="display: none;">
-            <input type="date" id="endDate" style="display: none;">
-            <button id="fetchChartData">Generate Chart</button>
+        <div class="chart-container">
+            <h3 style="margin: auto;">Payment Methods Distribution</h3>
+            <canvas id="paymentChart" width="250" height="250"></canvas>
         </div>
 
-        <canvas id="myChart" width="400" height="200"></canvas>
+        <h2>Yearly Sales</h2>
+        <canvas id="salesChart" width="300" height="200"></canvas>
 
-        
+        <h2>Monthly Sales</h2>
+        <canvas id="monthlyChart" width="300" height="200"></canvas>
 
-
-
-
-
-        <!-- <%-include('footer') %> -->
+        <%-include('footer') %>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+const salesData = <%= JSON.stringify(salesData) %> ;
+console.log(salesData)
 
-
-
-
-
-
-
-
-
-
-    document.getElementById('fetchChartData').addEventListener('click', async () => {
-    const reportRange = document.getElementById('reportRange').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-
-    const requestBody = { reportRange };
-    if (reportRange === 'custom') {
-        // Include startDate and endDate only for custom range
-        requestBody.startDate = startDate;
-        requestBody.endDate = endDate;
-    }
-try{
-    const response = await fetch('/admin/salesChart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify( requestBody)
-    });
-
-    if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+const ctx = document.getElementById('salesChart').getContext('2d');
+const salesChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'Sales Amount',
+            data: salesData, // Data from the server
+            backgroundColor: 'rgba(0, 0, 0, 1)',
+            borderColor: 'rgba(0, 0, 0, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                stepSize : 1000,
+                ticks: {
+                    callback: function(value) { return 'Rs' + value; } 
+                }
+            }
         }
-
-        const chartData = await response.json();
-        console.log(chartData); // Log the received chart data
-        renderChart(chartData); // Call a function to render the chart
-    } catch (error) {
-        console.error('Error in chart data fetch:', error);
     }
 });
 
 
-// function renderChart(data) {
-//     const ctx = document.getElementById('salesChart').getContext('2d');
-//     new Chart(ctx, {
-//         type: 'bar',
-//         data: {
-//             labels: data.labels,
-//             datasets: data.datasets
-//         },
-//         options: { responsive: true, scales: { y: { beginAtZero: true } } }
-//     });
-// }
+const distributionData = <%- JSON.stringify(distribution) %>;
 
-function renderChart(data) {
+    const paymentLabels = distributionData.map(item => item._id);
+    const paymentValues = distributionData.map(item => item.count);
+    const paymentColors = [
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(255, 205, 86, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+    ];
 
-    let myChart;
-
-    const ctx = document.getElementById('myChart').getContext('2d');
-
-    if (myChart) {
-        myChart.destroy();
-    }
-
-    myChart = new Chart(ctx, {
-        type: 'bar', 
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    new Chart(paymentCtx, {
+        type: 'pie',
         data: {
-            labels: data.labels,
+            labels: paymentLabels,
             datasets: [{
-                label: 'Sales',
-                data: data.sales, 
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                label: 'Payment Method Distribution',
+                data: paymentValues,
+                backgroundColor: paymentColors,
+                borderColor: paymentColors.map(color => color.replace('0.6', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = paymentValues.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.raw / total) * 100).toFixed(2);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+
+</script> -->
+<body>
+    <style>
+        /* General page styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .Container {
+            display: flex;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        /* Sidebar styling */
+        .SideBar {
+            width: 220px;
+            height:fit-content;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .SideBar .btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 10px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #444;
+            color: #caaf7a;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .SideBar .btn:hover {
+            background-color: #555;
+        }
+
+        .SideBar a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Stats container styling */
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            width: 250px;
+            height: 150px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #d89013;
+        }
+
+        /* Chart container styling */
+        .chart-container {
+            width: 700px;
+            max-width: 100%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+         #paymentChart {
+            max-width: 90%;
+            height: auto;
+            margin: 0 auto;
+        }
+
+
+        h2, h3 {
+            color: #444;
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <%-include('navbar.ejs') %>
+
+    <div class="Container">
+        <div class='SideBar'>
+            <a href="/admin/home"><button class="btn">Dashboard</button></a>
+            <a href="/admin/salesReport"><button class="btn">Sales Report</button></a>
+            <a href="/admin/Category"><button class="btn">Category</button></a>
+            <a href="/admin/Products"><button class="btn">Products</button></a>
+            <a href="/admin/Customers"><button class="btn">Customers</button></a>
+            <a href="/admin/Orders"><button class="btn">Order</button></a>
+            <a href="/admin/Coupons"><button class="btn">Coupons</button></a>
+            <a href="/admin/Offers"><button class="btn">Offers</button></a>
+            <a href="/admin/trendingProducts"><button class="btn">Trending</button></a>
+            <form action="/admin/logout" method="POST">
+                <button type="submit" class="btn">Logout</button>
+            </form>
+        </div>
+
+        <div class="stats-container">
+            <div class="card">
+                <h3>Total Orders</h3>
+                <p class="card-value"><%= totalOrders %></p>
+            </div>
+
+            <div class="card">
+                <h3>Total Sales Amount</h3>
+                <p class="card-value">Rs: <%= overallOrderAmount %></p>
+            </div>
+
+            <div class="card">
+                <h3>Total Discount</h3>
+                <p class="card-value"><%= overallDiscount %></p>
+            </div>
+            <div class="card">
+                <h3>Pending Orders</h3>
+                <p class="card-value"><%= pendingOrdersCount  %></p>
+            </div>
+
+            <div class="chart-container1">
+                <h3>Payment Methods Distribution</h3>
+                <canvas id="paymentChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Annual Revenue</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <div class="activities">
+                <h2>   Recent Activities / Updates</h2>
+                <canvas id="paymentChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h2>Monthly Sales</h2>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        
+        </div>
+    </div>
+
+    
+
+    
+
+    
+    
+
+    <%-include('footer') %>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Sales Chart Configuration
+    const salesData = <%= JSON.stringify(salesData) %>;
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Sales Amount',
+                data: salesData,
+                backgroundColor: 'rgba(0, 0, 0, 1)',
+                borderColor: 'rgba(0, 0, 0, 0.1)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => `Rs ${value}`
+                    }
                 }
             }
         }
     });
-}
 
+    // Payment Distribution Chart Configuration
+    const distributionData = <%- JSON.stringify(distribution) %>;
+    const paymentLabels = distributionData.map(item => item.method);
+    const paymentValues = distributionData.map(item => item.count);
+    const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+    new Chart(paymentCtx, {
+        type: 'pie',
+        data: {
+            labels: paymentLabels,
+            datasets: [{
+                data: paymentValues,
+                backgroundColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: context => {
+                            const total = paymentValues.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.raw / total) * 100).toFixed(2);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 </script>

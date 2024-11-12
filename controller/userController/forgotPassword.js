@@ -35,10 +35,10 @@ const ForgotPasswordpost = async (req, res) => {
         req.session.otp = otp
         console.log(req.session.otp)
         // req.session.otpTime = Date.now()
-        req.session.otpTime = Date.now() + (5 * 60 * 1000); // OTP valid for 5 minutes
+        req.session.otpTime = Date.now() + (5 * 60 * 1000); 
         req.session.email = req.body.email
 
-        res.redirect('/ForgotPasswordOtp')
+        res.render('user/ForgotPasswordOtp')
     }
     catch (err) {
         console.error('Error in submitting forgot password page', err)

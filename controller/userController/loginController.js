@@ -62,7 +62,7 @@ const loginPost = async (req, res) => {
 
 const SignUp = (req, res) => {
     try {
-        res.render('Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })    
+        res.render('user/Sign-Up', { title: 'Sign-Up', alertMessage: req.flash('error'), user: req.session.user })    
     }
     catch (err) {
         console.log(`Error in rendering Sign-Up page, ${err}`)
@@ -136,7 +136,7 @@ const SignUpPost = async (req, res) => {
 
 
         // Render the OTP verification page
-        res.render('OTPpage', {
+        res.render('user/OTPpage',{ 
             title: 'OTP Page',
             email: req.session.email,
             otpTime: req.session.otpTime,
@@ -153,8 +153,8 @@ const SignUpPost = async (req, res) => {
 const otpPagePost = async (req, res) => {
     const {otp} = req.body
     try {
-        console.log('Reached otppagePost try')
-        if (req.session.otp === otp && Date.now() - req.session.otpTime < 300000) {
+        // console.log('Reached otppagePost try')
+        if (String(req.session.otp) === String(otp) && Date.now() - req.session.otpTime < 300000) {
             const user = await userSchema.findOne({email : req.session.email})
             if(user){
                 user.isVerified = true;
@@ -167,27 +167,24 @@ const otpPagePost = async (req, res) => {
                 req.session.otp = null;
                 req.session.otpTime = null;
             
-                req.flash('sucess', 'Welcome!...New user verification successful');
+                // req.flash('sucess', 'Welcome!...New user verification successful');
                 console.log('New user verification successful');
-                res.redirect('user/home');
+                res.redirect('/home');
                 }
             else{
                 console.log('User not found')
-                req.flash('User Not found')
-                res.redirect('user/Sign-Up');
+                res.redirect('/Sign-Up');
 
             }
         }
         else{
-            req.flash('error', 'Invaild OTP , Try Again')
-            console.log('Error in OTP')
-            res.redirect('user/Sign-Up')
+            console.log('Error in OTP:')
+            res.redirect('/Sign-Up')
         }    
             
     } catch (error) {
         console.log(`error while verifying otp${error}`)
-        req.flash('error', 'Error in OTP verification')
-        res.redirect('user/Sign-Up')
+        res.redirect('/Sign-Up')
     }
 };
 
@@ -254,11 +251,12 @@ const googleAuthCallback = (req, res, next) => {
 
 const logout = (req, res) => {
     try {
-        req.session.destroy(error => {
-            if (error) {
-                console.log(`Error in logout ${error}`)
-            }
-        })
+        // req.session.destroy(error => {
+        //     if (error) {
+        //         console.log(`Error in logout ${error}`)
+        //     }
+        // })
+        req.session.user = null
         res.redirect('home')
     } catch (error) {
         console.log(`Error in user logout ${error}`)

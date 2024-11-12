@@ -43,23 +43,24 @@ const adminLoginPost = async (req, res) => {
 // Handle admin logout
 const logout = (req, res) => {
     try {
-        // console.log('Session before destruction:', req.session);
         const userData = req.session.admin;
-        console.log("admin data",userData)
         // Destroy admin session
-        req.session.destroy((err) => {
-            if (err) {
-                // Log any error that occurs during session destruction
-                console.log(`error during session logout${err}`)
-                // res.redirect('/admin/home')
-            }
-            else{
-            // Redirect to admin dashboard after logout
-            // res.clearCookie('connect.sid'); // Clear the session cookie
-            res.redirect('/admin/adminLogin')
-            }
+        // req.session.destroy((err) => {
+        //     if (err) {
+        //         // Log any error that occurs during session destruction
+        //         console.log(`error during session logout${err}`)
+        //         // res.redirect('/admin/home')
+        //     }
+        //     else{
+        //     // Redirect to admin dashboard after logout
+        //     // res.clearCookie('connect.sid'); // Clear the session cookie
+        //     res.redirect('/admin/adminLogin')
+        //     }
+        // })
 
-        })
+        req.session.admin= null
+        // res.clearCookie('connect.sid');
+        res.redirect('/admin/adminLogin');
     } catch (error) {
         // Log any error that occurs during logout
         console.log(`Error on admin logout ${error}`)

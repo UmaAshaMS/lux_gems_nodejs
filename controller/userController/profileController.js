@@ -4,12 +4,13 @@ const orderSchema = require('../../model/orderSchema')
 const couponSchema = require('../../model/couponSchema')
 const walletSchema = require('../../model/walletSchema')
 const bcrypt = require('bcrypt')
+const Razorpay = require("razorpay");
 
 
 const profile = async (req, res) => {
     try {
-        const userID = req.session.user; // Get user ID from session
-        const category = await categorySchema.find(); // Get categories
+        const userID = req.session.user; 
+        const category = await categorySchema.find(); 
 
         // Find the user
         const userData = await userSchema.findOne({ _id: userID }, { _id: 0 });
@@ -347,7 +348,12 @@ const wallet = async (req, res) => {
         const category = await categorySchema.find()
         const wallet = await walletSchema.findOne({userID:user})
         if(!wallet){
-            return res.status(400).json({message:'User wallet not found'})
+            return res.render('user/Wallet' , 
+            { title: 'Wallet', 
+            user, 
+            category, 
+            wallet : wallet || { balance: 0 },
+            message: 'No wallet found for the user.' })
         }
         res.render('user/Wallet', { title: 'Wallet', user, category, wallet : wallet || { balance: 0 } })
 
@@ -356,6 +362,59 @@ const wallet = async (req, res) => {
         console.log(`Error in rendering wallet page, ${error}`)
     }
 }
+
+const addMoneyToWallet = async(req,res) => {
+    const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_SECRET_KEY
+    });
+    try{
+    const { amount } = req.body;
+
+        // Validate the amount
+        if (!amount || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid amount'
+            });
+        }
+
+        // Fetch user from database
+        const user = req.session.user
+        let wallet = await walletSchema.findOne({userID : user})  
+
+        if (!wallet) {
+            wallet = new walletSchema({ userID: user });
+        }
+
+
+        wallet.balance += amount;
+
+        // Add a new transaction record
+        wallet.transaction.push({
+            walletAmount: amount,
+            orderId : null,
+            transactionType: 'Credited',
+            transactionDate: new Date()
+        });
+
+        await wallet.save();
+
+
+        // Send success response
+        res.status(200).json({
+            success: true,
+            message: `An amount of ${amount} has been added to your wallet successfully!`
+        });
+    } catch (error) {
+        console.error('Error adding money to wallet:', error);
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while adding money to the wallet. Please try again later.'
+        });
+    }
+}
+
 
 
 module.exports = {
@@ -370,5 +429,6 @@ module.exports = {
     setDefaultAddress,
     orderHistory,
     rewards,
-    wallet
+    wallet,
+    addMoneyToWallet,
 }

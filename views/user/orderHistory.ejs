@@ -257,6 +257,12 @@
                             <button class="btn"style="background-color: #555;">Download Invoice</button>
                         </a>
                     <% } %>
+
+                    <% if(order.status === 'payment pending') { %>
+                        <a id="payNow-button" onclick="payNow('<%= order._id %>', '<%= order.totalAmount %>')" target="_blank">
+                        <button class="btn btn-warning"style="background-color: #555;">Pay Now</button>
+                            </a>
+                        <% } %>
                 </div>
             </div>
         <% }) %>
@@ -290,6 +296,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
@@ -440,5 +448,69 @@ function submitReturnForm() {
         alert('Failed to download invoice.');
     }
     }
+
+    //Re-initiate payment
+    function payNow(orderId, totalAmount) {
+    fetch('/reInitiatePayment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId: orderId, totalAmount: totalAmount })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.razorpayOrderId) {
+            const options = {
+                key: "rzp_test_eOmJ744HMbCtga",  
+                amount: totalAmount * 100,  
+                currency: 'INR',
+                name: 'LUXGEMS',
+                description: 'Jewellery Purchase',
+                order_id: data.razorpayOrderId,  
+                handler: function (response) {
+                    // Handle payment success
+                    fetch('/updateOrderPendingStatus', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            paymentId: response.razorpay_payment_id,
+                            status: 'pending'
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            window.location.reload();  
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to update order status after payment.'
+                            });
+                        }
+                    })
+                    .catch((err) => console.error('Error updating order status:', err));
+                },
+                theme: {
+                    color: '#F37254'
+                }
+            };
+
+            const razorpayInstance = new Razorpay(options);
+            razorpayInstance.open();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to initiate payment.'
+            });
+        }
+    })
+    .catch(err => console.error('Error re-initiating payment:', err));
+}
 
 </script>

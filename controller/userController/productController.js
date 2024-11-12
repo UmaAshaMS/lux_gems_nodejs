@@ -1,6 +1,7 @@
 const userSchema = require('../../model/userSchema')
 const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
+const orderSchema = require('../../model/orderSchema')
 
 const AllproductsRender  = async(req,res) => {
     const searchQuery = req.query.query || ''; 
@@ -82,10 +83,69 @@ const productCategory = async (req, res) => {
     }
 };
 
+const filterProducts = async(req,res) => {
+    const { hideOutOfStock, sortOption } = req.body;
+
+    let query = {};
+
+    // Filter out of stock products
+    if (hideOutOfStock) {
+        query.stock = { $gt: 0 };
+    }
+
+    let products = await productSchema.find(query);
+
+    // Sort based on the sortOption value
+    switch (sortOption) {
+        case "priceLowHigh":
+            products = products.sort((a, b) => a.productPrice - b.productPrice);
+            break;
+        case "priceHighLow":
+            products = products.sort((a, b) => b.productPrice - a.productPrice);
+            break;
+        case "averageRating":
+            products = products.sort((a, b) => b.rating - a.rating);
+            break;
+        case "aToZ":
+            products = products.sort((a, b) => a.productName.localeCompare(b.productName));
+            break;
+        case "zToA":
+            products = products.sort((a, b) => b.productName.localeCompare(a.productName));
+            break;
+        case "newArrivals":
+            products = products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            break;
+        case "popularity":
+            const orders = await orderSchema.aggregate([
+                { $unwind: "$items" },
+                { $group: {
+                    _id: "$items.productId",
+                    orderCount: { $sum: "$items.quantity" } 
+                }},
+                { $sort: { orderCount: -1 } } 
+            ]);
+            // console.log("Aggregated Orders for Popularity:", orders);
+
+            // Create a map of productId to orderCount
+            const popularityMap = {};
+            orders.forEach(order => {
+                popularityMap[order._id] = order.orderCount;
+            });
+
+            // Sort products based on popularity
+            products = products.sort((a, b) => (popularityMap[b._id] || 0) - (popularityMap[a._id] || 0));
+            break;
+
+    }
+
+    res.json(products);
+}
+
 
 
 module.exports ={
     AllproductsRender,
     productDetails,
-    productCategory
+    productCategory,
+    filterProducts
 }

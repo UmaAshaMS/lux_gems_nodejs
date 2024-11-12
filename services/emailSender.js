@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer')
 require('dotenv').config()
 
+console.log('Process.env.mail : ' ,process.env.MAIL)
+
 const transporter = nodemailer.createTransport({
     host:process.env.SMTP_HOST,
     port:process.env.SMTP_PORT,
@@ -8,6 +10,9 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.MAIL,
         pass: process.env.PASS
+    },
+    tls: {
+        rejectUnauthorized: false // Allow self-signed certificates
     }
 })
 

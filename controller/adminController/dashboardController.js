@@ -14,6 +14,7 @@ const home = async (req, res) => {
 
         let overallOrderAmount = 0;
         let overallDiscount = 0;
+        const salesData = new Array(12).fill(0);
 
         orders.forEach(order => {
             overallOrderAmount += order.totalAmount;
@@ -21,15 +22,46 @@ const home = async (req, res) => {
             if (order.couponDiscount) {
                 overallDiscount += order.couponDiscount; 
             }
+        
+        const month = order.orderDate.getMonth();
+        salesData[month] += order.totalAmount; 
         });
 
-        
+        const pendingOrdersCount = await orderSchema.countDocuments({ status: 'Pending' });
 
+
+        const distribution = await orderSchema.aggregate([
+            {
+                $match: { status: 'Delivered' }  
+            },
+            {
+                $group: {
+                    _id: '$paymentMethod',       
+                    count: { $sum: 1 }          
+                }
+            }
+        ]);
+
+        const paymentMethodMap = {
+            0: 'COD',
+            1: 'Paypal',
+            2: 'Wallet',
+            3: 'InstaMojo',
+            4: 'Razorpay',
+        };
+
+        const transformedDistribution = distribution.map(item => ({
+            method: paymentMethodMap[item._id] || 'Unknown', 
+            count: item.count,
+        }));
         res.render('admin/home', {
             title: 'Home',
             totalOrders,
             overallOrderAmount,
             overallDiscount,
+            salesData,
+            distribution : transformedDistribution,
+            pendingOrdersCount,
         })
     }
     catch (err) {
@@ -442,7 +474,7 @@ const trendingProducts = async(req,res) => {
             { $unwind: "$items" },
             {
                 $group: {
-                    _id: "$items.productId", // Group by productId to sum sales
+                    _id: "$items.productId", 
                     totalSold: { $sum: "$items.quantity" }
                 }
             },
@@ -457,8 +489,8 @@ const trendingProducts = async(req,res) => {
             { $unwind: "$productInfo" },
             {
                 $lookup: {
-                    from: "categories", // Categories collection
-                    localField: "productInfo.productCategory", // Using the productCategory reference
+                    from: "categories", 
+                    localField: "productInfo.productCategory", 
                     foreignField: "_id", 
                     as: "categoryInfo"
                 }
@@ -466,8 +498,8 @@ const trendingProducts = async(req,res) => {
             { $unwind: "$categoryInfo" },
             {
                 $group: {
-                    _id: "$categoryInfo._id", // Group by categoryId
-                    categoryName: { $first: "$categoryInfo.name" }, // Assuming the category has a 'name' field
+                    _id: "$categoryInfo._id", 
+                    categoryName: { $first: "$categoryInfo.name" },
                     totalSold: { $sum: "$totalSold" }
                 }
             },
@@ -475,15 +507,13 @@ const trendingProducts = async(req,res) => {
             { $limit: 3 },
             {
                 $project: {
-                    categoryId: "$_id", // The category ID
-                    categoryName: 1, // The category name
-                    totalSold: 1 // The total sold products in that category
+                    categoryId: "$_id", 
+                    categoryName: 1,
+                    totalSold: 1 
                 }
             }
         ]);
 
-        console.log('Top Products obtained : ',topProducts)
-        console.log('Top category :', topCategories)
         res.render('admin/trending', {
             topProducts,
             topCategories,

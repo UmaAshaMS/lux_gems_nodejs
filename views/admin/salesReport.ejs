@@ -1,4 +1,4 @@
-<style>
+<!-- <style>
     .Container {
         border-radius: 10px;
         display: flex;
@@ -111,6 +111,194 @@
         height: auto;
         border-collapse: collapse;
     }
+</style> -->
+
+
+<style>
+    /* General Container Styling */
+
+
+body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .Container {
+            display: flex;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        /* Sidebar styling */
+        .SideBar {
+            width: 220px;
+            height:fit-content;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .SideBar .btn {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            margin: 10px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #444;
+            color: #caaf7a;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .SideBar .btn:hover {
+            background-color: #555;
+        }
+
+        .SideBar a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .Search {
+        display: flex;
+        flex-direction: column;
+        font-size: 42px;
+        align-items: center;
+        margin-left: 85px;
+    }
+
+    .Search form {
+        display: flex;
+    }
+
+    .form-control {
+        width: 500px;
+    }
+
+    .searchBtn {
+        flex: 2;
+        width: 10px;
+        color: white;
+        border: 2px;
+    }
+
+/* Report Section Styling */
+.reportButtons {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.reportButtons select, .reportButtons button {
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.reportButtons select:hover, .reportButtons button:hover {
+    background-color: #2d3b49;
+    border-color: #caaf7a;
+    color: #fff;
+}
+
+.reportButtons button {
+    background-color: #caaf7a;
+    border-color: #caaf7a;
+    color: #fff;
+    cursor: pointer;
+}
+
+.reportButtons button:hover {
+    background-color: #1f2733;
+    transform: scale(1.05);
+}
+
+/* Table Styling */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #2d3b49;
+    color: white;
+    text-align: left;
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Modal and Form Styling */
+#customDateInputs {
+    display: none;
+}
+
+input[type="date"], input[type="text"], .form-control {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin: 5px 0;
+}
+
+input[type="date"]:focus, input[type="text"]:focus, .form-control:focus {
+    border-color: #caaf7a;
+    outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .SideBar {
+        width: 100%;
+        position: relative;
+        margin: 0;
+        padding: 15px;
+    }
+
+    .Container {
+        margin-left: 0;
+    }
+
+    .custom-navbar .navbar-collapse {
+        justify-content: space-between;
+    }
+
+    .reportButtons {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 </style>
 
 
@@ -148,7 +336,8 @@
         <a href="/admin/Orders"><button class="btn btn-dark">Order</button></a>
         <a href="/admin/Coupons"><button class="btn btn-dark">Coupons</button></a>
         <a href="/admin/Offers"><button class="btn btn-dark">Offers</button></a>
-        <a href="/admin/Banner"><button class="btn btn-dark">Banner</button></a>
+        <a href="/admin/trendingProducts"><button class="btn">Trending</button></a>
+
         <form action="/admin/logout" method="POST">
             <button type="submit" class="btn btn-dark">Logout</button>
         </form>

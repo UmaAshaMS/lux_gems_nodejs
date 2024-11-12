@@ -10,13 +10,15 @@ const mongoose = require('mongoose');
 const { refund } = require('paypal-rest-sdk')
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
+const Razorpay = require("razorpay");
+
 
 
 
 
 
 const placeOrder = async (req, res) => {
-    // console.log('place order reached......')
+    console.log('place order reached......')
     try {
         const userId = req.session.user;
         const cart = req.session.cart;
@@ -65,6 +67,9 @@ const placeOrder = async (req, res) => {
 
         }
 
+        const orderStatus = parseInt(selectedPaymentOption) === 4   ? 'payment pending' : undefined;
+
+
         // order details
         const order = new orderSchema({
             userId: new ObjectId(userId),
@@ -85,7 +90,8 @@ const placeOrder = async (req, res) => {
             }),
             paymentMethod: selectedPaymentOption,
             totalAmount: totalAmount,
-            couponDiscount: cart.promotionAmount
+            couponDiscount: cart.promotionAmount,
+            status : orderStatus
         });
 
         // Save the order
@@ -120,7 +126,7 @@ const placeOrder = async (req, res) => {
         // Clear the cart session
         req.session.cart = null;
 
-        res.status(201).json({ success: true, orderId: savedOrder._id });
+        res.status(201).json({ success: true, orderId: savedOrder._id, orderTotal:savedOrder.totalAmount });
     } catch (error) {
         console.error(`Error placing order: ${error}`);
         res.status(500).json({ error: 'Failed to place the order. Please try again later.' });
@@ -384,6 +390,27 @@ const downloadInvoice = async (req, res) => {
     }
 };
 
+const reInitiatePayment = async(req,res) =>{
+        const { orderId, totalAmount } = req.body;
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_SECRET_KEY
+        });
+
+        try {
+            // Create a new Razorpay order with the same amount
+            const razorpayOrder = await razorpay.orders.create({
+                amount: totalAmount * 100,  
+                currency: 'INR',
+                receipt: orderId,  
+            });
+    
+            res.status(200).json({ razorpayOrderId: razorpayOrder.id });
+        } catch (error) {
+            console.error('Error creating Razorpay order:', error);
+            res.status(500).json({ error: 'Failed to create Razorpay order' });
+        }
+}
 
 
 module.exports = {
@@ -391,5 +418,6 @@ module.exports = {
     orderConfirmed,
     cancelOrder,
     returnOrder,
-    downloadInvoice
+    downloadInvoice,
+    reInitiatePayment
 }

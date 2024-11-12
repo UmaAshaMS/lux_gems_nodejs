@@ -4,6 +4,7 @@ const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const couponSchema = require('../../model/couponSchema')
 const walletSchema = require('../../model/walletSchema')
+const orderSchema = require('../../model/orderSchema')
 const { ObjectId } = require('mongodb')
 const addressSchema = require('../../model/addressSchema')
 const paypal = require('@paypal/checkout-server-sdk');
@@ -200,7 +201,7 @@ const checkout = async (req, res) => {
             cartItems,
             category,
             userAddress,
-            defaultAddress,
+            defaultAddress : defaultAddress || null,
             selectedAddress: req.session.address,
             subtotal,
             deliveryCharge,
@@ -251,6 +252,9 @@ const addNewAddressPost = async(req,res) => {
 
         const user = await userSchema.findOne({_id:userID})
 
+        const hasDefaultAddress = user.address.some(address => address.isDefault)
+
+
         const newAddress = {
           fullName,
           phoneNumber,
@@ -261,6 +265,8 @@ const addNewAddressPost = async(req,res) => {
           pincode,
           state,
           country,
+          isActive: true,
+          isDefault: !hasDefaultAddress,
         };
 
         user.address.push(newAddress)
@@ -269,6 +275,7 @@ const addNewAddressPost = async(req,res) => {
     
         
         res.status(200).json({ message: 'Address added successfully'});
+
         console.log('New Address added successfully')
       } 
       catch (error) {
@@ -277,17 +284,17 @@ const addNewAddressPost = async(req,res) => {
       }
     }
 
-    const editAdressCheckout = async(req,res) => {
-        try{
+const editAdressCheckout = async(req,res) => {
+    try{
 
         }
-        catch(error){
-            console.log(`Error in editing address in checkout page: ${error}`)
-        }
+    catch(error){
+        console.log(`Error in editing address in checkout page: ${error}`)
     }
+}
 
-    const deleteAddressCheckout = async(req,res) => {
-        console.log('Reached delete address checkout')
+const deleteAddressCheckout = async(req,res) => {
+    console.log('Reached delete address checkout')
         try{
             const addressId = req.params.id;
             const result = await addressSchema.findByIdAndDelete(addressId);
@@ -301,7 +308,8 @@ const addNewAddressPost = async(req,res) => {
         catch(error){
             console.log(`Error in deleting address in checkout: ${error}`)
         }
-    }
+}
+
 const renderPaypal = async(req,res) => {
 
     const environment = new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
@@ -454,13 +462,16 @@ const renderRazorpay = async (req, res) => {
                     discountAmount = totalAmount * (coupon.discount / 100)
                 }
             }
+            else{
+            return res.status(400).json({message:'Invalid Coupon Code'})
         }
-        else{
-            res.status(400).json({message:'Invalid Coupon Code'})
+
         }
         
+        
         const deliveryCharge = totalAmount < 2000 ? 100 : 0;
-        const finalAmount = (totalAmount + deliveryCharge - discountAmount).toFixed(2) * 100;
+        const finalAmount = Math.round((totalAmount + deliveryCharge - discountAmount)) * 100;
+        console.log('Final amount in paise', finalAmount)
 
         // Create Razorpay order
         const options = {
@@ -486,6 +497,30 @@ const renderRazorpay = async (req, res) => {
     }
 };
 
+const updateOrderPendingStatus = async(req,res) => {
+        const { orderId, paymentId, status } = req.body;
+        try {
+            // Find the order in the database using orderId
+            const order = await orderSchema.findById(orderId);
+    
+            if (!order) {
+                return res.status(404).json({ success: false, message: 'Order not found' });
+            }
+    
+            // order.paymentId = paymentId; 
+            order.status = status; 
+            console.log('Order status:', order.status)
+    
+            // Save the updated order
+            await order.save();
+    
+            return res.json({ success: true, message: 'Order status updated successfully' });
+        } catch (err) {
+            console.error('Error updating order status:', err);
+            return res.status(500).json({ success: false, message: 'Failed to update order status' });
+        }
+    };
+
 module.exports = {
     getAvailableCoupon,
     applyCoupon,
@@ -497,6 +532,7 @@ module.exports = {
     deleteAddressCheckout,
     renderPaypal,
     renderInstamojo,
-    renderRazorpay
+    renderRazorpay,
+    updateOrderPendingStatus
 
 }

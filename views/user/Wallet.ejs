@@ -84,6 +84,7 @@
         text-align: left;
         border: 1px solid #dee2e6;
         margin-bottom: 2%;
+        padding-bottom: 1%;
     }
 
     th, td {
@@ -137,10 +138,32 @@
 </div>
 
 <div class="button-container">
-    <button class="btn btn-secondary">Add Money</button>
+    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addMoneyModal">Add Money</button>
+</div>
+<!-- MOdal for add money to wallet -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-labelledby="addMoneyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMoneyModalLabel">Add Money to Wallet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMoneyForm">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required min="1">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="addMoneyToWallet()">Add Money</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="transactionHistory">
+    <% if(wallet  && wallet.transaction && wallet.transaction.length > 0) { %>
+
     <table>
         <thead>
             <tr>
@@ -154,13 +177,69 @@
             <% wallet.transaction.forEach(transaction => { %>
                 <tr>
                     <td><%= new Date(transaction.transactionDate).toLocaleString() %></td>
-                    <td><%= transaction.orderId %></td>
+                    <td><%= transaction.orderId ? transaction.orderId : 'Null' %></td>
                     <td>Rs.<%= transaction.walletAmount %></td>
                     <td><%= transaction.transactionType %></td>
                 </tr>
             <% }) %>
+            <% } else { %>
+                <p>No transactions yet!.</p>
+                <% } %>
         </tbody>
     </table>
 </div>
+<br>
+<div></div>
 
 <%-include('footer') %>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    function addMoneyToWallet() {
+    const amount = document.getElementById('amount').value;
+
+    if (!amount || amount <= 0) {
+        Swal.fire({
+                title: "Warning!",
+                text: "Please enter a valid amount",
+                icon: "warning",
+                confirmButtonText: "OK"
+            })
+        return;
+    }
+
+    fetch('/addMoneyToWallet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount: parseInt(amount) })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const addMoneyModal = bootstrap.Modal.getInstance(document.getElementById('addMoneyModal'));
+            addMoneyModal.hide();
+            Swal.fire({
+                title: "Money Added Successfully!",
+                text: data.message,
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                window.location.reload();  
+            });
+        } else {
+            Swal.fire({
+                title: "Payment Failed!",
+                text: data.message,
+                icon: "error",
+                confirmButtonText: "OK"
+            })
+        }
+    })
+    .catch(error => {
+        console.error('Error adding money to wallet:', error);
+    });
+}
+</script>

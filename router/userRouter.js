@@ -55,6 +55,7 @@ user.put('/setDefaultAddress/:index', checkUserLogin, userProfileControl.setDefa
 
 user.get('/rewards', checkUserLogin, userProfileControl.rewards)
 user.get('/wallet', checkUserLogin, userProfileControl.wallet)
+user.post('/addMoneyToWallet' , checkUserLogin, userProfileControl.addMoneyToWallet)
 
 
 user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
@@ -63,6 +64,7 @@ user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
 user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
 user.get('/productDetails/:id', checkUserLogin, userProductControl.productDetails);
 user.get('/product-category/:id', checkUserLogin, userProductControl.productCategory);
+user.post('/filterProducts',checkUserLogin, userProductControl.filterProducts)
 
 // Cart
 user.get('/cart', checkUserLogin, cartController.cart);
@@ -89,6 +91,7 @@ user.delete('/deleteAddressCheckout/:addressId', checkUserLogin, checkoutControl
 user.post('/renderPaypal', checkUserLogin, checkoutController.renderPaypal)
 user.post('/renderInstamojo',checkUserLogin, checkoutController.renderInstamojo)
 user.post('/renderRazorPay', checkUserLogin, checkoutController.renderRazorpay)
+user.post('/updateOrderPendingStatus',checkUserLogin , checkoutController.updateOrderPendingStatus)
 
 //Order
 user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
@@ -96,6 +99,7 @@ user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfir
 user.post('/cancelOrder/:orderId/:itemId', checkUserLogin, orderController.cancelOrder)
 user.post('/returnOrder/:orderId/:productId',checkUserLogin, orderController.returnOrder)
 user.get('/downloadInvoice/:orderId', checkUserLogin, orderController.downloadInvoice)
+user.post('/reInitiatePayment', checkUserLogin, orderController.reInitiatePayment)
 
 // Logout
 user.post('/logout', userLoginControl.logout);
