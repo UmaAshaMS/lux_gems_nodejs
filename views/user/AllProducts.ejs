@@ -157,7 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         applyFiltersBtn.addEventListener("click", () => {
             const hideOutOfStock = document.getElementById("outOfStockCheckbox").checked;
             const sortOption = document.getElementById("sortOptions").value;
-            fetchProducts({ hideOutOfStock, sortOption });
+            const categoryId = document.getElementById("categorySelect").value; 
+
+            fetchProducts({ hideOutOfStock, sortOption, categoryId });
         });
     }
 });

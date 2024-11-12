@@ -29,7 +29,6 @@ const home = async (req, res) => {
 
         const pendingOrdersCount = await orderSchema.countDocuments({ status: 'Pending' });
 
-
         const distribution = await orderSchema.aggregate([
             {
                 $match: { status: 'Delivered' }  

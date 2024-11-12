@@ -86,7 +86,8 @@ const productCategory = async (req, res) => {
             category, 
             categorySam,
             product: products,
-            user
+            user,
+            categoryId
         });
     } catch (err) {
         console.error('Error in loading category-wise products:', err);

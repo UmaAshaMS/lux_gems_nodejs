@@ -488,7 +488,7 @@ const distributionData = <%- JSON.stringify(distribution) %>;
             </div>
 
             <div class="activities">
-                <h2>   Recent Activities / Updates</h2>
+                <h2>Recent Activities / Updates</h2>
                 <canvas id="paymentChart"></canvas>
             </div>
 
@@ -515,6 +515,7 @@ const distributionData = <%- JSON.stringify(distribution) %>;
 <script>
     // Sales Chart Configuration
     const salesData = <%= JSON.stringify(salesData) %>;
+    console.log('Sales data : ',salesData)
     const ctx = document.getElementById('salesChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',

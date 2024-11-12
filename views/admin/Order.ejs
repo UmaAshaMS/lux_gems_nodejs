@@ -372,14 +372,14 @@
         <% if (hasPreviousPage) { %>
             <form action="/admin/orders" method="get" style="display:inline;">
                 <input type="hidden" name="page" value="<%= previousPage %>">
-                <button type="submit" class="btn">Previous</button>
+                <button type="submit">Previous</button>
             </form>
             <% } %>
 
                 <% for (let i=1; i <=totalPages; i++) { %>
                     <form action="/admin/orders" method="get" style="display:inline;">
                         <input type="hidden" name="page" value="<%= i %>">
-                        <button type="submit" class="btn <%= i === currentPage ? 'active' : '' %>">
+                        <button type="submit" <%= i === currentPage ? 'active' : '' %>">
                             <%= i %>
                         </button>
                     </form>
@@ -388,7 +388,7 @@
                         <% if (hasNextPage) { %>
                             <form action="/admin/orders" method="get" style="display:inline;">
                                 <input type="hidden" name="page" value="<%= nextPage %>">
-                                <button type="submit" class="btn">Next</button>
+                                <button type="submit" >Next</button>
                             </form>
                             <% } %>
     </div>
