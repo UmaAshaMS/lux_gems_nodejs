@@ -86,6 +86,11 @@
                     <div class="container">
                         <div class="product-row">
 
+
+                            <% if (product.length === 0) { %>
+                                <p>No products found matching your search.</p>
+                            <% } else { %>
+
                             <% product.forEach((prod)=> {%>
                                 <div class="product-item">
                                     <!-- Discount Badge -->
@@ -124,6 +129,8 @@
                                                     </h4>
                                 </div>
                                 <% })%>
+
+                                <% } %>
 
                                     
 

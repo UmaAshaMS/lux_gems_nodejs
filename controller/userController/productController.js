@@ -12,6 +12,7 @@ const AllproductsRender  = async(req,res) => {
     // Retrieve products that are active and belong to non-blocked categories
     const products = await productSchema.find({
         isActive: 1,
+        productName: { $regex: searchQuery, $options: 'i' }
         // productCategory: { $in: validCategoryIds }
     });
 
@@ -141,11 +142,14 @@ const filterProducts = async(req,res) => {
     res.json(products);
 }
 
+const search = async(req,res) => {
 
+}
 
 module.exports ={
     AllproductsRender,
     productDetails,
     productCategory,
-    filterProducts
+    filterProducts,
+    search
 }
