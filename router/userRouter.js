@@ -65,7 +65,6 @@ user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
 user.get('/productDetails/:id', checkUserLogin, userProductControl.productDetails);
 user.get('/product-category/:id', checkUserLogin, userProductControl.productCategory);
 user.post('/filterProducts',checkUserLogin, userProductControl.filterProducts)
-user.get('/search', checkUserLogin, userProductControl.search)
 
 // Cart
 user.get('/cart', checkUserLogin, cartController.cart);

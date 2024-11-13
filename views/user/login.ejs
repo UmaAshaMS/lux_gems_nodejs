@@ -1,7 +1,6 @@
 
 <head>
     <link rel="stylesheet" href="../../public/style.css">
-
 </head>
 <body>
 
@@ -30,6 +29,11 @@
         }
     </style>
 
+
+
+
+
+
     <section  style="background-color: #9A616D;">
         <div class="container py-5 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
@@ -43,7 +47,7 @@
                             <div class="col-md-6 col-lg-7 d-flex align-items-center">
                                 <div class="card-body p-4 p-lg-5 text-black">
 
-                                    <form action="/login" method="post">
+                                    <form  method="post" id="loginForm">
 
                                         <div class="d-flex align-items-center mb-3 pb-1">
                                             <i class="fas fa-gem fa-2x me-3" style="color: #000000;"></i>
@@ -54,13 +58,13 @@
                                             account</h5>
 
                                         <div data-mdb-input-init class="form-outline mb-4">
-                                            <input type="email" name="email" id="form2Example17"
+                                            <input type="email" name="email" id="userEmail"
                                                 class="form-control form-control-lg" required />
                                             <label class="form-label">Email address</label>
                                         </div>
 
                                         <div data-mdb-input-init class="form-outline mb-4">
-                                            <input type="password" name="password" id="form2Example27"
+                                            <input type="password" name="password" id="userPassword"
                                                 class="form-control form-control-lg" required />
                                             <label class="form-label" for="form2Example27">Password</label>
                                         </div>
@@ -96,5 +100,53 @@
 </body>
 
 <script>
+    // script.js
+
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+    console.log('Form submitted')
+
     
+   
+    const formData = {
+    userEmail : document.getElementById('userEmail').value,
+    userPassword : document.getElementById('userPassword').value
+    }
+
+    console.log('Form data :', formData)
+
+    // Send data to the server using fetch
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData), 
+    })
+    .then(response => response.json()) 
+    .then(data => {
+        if (data.success) {
+            if (data.redirect) {
+                window.location.href = data.redirect; // Redirect to home
+            }
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message || 'Login failed. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'An error occurred. Please try again later.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+});
+
 </script>

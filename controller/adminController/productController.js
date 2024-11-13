@@ -2,6 +2,8 @@ const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const upload = require('../../middleware/multer')
 const fs = require('fs');
+const path = require('path');
+
 const {ObjectId} = require('mongodb');
 const { productCategory } = require('../userController/productController');
 
@@ -43,33 +45,26 @@ const addProductPost = async (req, res) => {
     try {
         // Handle image uploads (assuming req.files.productImage is an array of images)
         let productImages = [];
-        // if (req.files && req.files.productImage) {
-        //     productImages = req.files.productImage.map(file => file.filename); // Assuming you store filenames in the database
-        //     console.log('Uploaded images:', productImages);
-        // }
+        
         req.files.forEach((img) => {
             productImages.push(img.path)
         })
 
-        // Extract form data from the request body
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body
         // const productImages = req.files;
 
         const category = await categorySchema.findOne({_id: new ObjectId(productCategory) });
+        if (!category) {
+            return res.status(400).json({ success: false, message: 'Selected category does not exist.' });
+        }
 
         // Check if a product with the same name and collection already exists
         const existingProduct = await productSchema.findOne({
             productName,
             productCategory
         });
-
         if (existingProduct) {
-            // If product exists, send an error response or flash a message
-            console.log(res.locals.error, res.locals.success)
-            req.flash('error', 'A product with this name already exists in the selected collection.');
-            res.status(400).json({message:'Product already Exists'})
-            console.log('Product exists')
-            return res.redirect('/admin/addProduct');
+            return res.status(400).json({ success: false, message: 'A product with this name already exists in the selected category.' });
         }
 
         // Create a product instance
@@ -85,14 +80,12 @@ const addProductPost = async (req, res) => {
         });
 
         await productDetails.save();
-        res.status(200).json({message:'New Product Added'})
-        // console.log("Product Added")
+        return res.status(200).json({ success: true, message: 'New Product Added' });
 
-        // console.log('new product saved in db')
-        res.redirect('/admin/Products');
     }
     catch (err) {
         console.error(`Error in saving product: ${err}`)
+        return res.status(500).json({ success: false, message: 'An error occurred while saving the product.' });
     }
 }
 
@@ -101,22 +94,24 @@ const blockProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         if (!productId) {
-            return res.status(404).json({ message: "Product not found" })
+            return res.status(400).json({success:false, message: "Product not found" })
         }
         // Find product by productId
         const product = await productSchema.findById(productId)
         if (!product) {
-            return res.status(404).json({ message: "Product does not exists." })
+            return res.status(400).json({success:false, message: "Product does not exists." })
         }
 
         //Mark the product as blocked
         product.isActive = false
         await product.save();
-        res.status(200).json({ message: "Product marked as blocked" });
+        res.status(200).json({success:true, message: "Product marked as blocked" });
 
     }
     catch (err) {
         console.error(`Error in blocking product, ${err}`)
+        res.status(500).json({ success: false, message: "Error in blocking product" });
+
     }
 }
 
@@ -125,19 +120,19 @@ const unblockProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         if (!productId) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({success:false, message: 'Product not found' });
         }
 
         // Find product by productId
         const product = await productSchema.findById(productId);
         if (!product) {
-            return res.status(404).json({ message: "Product does not exist." });
+            return res.status(404).json({success:false, message: "Product does not exist." });
         }
 
         // Find category by product's category name
         const category = await categorySchema.findOne({ _id: new ObjectId(product.productCategory) });
         if (!category) {
-            return res.status(404).json({ message: "Category does not exist." });
+            return res.status(404).json({success:false, message: "Category does not exist." });
         }
 
         // console.log('Category of the product selected: ', category.name);
@@ -150,7 +145,6 @@ const unblockProduct = async (req, res) => {
             return res.status(200).json({ success: true, message: "Product marked as Unblocked" });
         } else {
             console.log('Cannot unblock Product under a blocked category');
-            req.flash('error', 'Cannot unblock Product under a blocked category');
             return res.status(400).json({ success: false, message: "Cannot unblock product under a blocked category" });
         }
     } catch (err) {
@@ -191,7 +185,7 @@ const editProduct = async (req, res) => {
         if (!product) {
             return res.status(404).render('admin/Products', { message: 'Product not found' });
         }
-        res.render('admin/editProduct', { title: 'Edit Product', category, searchQuery, product })
+        res.render('admin/editProduct', { title: 'Edit Product', category, searchQuery, product, productId })
 
     }
     catch (err) {
@@ -201,17 +195,6 @@ const editProduct = async (req, res) => {
 
 const editProductPost = async (req, res) => {
     try {
-        const deletedImages = JSON.parse(req.body.deletedImages || '[]');
-
-        deletedImages.forEach(imagePath => {
-            const absolutePath = path.resolve(__dirname, '../../uploads', imagePath); 
-            if (fs.existsSync(absolutePath)) {
-                fs.unlinkSync(absolutePath); // Delete the image from the filesystem
-                console.log(`Deleted image: ${absolutePath}`);
-            } else {
-                console.warn(`Image not found: ${absolutePath}`);
-            }
-        });
 
         let newProductImages = [];
         if (req.files && req.files.productImage) {
@@ -219,31 +202,35 @@ const editProductPost = async (req, res) => {
             newProductImages = req.files.productImage.map(file => file.filename);
         }
 
+        console.log('New images : ', newProductImages)
+        console.log('req.files', req.files)
 
         // Extract other form data
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body;
+        console.log('Req. body : ', req.body)
         const productId = req.params.id;
-
-        // Fetch the category using productCategory from the form
-        const category = await categorySchema.findById(productCategory);
-        if (!category) {
-            req.flash('error', 'Category not found.');
-            return res.redirect(`/admin/editProduct/${req.params.id}`);
-        }
 
         // Find the product by its ID
         const product = await productSchema.findById(productId);
         if (!product) {
-            req.flash('error', 'Product not found.');
             console.log('Product not found');
-            return res.redirect('/admin/Products');
+            return res.status(400).json({success : false, message:'Product not found'});
+        }
+
+        // Fetch the category using productCategory from the form
+        const category = await categorySchema.findOne({ _id: productCategory });
+        console.log(category)
+        if (!category) {
+            return res.status(400).json({success: false, message:'Category not found'});
         }
 
         // Prepare the updated image list
         const updatedImages = [
-            ...product.productImage.filter(img => !deletedImages.includes(img)), // Keep existing images not marked for deletion
+            ...product.productImage,
             ...newProductImages 
         ];
+
+        console.log('Updtaed Images : ',updatedImages)
 
         // Prepare the update data
         const updateData = {
@@ -255,39 +242,63 @@ const editProductPost = async (req, res) => {
             productDiscount,
             productImage: updatedImages 
         };
+        console.log('updtae data', updateData)
 
         // Update the product in the database
         const updatedProduct = await productSchema.findByIdAndUpdate(productId, updateData, { new: true });
+        console.log(updatedProduct)
 
         if (!updatedProduct) {
             throw new Error('Failed to update the product.');
         }
-        res.redirect('/admin/Products');
+        res.status(200).json({success:true, message:'Product updated'});
     } catch (err) {
         console.error(`Error in submitting edit product form: ${err}`);
-        res.redirect(`/admin/editProduct/${req.params.id}`);
+        res.status(200).json({success : false, message:'Product not updated'});
     }
 };
 
+const deleteImage = async (req, res) => {
+    console.log('Reached delete image');
+    try {
+        let { imagePath, productId } = req.body;
+        imagePath = imagePath.replace(/\//g, '\\');
 
-const deleteImage = (req, res) => {
-    const imageName = decodeURIComponent(req.params.imageName); // Decode image name
-    const absolutePath = path.resolve(__dirname, '../../uploads', imageName);
 
-    if (fs.existsSync(absolutePath)) {
-        fs.unlink(absolutePath, (err) => {
-            if (err) {
-                console.error(`Error deleting image: ${err}`);
-                return res.status(500).json({ success: false });
-            }
-            console.log(`Deleted image: ${absolutePath}`);
-            res.json({ success: true });
-        });
-    } else {
-        console.warn(`Image not found: ${absolutePath}`);
-        res.status(404).json({ success: false });
+        const normalizedImagePath = path.posix.normalize(imagePath); 
+
+        const product = await productSchema.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Convert backend paths to Windows format for comparison
+        const productImages = product.productImage.map(img => path.win32.normalize(img));
+
+        // console.log("Frontend Image Path (Normalized):", normalizedImagePath);
+        // console.log("Backend Image Paths (Normalized):", productImages);
+
+        // Check if the normalized image path exists in the array
+        const imageExists = productImages.includes(normalizedImagePath);
+
+        if (!imageExists) {
+            return res.status(404).json({ success: false, message: 'Image not found in product' });
+        }
+
+        // Filter out the matching image
+        product.productImage = product.productImage.filter(img => path.win32.normalize(img) !== normalizedImagePath);
+
+        await product.save();
+        console.log('Updated product after image deletion:', product);
+
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
 
 module.exports = {
     getproduct,
@@ -298,5 +309,5 @@ module.exports = {
     blockProduct,
     unblockProduct,
     deleteProduct,
-    deleteImage
+    deleteImage,
 }

@@ -2,6 +2,8 @@ const userSchema = require('../../model/userSchema')
 const bcrypt = require('bcrypt')
 const sendOTP = require('../../services/emailSender')
 const generateOTP = require('../../services/generateOTP')
+const flash = require('connect-flash');
+
 
 const passport = require('passport')
 const auth = require('../../services/auth')
@@ -20,45 +22,33 @@ const login = (req, res) => {
 
 const loginPost = async (req, res) => {
     try {
-        // Find the user in the database by email
-        const checkUser = await userSchema.findOne({ email: req.body.email });
+        const { userEmail, userPassword } = req.body;
 
-        // Log the found user details
-        // console.log('User found:', checkUser);
+        const checkUser = await userSchema.findOne({ email: req.body.userEmail });
 
         if (!checkUser) {
-            // If the user is not found, set a flash message and redirect
-            req.flash('error', 'Invalid user credentials');
-            console.log('Invalid user credentials - user not found.');
-            return res.redirect('login');
+            return res.status(400).json({success:false, message:'Invalid User credentials - user not found'})
         }
 
         if (checkUser.isBlocked) {
-            // If the user is blocked, set a flash message and redirect
-            console.log('User blocked by admin.');
-            req.flash('error', 'Your account has been blocked. Please contact support.');
-            return res.redirect('user/login');
+            return res.status(400).json({success:false, message:'Your account has been blocked. Please contact support.'})
         }
 
-        // Compare the provided password with the stored hashed password
-        const isPasswordValid = await bcrypt.compare(req.body.password.trim(), checkUser.password);
+        const isPasswordValid = await bcrypt.compare(req.body.userPassword.trim(), checkUser.password);
 
         if (isPasswordValid) {
-            // If the password is correct, set the session user and redirect to home
-            req.session.user = checkUser._id;
-            res.redirect('/home');
+            req.session.user = checkUser._id; 
+            return res.status(200).json({success:true, message:'User logged in', redirect:'/home'}); 
         } else {
-            // If the password is incorrect, set a flash message and redirect
             req.flash('error', 'Invalid user credentials');
-            console.log('Invalid user credentials - password mismatch.');
-            res.redirect('user/login');
+            return res.status(400).json({success:false, message:'Invalid user credentials- Password mismatch'})
         }
     } catch (err) {
-        // Handle any unexpected errors
-        req.flash('error', 'An error occurred. Please try again later.');
-        console.log(`Error in Login: ${err}`);
+        console.log(`Error in Login: ${err.message || err}`);
+        return res.status(400).json({success:false, message:'An error occured, Please try again later.'}); 
     }
 };
+
 
 const SignUp = (req, res) => {
     try {
@@ -82,14 +72,14 @@ const SignUpPost = async (req, res) => {
         if (!name || !phoneNumber || !email || !password1 || !password2) {
             console.error('All fields are required');
             req.flash('error', 'All fields are required');
-            return res.redirect('user/Sign-Up');
+            return res.status(400).json({success:false, message:'All feilds are required.'});
         }
 
         // Validate email format
         if (!emailRegex.test(email)) {
             console.error('Invalid email format');
             req.flash('error', 'Invalid email format');
-            return res.redirect('user/Sign-Up');
+            return res.status(400).json({success:false, message:'Invalid email format'});
         }
 
         // Check if passwords match
@@ -133,7 +123,6 @@ const SignUpPost = async (req, res) => {
         req.session.otpTime = Date.now();
         req.session.email = email;
         
-
 
         // Render the OTP verification page
         res.render('user/OTPpage',{ 
@@ -229,10 +218,10 @@ const googleAuthCallback = (req, res, next) => {
             }
             if (user.isBlocked) {
                 req.flash('error', 'User access is blocked by admin')
-                return res.redirect('login')
+                return res.redirect('/login')
             }
             if (!user) {
-                return res.redirect('login');
+                return res.redirect('/login');
             }
             req.logIn(user, (err) => {
                 if (err) {

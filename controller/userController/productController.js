@@ -2,9 +2,15 @@ const userSchema = require('../../model/userSchema')
 const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
 const orderSchema = require('../../model/orderSchema')
+const mongoose = require('mongoose');
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 
 const AllproductsRender  = async(req,res) => {
-    const searchQuery = req.query.query || ''; 
+    const searchQuery = req.query.query ? escapeRegex(req.query.query) : ''; 
     const categoryId = req.query.category || '';
 
     // Retrieve non-blocked categories
@@ -13,8 +19,6 @@ const AllproductsRender  = async(req,res) => {
     if (categoryId) {
         filterQuery.productCategory = categoryId;  // Filter by category
     }
-
-
 
     // Retrieve products that are active and belong to non-blocked categories
     const products = await productSchema.find({
@@ -45,6 +49,9 @@ const productDetails = async (req,res) => {
     const category = await categorySchema.find()
     const user = req.session.user || null;
     const productID = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(productID)) {
+        return res.status(404).render('pageNotFound', { title: 'Page Not Found' });
+    }
 
     try{
         // Fetch product details
@@ -68,6 +75,9 @@ const productDetails = async (req,res) => {
 const productCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(404).render('pageNotFound', { title: 'Page Not Found' });
+        }
 
         const category = await categorySchema.find();
 
@@ -77,7 +87,10 @@ const productCategory = async (req, res) => {
             return res.status(404).render('pageNotFound',{ title: 'Page Not Found'})
         }
 
-        const products = await productSchema.find({ productCategory: categorySam._id });
+        const products = await productSchema.find({ 
+            productCategory: categorySam._id,
+            isActive: true,
+        });
 
         const user = req.session.user || null;
 
@@ -98,7 +111,7 @@ const productCategory = async (req, res) => {
 const filterProducts = async(req,res) => {
     const { hideOutOfStock, sortOption, categoryId } = req.body;
 
-    let query = {};
+    let query = {isActive: true};
 
     // Filter out of stock products
     if (hideOutOfStock) {
@@ -139,7 +152,6 @@ const filterProducts = async(req,res) => {
                 }},
                 { $sort: { orderCount: -1 } } 
             ]);
-            // console.log("Aggregated Orders for Popularity:", orders);
 
             // Create a map of productId to orderCount
             const popularityMap = {};
@@ -156,14 +168,11 @@ const filterProducts = async(req,res) => {
     res.json(products);
 }
 
-const search = async(req,res) => {
 
-}
 
 module.exports ={
     AllproductsRender,
     productDetails,
     productCategory,
     filterProducts,
-    search
 }

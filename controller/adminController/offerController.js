@@ -23,6 +23,7 @@ const offers = async(req,res) => {
 const addOfferPost = async (req, res) => {
     try {
         const { offerTitle, offerType, referenceId, discountPercent } = req.body;
+        console.log('Reference ID: ', referenceId)
 
         // Check for missing fields
         if (!offerTitle || !offerType || (offerType !== 'none' && !referenceId) || !discountPercent) {
@@ -35,7 +36,7 @@ const addOfferPost = async (req, res) => {
         }
 
         // Check if the offer already exists
-        const offerExists = await offerSchema.findOne({ referenceId });
+        const offerExists = await offerSchema.findOne({ offerTitle });
         if (offerExists) {
             return res.status(400).json({ message: 'Offer Already Exists' });
         }

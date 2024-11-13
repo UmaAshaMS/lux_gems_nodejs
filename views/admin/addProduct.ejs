@@ -444,19 +444,63 @@
                 //     validate = false;
                 // }
 
-                if (validate) {
-                    addProductForm.submit();
+                if (!validate) {
                     
-                }
-                else {
                     console.log('Error in form validation')
                     Swal.fire({
                         title: "Invalid Inputs",
                         text: errorMessage,
                         icon: "error"
                     });
+                    return;
                 }
+
+                const confirmation = await Swal.fire({
+                title: "Add Product?",
+                text: "Are you sure you want to add this product?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Yes, add it!",
+                cancelButtonText: "Cancel"
+                });
+
+
+            if (confirmation.isConfirmed) {
+            const formData = new FormData(addProductForm);
+
+            // Send data with fetch
+            fetch('/admin/addProduct', {
+            method: 'POST',
+            body: formData
+            })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Product Added",
+                    text: data.message,
+                    icon: "success"
+                }).then(() => { 
+                    window.location.href = '/admin/products';
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: data.message || "An error occurred while adding the product.",
+                    icon: "error"
+                });
+            }
+        })
+            .catch(error => {
+            Swal.fire({
+                title: "Error",
+                text: "An error occurred while adding the product.",
+                icon: "error"
             });
+            console.error("Error in product addition:", error);
+        });
+    }
+});
 
             let cropper;
             let currentImageElement;
