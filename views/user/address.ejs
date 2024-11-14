@@ -104,7 +104,8 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" form="addAddressForm">Save</button>
+                            <button type="submit" class="btn btn-primary" form="addAddressForm"
+                                onclick="addAddress(event)">Save</button>
                         </div>
                         </form>
                     </div>
@@ -134,17 +135,17 @@
                                                                 <%= address.state %>, <%= address.country %>
                                     </p>
                                     <div class="d-flex justify-content-between">
-                                        <a class="address-card-link text-primary" style="cursor:pointer"  
-                                        href="/editAddress/<%= index %>">
-                                        <i class="fas fa-edit"></i>
+                                        <a class="address-card-link text-primary" style="cursor:pointer"
+                                            href="/editAddress/<%= index %>">
+                                            <i class="fas fa-edit"></i>
                                             Edit</a>
                                         <a class="address-card-link text-danger" style="cursor:pointer"
                                             onclick="deleteAddress(`<%= index %>`)" data-index="<%= index %>"><i
                                                 class="fas fa-trash-alt"></i> Delete</a>
-                                                <% if(!address.isDefault) {%>
-                                        <a class="address-card-link text-success" style="cursor:pointer" onclick="setAsDefault('<%= index %>')"><i
-                                                class="fas fa-check"></i>
-                                            Set as Default</a>
+                                        <% if(!address.isDefault) {%>
+                                            <a class="address-card-link text-success" style="cursor:pointer"
+                                                onclick="setAsDefault('<%= index %>')"><i class="fas fa-check"></i>
+                                                Set as Default</a>
                                             <% } else { %>
                                                 <strong>Default Address</strong>
                                                 <% } %>
@@ -158,42 +159,83 @@
 
 
             <script>
-                document.getElementById('addAddressForm').addEventListener(submit,(e) => {
-                    e.preventDefault();
-                
-                let validate = true;
-                let errorMessage = "";
-                
-                const fullName = getElementById('fullName').value
-                const phoneNumber = getElementById('phoneNumber').value
-                const email = getElementById('email').value
-                const addressLine1 = getElementById('addressLine1').value
-                const addressLine2 = getElementById('addressLine2').value
-                const city = getElementById('city').value
-                const pincode = getElementById('pincode').value
-                const state = getElementById('state')
-                const country = getElementById('country')
-                if(!fullName || fullName === 0){
 
-                }
-                })
+
+
                 //Function to add address
                 function addAddress(event) {
+                    console.log('reached add address post in front end')
                     event.preventDefault()
 
-                    // Collect data from form
-                    const form = document.getElementById('addAddressForm');
-                    const formData = new FormData(form);
+                    const fullName = document.getElementById('fullName').value
+                    const phoneNumber = document.getElementById('phoneNumber').value
+                    const email = document.getElementById('email').value
+                    const addressLine1 = document.getElementById('addressLine1').value
+                    const addressLine2 = document.getElementById('addressLine2').value
+                    const city = document.getElementById('city').value
+                    const pincode = document.getElementById('pincode').value
+                    const state = document.getElementById('state').value
+                    const country = document.getElementById('country').value
+
+                    console.log(fullName)
+
+
+                    let validate = true
+                    let errorMessage = ""
+
+                    if (!fullName || /^[A-Za-z\s]+$/.test(fullName)) {
+                        errorMessage += "Full Name is required and should contain only letters.\n";
+                        validate = false;
+                    }
+                    if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+                        errorMessage += "Phone number is required and should be 10 digits.\n";
+                        validate = false;
+                    }
+                    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+                        errorMessage += "Please provide a valid email address.\n";
+                        validate = false;
+                    }
+                    if (!addressLine1) {
+                        errorMessage += "Address Line 1 is required.\n";
+                        validate = false;
+                    }
+                    if (!city) {
+                        errorMessage += "City is required.\n";
+                        validate = false;
+                    }
+                    if (!pincode || !/^\d{6}$/.test(pincode)) {
+                        errorMessage += "PINCODE is required and should be 6 digits.\n";
+                        validate = false;
+                    }
+                    if (!state) {
+                        errorMessage += "Please select a state.\n";
+                        validate = false;
+                    }
+                    if (!country) {
+                        errorMessage += "Please select a country.\n";
+                        validate = false;
+                    }
+
+                    if (!validate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error!',
+                            text: errorMessage,
+                            confirmButtonText: 'Try Again'
+                        });
+                        return;
+                    }
+
                     const data = {
-                        fullName: formData.get('fullName'),
-                        phoneNumber: formData.get('phoneNumber'),
-                        email: formData.get('email'),
-                        addressLine1: formData.get('addressLine1'),
-                        addressLine2: formData.get('addressLine2'),
-                        city: formData.get('city'),
-                        pincode: formData.get('pincode'),
-                        state: formData.get('state'),
-                        country: formData.get('country')
+                        fullName,
+                        phoneNumber,
+                        email,
+                        addressLine1,
+                        addressLine2,
+                        city,
+                        pincode,
+                        state,
+                        country
                     };
 
                     const URL = `/addAddress`;
@@ -220,7 +262,7 @@
                                     text: data.message,
                                     icon: 'error',
                                     confirmButtonText: 'OK',
-                                    
+
                                 });
                             }
                         })
@@ -257,19 +299,19 @@
                                     if (response.ok) {
                                         Swal.fire({
                                             title: 'Success!',
-                                        text: 'Address deleted successfully!',
-                                        icon: 'success',
-                                        confirmButtonText: 'OK'
+                                            text: 'Address deleted successfully!',
+                                            icon: 'success',
+                                            confirmButtonText: 'OK'
                                         })
                                         window.location.reload(); // Refresh the page to reflect changes
                                     } else {
                                         Swal.fire({
-                                        title: 'Error!',
-                                        text: 'Address deletion failed!',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK'
+                                            title: 'Error!',
+                                            text: 'Address deletion failed!',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
                                         })
-                                        ;
+                                            ;
                                     }
                                 })
                                 .catch(err => {
@@ -281,33 +323,34 @@
                     )
                 }
 
-async function setAsDefault(index) {
-    try {
-        const response = await fetch(`/setDefaultAddress/${index}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ index })
-        });
+                async function setAsDefault(index) {
+                    try {
+                        const response = await fetch(`/setDefaultAddress/${index}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ index })
+                        });
 
-        if (response.ok) {
-            const result = await response.json();
-            Swal.fire({
-                title: 'Sucess!',
-                text: 'Address set as default!',
-                icon: 'success',
-                confirmButtonText: 'OK',
+                        if (response.ok) {
+                            const result = await response.json();
+                            Swal.fire({
+                                title: 'Sucess!',
+                                text: 'Address set as default!',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
 
-            }).then( ()=>  { window.location.reload()
-        });
-        } else {
-            alert('Failed to set default address.');
-        }
-    } catch (error) {
-        console.error('Error setting default address:', error);
-    }
-}
+                            }).then(() => {
+                                window.location.reload()
+                            });
+                        } else {
+                            alert('Failed to set default address.');
+                        }
+                    } catch (error) {
+                        console.error('Error setting default address:', error);
+                    }
+                }
 
 
             </script>

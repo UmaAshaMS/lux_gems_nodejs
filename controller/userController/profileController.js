@@ -41,8 +41,9 @@ const address = async (req, res) => {
     const userID = req.session.user
     try {
         const userData = await userSchema.findOne({ _id: userID }, { address: 1 })
-        if (userData.address.length > 0)
+        if (userData && userData.address && userData.address.length > 0) {
             address = userData.address
+        }
     }
     catch (error) {
         console.log("Error in fetching address:", error)
@@ -54,7 +55,6 @@ const addAddress = async (req, res) => {
     const userID = req.session.user
     try {
         const { fullName, phoneNumber, email, addressLine1, addressLine2, city, pincode, state, country } = req.body;
-        console.log('Form details in adding address', req.body.fullName)
 
         const user = await userSchema.findOne({ _id: userID })
 
@@ -106,12 +106,23 @@ const editAddress = async (req, res) => {
         const category = await categorySchema.find();
         const index = req.params.index
         const user = req.session.user
+        if (!user) {
+            return res.status(400).json({success: false , message:"User not logged in"});
+        }
         const userData = await userSchema.findOne({ _id: user }, { address: 1 })
+        if (!userData || !userData.address) {
+            return res.status(404).json({success: false, message:"Address not found for this user"});
+        }
         const address = userData.address[index]
+        if (!address) {
+            return res.status(404).json({success : false , messsage:"Address at the given index not found"});
+        }
+
         res.render('user/editAddress', { title: ' Edit Address', category, user: req.session.user, address, index })
     }
     catch (error) {
         console.log(`Error in loading edit address page : ${error}`)
+        res.status(500).json({success:false, message:'Error in loading edit address page.'})
     }
 }
 
@@ -136,7 +147,7 @@ const editAddressPost = async (req, res) => {
             };
 
             await user.save();
-            res.redirect('/address');
+            res.status(200).json({success:true, message:'Address edited Successfully!'})
         } else {
             res.status(404).send('User not found');
         }
@@ -171,59 +182,6 @@ const setDefaultAddress = async (req, res) => {
         console.log(`Error in setting default address,${error}`)
     }
 }
-
-// const orderHistory = async (req, res) => {
-//     try {
-//         const category = await categorySchema.find();
-//         const user = req.session.user
-//         const {status} = req.query
-
-//         let orders;
-//         if(status){
-//             const orders = await orderSchema.find({userId:user, status}).sort({ createdAt: -1 });
-//         }
-//         else{
-//             const orders = await orderSchema.find({userId: user}).sort({ createdAt: -1 });
-//         }
-
-//         const orderDetails = orders.map(order => {
-//             const orderDate = new Date(order.orderDate);
-//             const expectedDeliveryDate = new Date(orderDate);
-//             expectedDeliveryDate.setDate(orderDate.getDate() + 10);
-
-//             const returnPolicyDays = 7;
-
-//             // Calculate the return date
-//             const returnDate = new Date(expectedDeliveryDate);
-//             returnDate.setDate(expectedDeliveryDate.getDate() + returnPolicyDays);
-
-//             const formattedReturnDate = returnDate.toDateString();
-
-//             const currentDate = new Date();
-//             const returnWindowClosed = currentDate > returnDate;
-
-//             return {
-//                 ...order.toObject(), 
-//                 expectedDeliveryDate: expectedDeliveryDate.toDateString(),
-//                 formattedReturnDate,
-//                 returnWindowClosed,
-//                 returnDate
-//             };
-//         });
-
-//         res.render('user/orderHistory', {
-//             title: 'Order History',
-//             category,
-//             user,
-//             orders: orderDetails,
-//             selectedStatus: status,
-            
-//         })
-//     }
-//     catch (error) {
-//         console.log(`Error in rendering order history page, ${error}`)
-//     }
-// }
 
 const orderHistory = async (req, res) => {
     try {
@@ -301,30 +259,27 @@ const editProfilePost = async (req, res) => {
         if (newPassword) {
             const isPasswordValid = await bcrypt.compare(currentPassword.trim(), user.password);
             if (!isPasswordValid) {
-                return res.status(400).json({ message: 'Current password is incorrect' });
+                return res.status(400).json({ success: false, message: 'Current password is incorrect' });
             }
+
+            // Check if new passwords match
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({success:false,message : 'New passwords do not match'})
+            }
+            user.password = await bcrypt.hash(newPassword, 10);
         }
-
-
-        // Check if new passwords match
-        if (newPassword !== confirmPassword) {
-            // res.status(400).send('New passwords do not match')
-            return redirect('editProfile');
-        }
-
+        
         user.name = fullName;
         user.phoneNumber = phoneNumber;
 
-        if (newPassword) {
-            user.password = await bcrypt.hash(newPassword, 10);
-        }
-
         await user.save()
 
-        res.redirect('profile')
+        res.status(200).json({ success:true,message: 'Profile updated successfully', redirect: 'login' });
+
     }
     catch (error) {
         console.log(`Error in saving edited profile info,${error}`)
+        res.status(500).json({ success:false, message: 'An error occurred while updating profile information' });
     }
 }
 
@@ -373,10 +328,7 @@ const addMoneyToWallet = async(req,res) => {
 
         // Validate the amount
         if (!amount || amount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid amount'
-            });
+            return res.status(400).json({success: false,message: 'Invalid amount'});
         }
 
         // Fetch user from database
@@ -386,7 +338,6 @@ const addMoneyToWallet = async(req,res) => {
         if (!wallet) {
             wallet = new walletSchema({ userID: user });
         }
-
 
         wallet.balance += amount;
 

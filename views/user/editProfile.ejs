@@ -60,7 +60,7 @@
         <!-- Form Section -->
     <div class="form-container">
         <h2>Edit User Information</h2>
-        <form method="POST" action="editProfilePost" autocomplete="off">
+        <form method="POST"  autocomplete="off" id="editProfileForm">
             <div class="form-group full">
                 <label for="fullName">Full Name:</label>
                 <input type="text" id="fullName" name="fullName" value="<%= user ? user.name : '' %>" autocomplete="off">
@@ -94,86 +94,101 @@
                 <div class="password-container">
                 <input type="password" id="confirmPassword" name="confirmPassword"  autocomplete="new-password">
                 <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
+                    <i class="fas fa-eye" id="toggleCurrentPassword"></i></button>
                 </div>
             </div>
-            <button class="btn" type="submit"> Save Changes</button>
+            <button class="btn" type="submit" onclick="editProfileForm(event)"> Save Changes</button>
         </form>
         
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOM fully loaded and parsed');
-    const form = document.querySelector('form');
+   async function editProfileForm(event) {
+    event.preventDefault(); // Prevent default form submission
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        alert('Form is being validated!');
+    // Form field values
+    const fullName = document.getElementById('fullName').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const currentPassword = document.getElementById('currentPassword').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
 
-        const fullName = document.getElementById('fullName').value.trim();
-        const phoneNumber = document.getElementById('phoneNumber').value.trim();
-        const newPassword = document.getElementById('newPassword').value.trim();
-        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+    // Initialize validation state
+    let isValid = true;
+    let errorMessage = '';
 
-        let isValid = true;
-        let errorMessage = '';
+    // Validation logic
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!fullName || !nameRegex.test(fullName)) {
+        isValid = false;
+        errorMessage += 'Full Name must only contain letters.\n';
+    }
 
-        // Validate Full Name
-        const nameRegex = /^[A-Za-z\s]+$/;
-        if (!fullName || !nameRegex.test(fullName)) {
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+        isValid = false;
+        errorMessage += 'Phone number must be 10 digits.\n';
+    }
+
+    if (newPassword) {
+        if (newPassword.length < 6) {
             isValid = false;
-            errorMessage += 'Full Name must only contain letters.\n';
+            errorMessage += 'New Password must be at least 6 characters long.\n';
         }
-
-        // Validate phone Number
-        const phoneRegex = /^\d{10}$/;
-        if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
+        if (newPassword !== confirmPassword) {
             isValid = false;
-            errorMessage += 'Phone number must be 10 digits.\n';
+            errorMessage += 'New Password and Confirm Password do not match.\n';
         }
+    }
 
-        if (newPassword) {
-            if (newPassword.length < 6) {
-                isValid = false;
-                errorMessage += 'New Password must be at least 6 characters long.\n';
-            }
-            if (newPassword !== confirmPassword) {
-                isValid = false;
-                errorMessage += 'New Password and Confirm Password do not match.\n';
-            }
-        }
-        console.log(`Validating: Full Name = ${fullName}, Phone = ${phoneNumber}, New Password = ${newPassword}, Confirm Password = ${confirmPassword}`);
-        console.log(`Is form valid? ${isValid}`);
+    console.log(`Validating: Full Name = ${fullName}, Phone = ${phoneNumber}, New Password = ${newPassword}, Confirm Password = ${confirmPassword}`);
+    console.log(`Is form valid? ${isValid}`);
 
-        if (!isValid) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error!',
-                text: errorMessage,
-                confirmButtonText: 'Try Again'
-            });
-            return; // Stop form submission
-        }
+    // Show error message if validation fails
+    if (!isValid) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error!',
+            text: errorMessage,
+            confirmButtonText: 'Try Again'
+        });
+        return; // Stop form submission
+    }
 
-        const formData = new FormData(form);
-        const response = await fetch(form.action, {
+    // Prepare form data for submission
+
+    const formData = {
+        fullName,
+        phoneNumber,
+        currentPassword,
+        newPassword,
+        confirmPassword
+    };
+    console.log(formData)
+
+    // Send data to server
+    try {
+        const response = await fetch('/editProfilePost', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
         });
 
         const data = await response.json();
 
-        if (response.ok) {
-            // Success
+    if (data.success) {
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
                 text: data.message,
                 confirmButtonText: 'OK'
             }).then(() => {
-                window.location.href = 'profile'; // Redirect to profile after confirmation
+                if (data.redirect) {
+                    window.location.href = data.redirect; // Redirect to profile or specified page
+                }
             });
         } else {
-            // Error
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
@@ -181,8 +196,20 @@
                 confirmButtonText: 'Try Again'
             });
         }
-    });
-});
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'An unexpected error occurred. Please try again later.',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+
+
+    
 
 // Move togglePassword function outside
 function togglePassword(passwordFieldId) {
