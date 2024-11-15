@@ -12,6 +12,9 @@ function escapeRegex(text) {
 const AllproductsRender  = async(req,res) => {
     const searchQuery = req.query.query ? escapeRegex(req.query.query) : ''; 
     const categoryId = req.query.category || '';
+    const page = parseInt(req.query.page) || 1; 
+    const itemsPerPage = 8;
+    const filterQuery = {};  
 
     // Retrieve non-blocked categories
     const categories = await categorySchema.find({ isBlocked: 0 });
@@ -20,12 +23,22 @@ const AllproductsRender  = async(req,res) => {
         filterQuery.productCategory = categoryId;  // Filter by category
     }
 
+    const totalProducts = await productSchema.countDocuments({
+        isActive: 1,
+        productName: { $regex: searchQuery, $options: 'i' },
+        ...filterQuery
+    });
+
     // Retrieve products that are active and belong to non-blocked categories
     const products = await productSchema.find({
         isActive: 1,
         productName: { $regex: searchQuery, $options: 'i' }
         // productCategory: { $in: validCategoryIds }
-    });
+    }).skip((page - 1) * itemsPerPage)  
+    .limit(itemsPerPage);
+
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
 
     // Retrieve user from the session, or set to null if not present
     const user = req.session.user || null;
@@ -36,7 +49,10 @@ const AllproductsRender  = async(req,res) => {
         product: products,
         user,
         searchQuery,
-        categoryId
+        categoryId,
+        currentPage: page,  
+        totalPages: totalPages, 
+        totalProducts: totalProducts
         
     })
     }

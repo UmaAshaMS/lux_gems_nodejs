@@ -34,6 +34,47 @@
     object-fit: cover; 
 }
 
+
+
+.pagination {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    margin: 20px 0; 
+}
+
+.pagination a {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    width: 40px; 
+    height: 40px; 
+    text-decoration: none;
+    margin: 5px;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 50%; 
+    font-weight: bold; 
+    transition: background-color 0.3s;
+}
+
+.pagination a.active {
+    background-color: #caaf7a;
+    color: white;
+}
+
+.pagination a:hover {
+    background-color: #ddd;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+
+
        
 </style>
 
@@ -143,8 +184,27 @@
                                 <% })%>
 
                                 <% } %>
+                            </div>
 
-                                    
+                                  <!-- Pagination Controls -->
+                                  <div class="pagination-container">
+<div class="pagination">
+    <% if (currentPage > 1) { %>
+        <a href="?page=<%= currentPage - 1 %>&query=<%= searchQuery %>&category=<%= categoryId %>"> Previous</a>
+    <% } %>
+
+    <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>&query=<%= searchQuery %>&category=<%= categoryId %>" 
+           class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+    <% } %>
+
+    <% if (currentPage < totalPages) { %>
+        <a href="?page=<%= currentPage + 1 %>&query=<%= searchQuery %>&category=<%= categoryId %>">Next</a>
+    <% } %>
+</div>
+
+</div>
+  
 
         <%-include('footer') %>
 
