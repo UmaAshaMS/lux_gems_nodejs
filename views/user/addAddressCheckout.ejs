@@ -3,98 +3,155 @@
         <%- include('./layout/category_navbar') %>
 
 
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <form id="addAddressForm" onsubmit="return addAddress(event)">
-                        <div class="form-group text-center">
-                            <label for="fullName" >Full Name:</label>
-                            <input type="text" class="form-control mx-auto" id="fullName" name="fullName" required>
-                        </div>
-                        <div class="form-group text-center">
-                            <label for="phoneNumber" >Phone Number:</label>
-                            <input type="text" class="form-control mx-auto" id="phoneNumber" name="phoneNumber" required>
-                        </div>
-                        <div class="form-group text-center">
-                            <label for="email" >Email ID:</label>
-                            <input type="email" class="form-control mx-auto" id="email" name="email" required>
-                        </div>
-                        <div class="form-group text-center">
-                            <label for="addressLine1">Address Line 1:</label>
-                            <input type="text" class="form-control mx-auto" id="addressLine1" name="addressLine1" required>
-                        </div>
-                        <div class="form-group text-center">
-                            <label for="addressLine2" >Address Line 2:</label>
-                            <input type="text" class="form-control mx-auto" id="addressLine2" name="addressLine2">
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                <label for="city">City:</label>
-                                <input type="text" class="form-control" id="city" name="city" required>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <form id="addAddressForm" onsubmit="return addAddress(event)">
+                            <div class="form-group text-center">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" class="form-control mx-auto" id="fullName" name="fullName" required>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="pincode">PINCODE:</label>
-                                <input type="text" class="form-control" id="pincode" name="pincode" required>
+                            <div class="form-group text-center">
+                                <label for="phoneNumber">Phone Number:</label>
+                                <input type="text" class="form-control mx-auto" id="phoneNumber" name="phoneNumber"
+                                    required>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-md-6">
-                                <label for="state">State:</label>
-                                <select class="form-control" id="state" name="state" required>
-                                    <option value="" disabled selected>Select your state</option>
-                                    <option value="Kerala">Kerala</option>
-                                    <option value="Tamil Nadu">Tamil Nadu</option>
-                                    <option value="Karnataka">Karnataka</option>
-                                </select>
+                            <div class="form-group text-center">
+                                <label for="email">Email ID:</label>
+                                <input type="email" class="form-control mx-auto" id="email" name="email" required>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="country">Country:</label>
-                                <select class="form-control" id="country" name="country" required>
-                                    <option value="" disabled selected>Select your country</option>
-                                    <option value="India">India</option>
-                                </select>
+                            <div class="form-group text-center">
+                                <label for="addressLine1">Address Line 1:</label>
+                                <input type="text" class="form-control mx-auto" id="addressLine1" name="addressLine1"
+                                    required>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary mt-3">Add Address</button>
-                    </form>
+                            <div class="form-group text-center">
+                                <label for="addressLine2">Address Line 2:</label>
+                                <input type="text" class="form-control mx-auto" id="addressLine2" name="addressLine2">
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="city">City:</label>
+                                    <input type="text" class="form-control" id="city" name="city" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="pincode">PINCODE:</label>
+                                    <input type="text" class="form-control" id="pincode" name="pincode" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="state">State:</label>
+                                    <select class="form-control" id="state" name="state" required>
+                                        <option value="" disabled selected>Select your state</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="country">Country:</label>
+                                    <select class="form-control" id="country" name="country" required>
+                                        <option value="" disabled selected>Select your country</option>
+                                        <option value="India">India</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Add Address</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-        
 
 
-<script>
-    //Function to add address
-    function addAddress(event) {
+
+            <script>
+                //Function to add address
+                function addAddress(event) {
                     event.preventDefault()
 
+                    const fullName = document.getElementById("fullName").value.trim();
+                    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+                    const email = document.getElementById("email").value.trim();
+                    const addressLine1 = document.getElementById("addressLine1").value.trim();
+                    const city = document.getElementById("city").value.trim();
+                    const pincode = document.getElementById("pincode").value.trim();
+                    const state = document.getElementById("state").value.trim();
+                    const country = document.getElementById("country").value.trim();
+
+                    let validate = true
+                    let errorMessage = ""
+
+                    if (!fullName || !/^[A-Za-z\s]+$/.test(fullName)) {
+                        errorMessage += "Full Name is required and should conatin only letters.\n";
+                        validate = false;
+                    }
+                    if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+                        errorMessage += "Phone number is required and should be 10 digits.\n";
+                        validate = false;
+                    }
+                    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+                        errorMessage += "Please provide a valid email address.\n";
+                        validate = false;
+                    }
+                    if (!addressLine1) {
+                        errorMessage += "Address Line 1 is required.\n";
+                        validate = false;
+                    }
+                    if (!city) {
+                        errorMessage += "City is required.\n";
+                        validate = false;
+                    }
+                    if (!pincode || !/^\d{6}$/.test(pincode)) {
+                        errorMessage += "PINCODE is required and should be 6 digits.\n";
+                        validate = false;
+                    }
+                    if (!state) {
+                        errorMessage += "Please select a state.\n";
+                        validate = false;
+                    }
+                    if (!country) {
+                        errorMessage += "Please select a country.\n";
+                        validate = false;
+                    }
+                    if (!validate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error!',
+                            text: errorMessage,
+                            confirmButtonText: 'Try Again'
+                        });
+                        return;
+                    }
+
                     // Collect data from form
-                    const form = document.getElementById('addAddressForm');
-                    const formData = new FormData(form);
-                    const data = {
-                        fullName: formData.get('fullName'),
-                        phoneNumber: formData.get('phoneNumber'),
-                        email: formData.get('email'),
-                        addressLine1: formData.get('addressLine1'),
-                        addressLine2: formData.get('addressLine2'),
-                        city: formData.get('city'),
-                        pincode: formData.get('pincode'),
-                        state: formData.get('state'),
-                        country: formData.get('country')
+
+
+
+                    const formData = {
+                        fullName,
+                        phoneNumber,
+                        email,
+                        addressLine1,
+                        addressLine2: document.getElementById("addressLine2").value.trim(),
+                        city,
+                        pincode,
+                        state,
+                        country
                     };
 
                     const URL = `/addAddressCheckout`;
                     fetch(URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+                        body: JSON.stringify(formData)
                     })
                         .then(response => response.json())
                         .then(data => {
-                            if (data.message === 'Address added successfully') {
+                            if (data.success) {
                                 Swal.fire({
                                     title: 'Success!',
-                                    text: 'Address added successfully!',
+                                    text: data.message,
                                     icon: 'success',
                                     confirmButtonText: 'OK'
                                 }).then(() => {
@@ -107,7 +164,7 @@
                                     text: data.message,
                                     icon: 'error',
                                     confirmButtonText: 'OK',
-                                    
+
                                 });
                             }
                         })
@@ -117,4 +174,4 @@
                 }
 
 
-</script>
+            </script>

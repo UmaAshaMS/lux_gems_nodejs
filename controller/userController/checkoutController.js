@@ -6,6 +6,7 @@ const couponSchema = require('../../model/couponSchema')
 const walletSchema = require('../../model/walletSchema')
 const orderSchema = require('../../model/orderSchema')
 const { ObjectId } = require('mongodb')
+const mongoose = require('mongoose');
 const addressSchema = require('../../model/addressSchema')
 const paypal = require('@paypal/checkout-server-sdk');
 const axios = require('axios');
@@ -129,9 +130,9 @@ const applyCoupon = async (req, res) => {
 
 
 const checkout = async (req, res) => {
-    console.log('Reached checkout')
     try {
         const userId = req.session.user;
+        const user = await userSchema.findById(userId)
         const category = await categorySchema.find({ isBlocked: 0 });
         const cart = await cartSchema.findOne({ userId: new ObjectId(userId) }).populate({
             path: 'product.productId',
@@ -143,7 +144,8 @@ const checkout = async (req, res) => {
 
         // Check if cart exists
         if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
+            // return res.status(404).json({ message: 'Cart not found' });
+            return res.render('user/cart', { title: 'Cart', cart, user, category })
         }
 
         const cartItems = cart.product || [];
@@ -196,7 +198,7 @@ const checkout = async (req, res) => {
         // console.log(process.env.PAYPAL_CLIENT_ID.trim())
         res.render('user/checkOut', {
             title: 'Checkout',
-            user: req.session.user,
+            user: user,
             cart,
             cartItems,
             category,
@@ -212,7 +214,7 @@ const checkout = async (req, res) => {
         });
     } catch (error) {
         console.error(`Error in rendering checkout page: ${error}`);
-        res.status(500).json({ message: 'Internal Server Error' });
+        // res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
@@ -232,6 +234,7 @@ const updateDefaultAddress = async(req,res) => {
     }
     catch(error){
         console.log(`Error in selecting default address in checkout page, ${error}`)
+
     }
 }
 
@@ -280,28 +283,87 @@ const addNewAddressPost = async(req,res) => {
       } 
       catch (error) {
         console.log(`Failed to add address , error: ${error}`)
-        res.status(500).json({ message: 'An error occured while adding address' });
+        res.status(500).json({ suucess : false, message: 'An error occured while adding address' });
       }
     }
 
-const editAdressCheckout = async(req,res) => {
+const editAddressCheckout = async(req,res) => {
     try{
+        const category = await categorySchema.find({ isBlocked: 0 });
+
+        const user = await userSchema.findOne({ _id: req.session.user }, { address: 1 })
+        if (!user || !user.address) {
+            return res.status(404).json({success: false, message:"No Address found for this user"});
+        }
+
+        const addressId = req.params.addressId;
+
+        const address = user.address.find(addr => addr._id.equals(addressId));
+
+        if (!address) {
+            return res.status(404).json({ success: false, message: "Address not found" });
+        }
+        res.render('user/editAddressCheckout', {title:'Add new address', category, user:req.session.user, address})
+    }
+    catch(error){
+        console.log(`Error in rendering edit address page in checkout : ${error} `)
+        res.status(500).json({success:false, message:'Error in rendering edit address page in checkout'})
+    }
+}    
+
+const editAdressCheckoutPost = async(req,res) => {
+    try{
+
+        const { fullName, phoneNumber, email, addressLine1, addressLine2, city, pincode, state, country } = req.body;
+
+        const user = await userSchema.findOne({ _id: req.session.user }, { address: 1 })
+        if (!user || !user.address) {
+            return res.status(404).json({success: false, message:"No Address found for this user"});
+        }
+
+        const addressId = req.params.addressId
+        const address = user.address.find(addr => addr._id.equals(addressId));
+
+        address.fullName = fullName || address.fullName;
+        address.phoneNumber = phoneNumber || address.phoneNumber;
+        address.email = email || address.email;
+        address.addressLine1 = addressLine1 || address.addressLine1;
+        address.addressLine2 = addressLine2 || address.addressLine2;
+        address.city = city || address.city;
+        address.pincode = pincode || address.pincode;
+        address.state = state || address.state;
+        address.country = country || address.country;
+        
+        // Save the updated user document
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Address updated successfully" });
 
         }
     catch(error){
         console.log(`Error in editing address in checkout page: ${error}`)
+        res.status(500).json({success:false, message:'Error in editing address page in checkout'})
     }
 }
 
-const deleteAddressCheckout = async(req,res) => {
-    console.log('Reached delete address checkout')
-        try{
-            const addressId = req.params.id;
-            const result = await addressSchema.findByIdAndDelete(addressId);
 
-        if (!result) {
-            return res.status(404).json({ success: false, message: 'Address not found.' });
+
+const deleteAddressCheckout = async(req,res) => {
+        try{
+            const addressId = req.params.addressId;
+
+            const user = await userSchema.findOne({ _id: req.session.user }, { address: 1 })
+            if (!user || !user.address) {
+                return res.status(404).json({success: false, message:"No Address found for this user"});
+            }
+
+        const addressIndex = user.address.findIndex(addr => addr._id.equals(addressId));
+
+        if (addressIndex === -1) {
+            return res.status(404).json({ success: false, message: "Address not found" });
         }
+        user.address.splice(addressIndex, 1);
+        await user.save();
 
         res.json({ success: true, message: 'Address deleted successfully.' });
         }
@@ -367,67 +429,6 @@ const renderPaypal = async(req,res) => {
         console.error(`Error in rendering PayPal: ${error}`);
 
     }
-}
-
-const renderInstamojo = async(req,res) => {
-
-        try {
-            const userDetails = await userSchema.findById(req.session.user);
-            const cart = await cartSchema.findOne({ userId: req.session.user });
-    
-            if (!cart) {
-                return res.status(400).json({ error: "Cart not found" });
-            }
-    
-            const totalAmount = cart.product.reduce((acc, item) => acc + item.price * item.quantity, 0);
-            const deliveryCharge = totalAmount < 2000 ? 100 : 0;
-            const finalAmount = (totalAmount + deliveryCharge).toFixed(2);
-
-            console.log('-------------',finalAmount)
-    
-            // Create Instamojo payment request
-            const instamojoResponse = await axios.post(
-                // 'https://test.instamojo.com/api/1.1/payment-requests/',
-                // 'https://test.instamojo.com/',
-                // 'https://test.instamojo.com/api/1.1/',
-                'https://test.instamojo.com/v2/payment_requests/',
-
-
-
-                {
-                    purpose: "Purchase from LUXGEMS",
-                    amount: finalAmount,
-                    buyer_name: userDetails.name,
-                    email: userDetails.email,
-                    phone: userDetails.phone,
-                    redirect_url: "http://localhost:5000/payment-success",
-                    webhook: "http://localhost:5000/payment-webhook" 
-                },
-                {
-                    headers: {
-                        // "X-Api-Key": process.env.INSTAMOJO_API_KEY,
-                        "X-Auth-Token": process.env.INSTAMOJO_AUTH_TOKEN
-                    }
-                }
-            );
-
-            console.log(instamojoResponse.data);
-
-    
-            if (instamojoResponse.data && instamojoResponse.data.payment_request) {
-                const paymentUrl = instamojoResponse.data.payment_request.longurl;
-                return res.status(200).json({
-                    success: "Instamojo payment URL created",
-                    paymentUrl: paymentUrl
-                });
-            } else {
-                return res.status(500).json({ error: "Failed to create Instamojo payment request" });
-            }
-    }
-    catch(error){
-        console.log(`Error in rendering instamojo page : ${error}`)
-    }
-    
 }
 
 
@@ -528,10 +529,10 @@ module.exports = {
     updateDefaultAddress,
     addNewAddress,
     addNewAddressPost,
-    editAdressCheckout,
+    editAddressCheckout,
+    editAdressCheckoutPost,
     deleteAddressCheckout,
     renderPaypal,
-    renderInstamojo,
     renderRazorpay,
     updateOrderPendingStatus
 

@@ -1,7 +1,12 @@
+<%- include('./layout/header') %>
+    <%- include('./layout/navbar') %>
+        <%- include('./layout/category_navbar') %>
+
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6"> <!-- Adjust the width here -->
-            <form action='/editAddress/<%= index %>' method='POST' id="editAddressForm"
+            <form  method='POST' id="editAddressForm"
                 onsubmit="return editAddress(event)">
                 <!-- First Four Fields Centered -->
                 <div class="form-group text-center">
@@ -72,10 +77,122 @@
                         </select>
                     </div>
                 </div>
+                <input type="hidden" id="addressId" value="<%= address._id %>">
+
                 <div class="form-group text-center mt-4">
-                    <button type="submit" class="btn btn-primary">Save Address</button>
+                    <button type="submit" class="btn btn-primary" onclick="editAddressCheckout(event)">Save Address</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
+<script>
+    function editAddressCheckout(event) {
+                    event.preventDefault()
+
+                    const fullName = document.getElementById('fullName').value
+                    const phoneNumber = document.getElementById('phoneNumber').value
+                    const email = document.getElementById('email').value
+                    const addressLine1 = document.getElementById('addressLine1').value
+                    const addressLine2 = document.getElementById('addressLine2').value
+                    const city = document.getElementById('city').value
+                    const pincode = document.getElementById('pincode').value
+                    const state = document.getElementById('state').value
+                    const country = document.getElementById('country').value
+                    const addressId = document.getElementById("addressId").value;
+
+
+
+                    let validate = true
+                    let errorMessage = ""
+
+                    if (!fullName || !/^[A-Za-z\s]+$/.test(fullName)) {
+                        errorMessage += "Full Name is required and should conatin only letters.\n";
+                        validate = false;
+                    }
+                    if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+                        errorMessage += "Phone number is required and should be 10 digits.\n";
+                        validate = false;
+                    }
+                    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+                        errorMessage += "Please provide a valid email address.\n";
+                        validate = false;
+                    }
+                    if (!addressLine1) {
+                        errorMessage += "Address Line 1 is required.\n";
+                        validate = false;
+                    }
+                    if (!city) {
+                        errorMessage += "City is required.\n";
+                        validate = false;
+                    }
+                    if (!pincode || !/^\d{6}$/.test(pincode)) {
+                        errorMessage += "PINCODE is required and should be 6 digits.\n";
+                        validate = false;
+                    }
+                    if (!state) {
+                        errorMessage += "Please select a state.\n";
+                        validate = false;
+                    }
+                    if (!country) {
+                        errorMessage += "Please select a country.\n";
+                        validate = false;
+                    }
+
+                    if (!validate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error!',
+                            text: errorMessage,
+                            confirmButtonText: 'Try Again'
+                        });
+                        return;
+                    }
+
+                    const data = {
+                        fullName,
+                        phoneNumber,
+                        email,
+                        addressLine1,
+                        addressLine2,
+                        city,
+                        pincode,
+                        state,
+                        country
+                    };
+
+                    const URL = `/editAddressCheckout/${addressId}`;
+                    fetch(URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: data.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.href= '/checkout'; 
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: data.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error editing address:', error);
+                        });
+                }
+</script>
