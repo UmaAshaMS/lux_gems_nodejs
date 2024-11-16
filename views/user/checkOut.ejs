@@ -140,6 +140,8 @@
                                     <ul class="list-group list-group-flush">
                                         <% if (cart && cart.product && cart.product.length> 0) { %>
                                             <% cart.product.forEach(productItem=> { %>
+                                                <% if (productItem.productId.isActive) { %>
+
                                                 <li class="list-group-item">
                                                     <div class="d-flex justify-content-between">
                                                         <span><strong>
@@ -171,15 +173,13 @@
                                                             </strong></span>
                                                     </div>
                                                 </li>
-                                                <% }); %>
+                                                <% }; %>
+                                                <%}) %>
 
                                                     <li class="list-group-item">
-                                                        <strong>Total: Rs <%= cart.product.reduce((total, item)=>
-                                                                total
-                                                                + ((item.productId.productPrice -
-                                                                (item.productId.productDiscount / 100) *
-                                                                item.productId.productPrice) *
-                                                                item.quantity), 0).toFixed(2) %></strong>
+                                                        <strong>Total: Rs <%= cart.product.filter(item => item.productId.isActive).reduce((total, item) =>
+                                                                total + ((item.productId.productPrice - (item.productId.productDiscount / 100) *
+                                                                item.productId.productPrice) * item.quantity), 0).toFixed(2) %></strong>
                                                     </li>
                                                     <li class="list-group-item">
                                                         <strong>Delivery Charge: </strong> Rs <%=
@@ -436,9 +436,6 @@
                     document.getElementById('promotionAmount').innerText = `- ₹${discountAmount}`;
                 }
 
-
-
-
                 function confirmCheckout(event) {
                     if (event) {
                         event.preventDefault();
@@ -453,8 +450,6 @@
                     // console.log('hlooooooooooooooooooooooooooooooooooooooooooo')
 
                     const selectedAddressId = document.getElementById('selectedAddress').value;
-
-
                     const defaultAddress = {
                         fullName: '<%= defaultAddress?.fullName || "N/A" %>',
                         addressLine1: '<%= defaultAddress?.addressLine1 || "N/A" %>',
@@ -484,7 +479,6 @@
                     } else {
                         addressToSend = defaultAddress;
                     }
-
                     let paymentIsChecked = false
                     let selectedPaymentOption = 0
                     for (let i = 0; i < paymentOptions.length; i++) {
@@ -504,12 +498,10 @@
                         });
                         return
                     }
-
                     const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
                     console.log('Order Total ready for payment : no change needed', orderTotal)
                     const couponCode = document.getElementById('couponCode').value;
                     console.log('Coupon code :', couponCode)
-
 
                     //if the option is COD
                     if (parseInt(selectedPaymentOption) === 0) {
@@ -600,6 +592,7 @@
                             });
                     }
 
+                    
                     //if the option is WALLET
                     if (parseInt(selectedPaymentOption) === 2) {
                         const URL = `/placeOrder`
@@ -630,9 +623,8 @@
                         })
                     }
 
-
-                    // RAZORPAY
-                    if (parseInt(selectedPaymentOption) === 4) {
+                     // RAZORPAY
+                     if (parseInt(selectedPaymentOption) === 4) {
                         console.log('Initiating payment via Razorpay');
 
                         // First, save the order as "payment pending" in the database
@@ -648,7 +640,7 @@
                                 couponCode: couponCode
                             })
                         })
-                            .then(res => res.json())
+                        .then(res => res.json())
                             .then(orderData => {
                                 console.log('OrderDAta received : ', orderData)
                                 if (orderData.success && orderData.orderId) {
@@ -673,7 +665,7 @@
                                                     status: 'pending'  // Update status to "pedning- default"
                                                 })
                                             })
-                                                .then((res) => res.json())
+                                            .then((res) => res.json())
                                                 .then(result => {
                                                     if (result.success) {
                                                         window.location.href = `/orderConfirmed/${orderData.orderId}`;
@@ -716,6 +708,299 @@
                             })
                             .catch(err => console.error('Error during order placement:', err));
                     }
+
+
+// ===========================================
+//                 function confirmCheckout(event) {
+//                     console.log('reached proceed')
+
+//                     if (event) {
+//                         event.preventDefault();
+//                     }
+
+//                     document.getElementById('applyCouponBtn').addEventListener('click', function () {
+//                         const couponCode = document.getElementById('couponCode').value;
+//                     });
+
+
+//                     const selectedAddressId = document.getElementById('selectedAddress').value;
+
+
+//                     const defaultAddress = {
+//                         fullName: '<%= defaultAddress?.fullName || "N/A" %>',
+//                         addressLine1: '<%= defaultAddress?.addressLine1 || "N/A" %>',
+//                         addressLine2: '<%= defaultAddress?.addressLine2 || "N/A" %>',
+//                         city: '<%= defaultAddress?.city || "N/A" %>',
+//                         state: '<%= defaultAddress?.state || "N/A" %>',
+//                         country: '<%= defaultAddress?.country || "N/A" %>',
+//                         pincode: '<%= defaultAddress?.pincode || "N/A" %>',
+//                         phoneNumber: '<%= defaultAddress?.phoneNumber || "N/A" %>'
+//                     };
+
+
+//                     let addressToSend;
+
+//                     if (selectedAddressId) {
+//                         const selectedAddress = userAddress.address.find(addr => addr._id === selectedAddressId);
+//                         addressToSend = {
+//                             fullName: selectedAddress.fullName,
+//                             addressLine1: selectedAddress.addressLine1,
+//                             addressLine2: selectedAddress.addressLine2,
+//                             city: selectedAddress.city,
+//                             state: selectedAddress.state,
+//                             country: selectedAddress.country,
+//                             pincode: selectedAddress.pincode,
+//                             phoneNumber: selectedAddress.phoneNumber
+//                         };
+//                     } else {
+//                         addressToSend = defaultAddress;
+//                     }
+
+//                     let paymentIsChecked = false
+//                     let selectedPaymentOption = 0
+//                     for (let i = 0; i < paymentOptions.length; i++) {
+//                         if (paymentOptions[i].checked) {
+//                             selectedPaymentOption = paymentOptions[i].value
+//                             paymentIsChecked = true
+//                             break;
+//                         }
+//                     }
+
+//                     if (!paymentIsChecked) {
+//                         Swal.fire({
+//                             title: 'Error',
+//                             icon: 'error',
+//                             text: 'Select a payment method',
+//                             confirmButtonText: 'OK'
+//                         });
+//                         return
+//                     }
+
+//                     const orderTotal = parseFloat(document.getElementById('OrderTotal').innerText);
+//                     const couponCode = document.getElementById('couponCode').value;
+
+
+
+
+//                     fetch('/checkout', {
+//                         method: 'POST',
+//                         headers: {
+//                             'Content-Type': 'application/json'
+//                         },
+//                         body: JSON.stringify({
+//                             addressToSend,
+//                             selectedPaymentOption,
+//                             couponCode
+//                         })
+//                     })
+//                         .then((res) => res.json())
+//                         .then((data) => {
+//                             console.log(data)
+//                             if (!data.success) {
+//                                 Swal.fire({
+//                                     title: 'Error',
+//                                     icon: 'error',
+//                                     text: data.message,
+//                                     confirmButtonText: 'OK'
+//                                 });
+//                                 return;
+//                             }
+
+//                             switch (parseInt(selectedPaymentOption)) {
+//                                 case 0: // COD option
+//                                     handleCODPayment(addressToSend, selectedPaymentOption, couponCode);
+//                                     break;
+//                                 case 1: // PayPal option
+//                                     handlePayPalPayment(orderTotal, addressToSend, selectedPaymentOption, couponCode);
+//                                     break;
+//                                 case 2: // Wallet option
+//                                     handleWalletPayment(addressToSend, selectedPaymentOption, couponCode);
+//                                     break;
+//                                 case 4: // Razorpay option
+//                                     handleRazorpayPayment(addressToSend, selectedPaymentOption, couponCode);
+//                                     break;
+//                                 default:
+//                                     Swal.fire({
+//                                         icon: 'warning',
+//                                         title: 'Error',
+//                                         text: 'Invalid payment option selected.'
+//                                     });
+//                             }
+//                         })
+//                         .catch((err) => {
+//                             console.error('Error during checkout process', err);
+//                         });
+
+//                     function handleCODPayment(addressToSend, selectedPaymentOption, couponCode) {
+//                         fetch('/placeOrder', {
+//                             method: 'POST',
+//                             headers: { 'Content-Type': 'application/json' },
+//                             body: JSON.stringify({ addressToSend, selectedPaymentOption, couponCode })
+//                         })
+//                             .then((res) => res.json())
+//                             .then((data) => {
+//                                 if (data.success) {
+//                                     window.location.href = `/orderConfirmed/${data.orderId}`;
+//                                 } else if (data.message) {
+//                                     Swal.fire({
+//                                         icon: 'warning',
+//                                         title: 'Error',
+//                                         text: data.message,
+//                                     });
+//                                 }
+//                             })
+//                             .catch((err) => console.error('Error on COD payment', err));
+//                     }
+
+//                     function handlePayPalPayment(orderTotal, addressToSend, selectedPaymentOption, couponCode) {
+//                         fetch('/renderPaypal', {
+//                             method: 'POST',
+//                             headers: { 'Content-Type': 'application/json' },
+//                             body: JSON.stringify({ totalAmount: orderTotal })
+//                         })
+//                             .then((res) => res.json())
+//                             .then((data) => {
+//                                 if (data.orderID) {
+//                                     paypal.Buttons({
+//                                         createOrder: function () {
+//                                             return data.orderID;
+//                                         },
+//                                         onApprove: function (data, actions) {
+//                                             return fetch('/placeOrder', {
+//                                                 method: 'POST',
+//                                                 headers: { 'Content-Type': 'application/json' },
+//                                                 body: JSON.stringify({
+//                                                     selectedAddressOption: addressToSend,
+//                                                     selectedPaymentOption: selectedPaymentOption,
+//                                                     paypalOrderID: data.orderID
+//                                                 })
+//                                             })
+//                                                 .then((res) => res.json())
+//                                                 .then((data) => {
+//                                                     if (data.success) {
+//                                                         window.location.href = `/orderConfirmed/${data.orderId}`;
+//                                                     } else if (data.error) {
+//                                                         Swal.fire({
+//                                                             icon: 'warning',
+//                                                             title: 'Error',
+//                                                             text: data.error
+//                                                         });
+//                                                     }
+//                                                 })
+//                                                 .catch((err) => {
+//                                                     console.error('Error processing PayPal payment', err);
+//                                                 });
+//                                         },
+//                                         onCancel: function () {
+//                                             window.location.href = '/payment-cancel';
+//                                         }
+//                                     }).render('#paypal-button-container');
+//                                 } else {
+//                                     console.error('No order ID returned from server.');
+//                                 }
+//                             })
+//                             .catch((err) => {
+//                                 console.error('Error fetching PayPal order', err);
+//                             });
+//                     }
+
+//                     function handleWalletPayment(addressToSend, selectedPaymentOption, couponCode) {
+//                         fetch('/placeOrder', {
+//                             method: 'POST',
+//                             headers: { 'Content-Type': 'application/json' },
+//                             body: JSON.stringify({ addressToSend, selectedPaymentOption, couponCode })
+//                         })
+//                             .then((res) => res.json())
+//                             .then((data) => {
+//                                 if (data.success) {
+//                                     window.location.href = `/orderConfirmed/${data.orderId}`;
+//                                 } else if (data.message) {
+//                                     Swal.fire({
+//                                         icon: 'warning',
+//                                         title: 'Error',
+//                                         text: data.message,
+//                                     });
+//                                 }
+//                             })
+//                             .catch((err) => console.error('Error on Wallet payment', err));
+//                     }
+
+//                     function handleRazorpayPayment(addressToSend, selectedPaymentOption, couponCode) {
+//                         console.log('Initiating Razorpay payment');
+
+//                         fetch('/placeOrder', {
+//                             method: 'POST',
+//                             headers: { 'Content-Type': 'application/json' },
+//                             body: JSON.stringify({
+//                                 addressToSend: addressToSend,
+//                                 selectedPaymentOption: selectedPaymentOption,
+//                                 status: 'payment pending',
+//                                 couponCode: couponCode
+//                             })
+//                         })
+//                             .then(res => res.json())
+//                             .then(orderData => {
+//                                 if (orderData.success && orderData.orderId) {
+//                                     const options = {
+//                                         key: "rzp_test_eOmJ744HMbCtga",
+//                                         amount: orderData.orderTotal * 100,
+//                                         currency: 'INR',
+//                                         name: 'LUXGEMS',
+//                                         description: 'Jewellery Purchase',
+//                                         order_id: orderData.razorpayOrderId,
+//                                         handler: function (response) {
+//                                             fetch('/updateOrderPendingStatus', {
+//                                                 method: 'POST',
+//                                                 headers: { 'Content-Type': 'application/json' },
+//                                                 body: JSON.stringify({
+//                                                     orderId: orderData.orderId,
+//                                                     paymentId: response.razorpay_payment_id,
+//                                                     status: 'pending'
+//                                                 })
+//                                             })
+//                                                 .then((res) => res.json())
+//                                                 .then(result => {
+//                                                     if (result.success) {
+//                                                         window.location.href = `/orderConfirmed/${orderData.orderId}`;
+//                                                     } else {
+//                                                         Swal.fire({
+//                                                             icon: 'error',
+//                                                             title: 'Error',
+//                                                             text: 'Failed to update order status after payment.'
+//                                                         });
+//                                                     }
+//                                                 })
+//                                                 .catch((err) => console.error('Error updating order status:', err));
+//                                         },
+//                                         modal: {
+//                                             ondismiss: function () {
+//                                                 Swal.fire({
+//                                                     icon: 'warning',
+//                                                     title: 'Payment Failed',
+//                                                     text: 'Your payment was not completed. You can retry from your orders page.',
+//                                                 })
+//                                                     .then(() => {
+//                                                         window.location.href = `/orderConfirmed/${orderData.orderId}`;
+//                                                     });
+//                                             }
+//                                         },
+//                                         theme: {
+//                                             color: '#F37254'
+//                                         }
+//                                     };
+//                                     const razorpayInstance = new Razorpay(options);
+//                                     razorpayInstance.open();
+//                                 } else {
+//                                     Swal.fire({
+//                                         icon: 'error',
+//                                         title: 'Error',
+//                                         text: 'Failed to place order before payment initiation.'
+//                                     });
+//                                 }
+//                             })
+//                             .catch(err => console.error('Error during order placement:', err));
+//                     }
+
 
 
                     //function for showing available coupon in Checkout page

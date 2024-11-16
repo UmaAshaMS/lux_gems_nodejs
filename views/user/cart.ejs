@@ -131,7 +131,7 @@
                     font-size: 1.5rem;
                     color: #888;
                 }
-                
+
                 .strikethrough {
                     text-decoration: line-through;
                 }
@@ -150,25 +150,36 @@
                                     <h4>
                                         <%= item.productId.productName %>
                                     </h4>
-                                    <p class="strikethrough"><i class="fas fa-rupee-sign"></i>
-                                        <%= item.productId.productPrice.toFixed(2) %>
-                                    </p>
-                                    <p>
-                                        <i class="fas fa-rupee-sign"></i> 
-                                        <%= (item.productId.productPrice - (item.productId.productPrice * (item.productId.productDiscount / 100))).toFixed(2) %>
-                                    </p>
-                                    
+                                    <% if(item.productId.isActive){ %>
+                                        <p class="strikethrough"><i class="fas fa-rupee-sign"></i>
+                                            <%= item.productId.productPrice.toFixed(2) %>
+                                        </p>
+                                        <p>
+                                            <i class="fas fa-rupee-sign"></i>
+                                            <%= (item.productId.productPrice - (item.productId.productPrice *
+                                                (item.productId.productDiscount / 100))).toFixed(2) %>
+                                        </p>
+                                        <% } else { %>
+                                            <p class="unavailable-message" style="color: red; font-weight: bold;">
+                                                Product is currently unavailable.
+                                            </p>
+                                            <% } %>
+
                                 </div>
-                                <div class="cart-item-quantity">
-                                    <button onclick="updateQuantity('<%= item.productId._id %>', -1)">-</button>
-                                    <%= item.quantity %>
-                                        <button onclick="updateQuantity('<%= item.productId._id %>', 1)">+</button>
-                                </div>
-                                <div class="cart-item-actions">
-                                    <button onclick="removeFromCart('<%= item.productId._id %>')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
+
+                                <% if (item.productId.isActive) { %>
+                                    <div class="cart-item-quantity">
+                                        <button onclick="updateQuantity('<%= item.productId._id %>', -1)">-</button>
+                                        <%= item.quantity %>
+                                            <button onclick="updateQuantity('<%= item.productId._id %>', 1)">+</button>
+                                    </div>
+                                    <% } %>
+                                    <div class="cart-item-actions">
+                                        <button onclick="removeFromCart('<%= item.productId._id %>')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                
                             </div>
                             <% }) %>
 
@@ -204,65 +215,100 @@
                             .catch(error => console.error('Error updating cart:', error));
                     }
 
-                    
+
                     // Function to remove a product from the cart
                     function removeFromCart(productId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to delete this item from the cart?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'No, cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/cart/remove/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                // Check if the response was ok before parsing it as JSON
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    return response.json().then(data => {
-                        // Handle case when response is not OK (e.g., 404 or 500 error)
-                        throw new Error(data.message || 'Error removing product from cart');
-                    });
-                }
-            })
-            .then(data => {
-                Swal.fire({
-                    title: 'Deleted!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.reload(); // Reload the page after successful deletion
-                });
-            })
-            .catch(error => {
-                // Handle any errors that occurred during the fetch
-                console.error('Error removing item from cart:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: error.message || 'There was an issue removing the product from the cart.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            });
-        }
-    });
-}
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "Do you really want to delete this item from the cart?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'No, cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/cart/remove/${productId}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' }
+                                })
+                                    .then(response => {
+                                        // Check if the response was ok before parsing it as JSON
+                                        if (response.ok) {
+                                            return response.json();
+                                        } else {
+                                            return response.json().then(data => {
+                                                // Handle case when response is not OK (e.g., 404 or 500 error)
+                                                throw new Error(data.message || 'Error removing product from cart');
+                                            });
+                                        }
+                                    })
+                                    .then(data => {
+                                        Swal.fire({
+                                            title: 'Deleted!',
+                                            text: data.message,
+                                            icon: 'success',
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            window.location.reload(); // Reload the page after successful deletion
+                                        });
+                                    })
+                                    .catch(error => {
+                                        // Handle any errors that occurred during the fetch
+                                        console.error('Error removing item from cart:', error);
+                                        Swal.fire({
+                                            title: 'Error',
+                                            text: error.message || 'There was an issue removing the product from the cart.',
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    });
+                            }
+                        });
+                    }
 
 
 
                     // Function to proceed to checkout
+
+
                     function checkout() {
-                        window.location.href = '/checkout';
-                    }
+    // Send a GET request to the /checkout route
+    fetch('/checkout', {
+        method: 'GET', // You can use POST if you need to send data
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            // Include any session or authorization tokens if needed
+        }
+    })
+    .then(response => response.json())  // Assuming the server sends a JSON response
+    .then(data => {
+        if (data.success === false) {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        }
+        Swal.fire({
+                    title: 'Success!',
+                    text: 'Proceeding to checkout.....',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    // Redirect to the checkout page if everything is valid
+                    window.location.href = '/checkout';
+                })
+    })
+    .catch(error => {
+        console.error('Error in rendering checkout page : ', error);
+        alert('There was an issue with the checkout process');
+    });
+}
+
                 </script>
             </body>
 

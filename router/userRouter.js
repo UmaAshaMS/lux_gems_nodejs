@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
 const user = express.Router();
-const { checkUserLogin } = require('../middleware/userSession');
-const { checkUserSession } = require('../middleware/checkUserSession');
+const { checkUserLogin, checkUserSessionBlocked, checkUserSession } = require('../middleware/userSession');
+
 
 const userLoginControl = require('../controller/userController/loginController');
 const userHomeControl = require('../controller/userController/homeController');
@@ -39,67 +39,68 @@ user.post('/reset-password', checkUserLogin, forgotPassword.resetPasswordPost);
 user.post('/resend-otp-forgot-password', checkUserLogin, forgotPassword.resendOTPforgotPassword);
 
 // Home
-user.get('/home', checkUserLogin, userHomeControl.home);
+user.get('/home', checkUserSessionBlocked, userHomeControl.home);
 
+//Private route starts here
 // User Profile
-user.get('/profile', checkUserLogin, userProfileControl.profile);
-user.get('/editProfile', checkUserLogin, userProfileControl.editProfile)
-user.post('/editProfilePost',checkUserLogin, userProfileControl.editProfilePost)
+user.get('/profile', checkUserSession, userProfileControl.profile);
+user.get('/editProfile', checkUserSession, userProfileControl.editProfile)
+user.post('/editProfilePost',checkUserSession, userProfileControl.editProfilePost)
 
-user.get('/address', checkUserLogin, userProfileControl.address);
-user.post('/addAddress', checkUserLogin, userProfileControl.addAddress);
-user.delete('/deleteAddress/:index', checkUserLogin, userProfileControl.deleteAddress);
-user.get('/editAddress/:index', checkUserLogin, userProfileControl.editAddress);
-user.post('/editAddress/:index',checkUserLogin, userProfileControl.editAddressPost);
-user.put('/setDefaultAddress/:index', checkUserLogin, userProfileControl.setDefaultAddress)
+user.get('/address', checkUserSession, userProfileControl.address);
+user.post('/addAddress', checkUserSession, userProfileControl.addAddress);
+user.delete('/deleteAddress/:index', checkUserSession, userProfileControl.deleteAddress);
+user.get('/editAddress/:index', checkUserSession, userProfileControl.editAddress);
+user.post('/editAddress/:index',checkUserSession, userProfileControl.editAddressPost);
+user.put('/setDefaultAddress/:index', checkUserSession, userProfileControl.setDefaultAddress)
 
-user.get('/rewards', checkUserLogin, userProfileControl.rewards)
-user.get('/wallet', checkUserLogin, userProfileControl.wallet)
-user.post('/addMoneyToWallet' , checkUserLogin, userProfileControl.addMoneyToWallet)
+user.get('/rewards', checkUserSession, userProfileControl.rewards)
+user.get('/wallet', checkUserSession, userProfileControl.wallet)
+user.post('/addMoneyToWallet' , checkUserSession, userProfileControl.addMoneyToWallet)
 
 
-user.get('/orderHistory', checkUserLogin, userProfileControl.orderHistory);
+user.get('/orderHistory', checkUserSession, userProfileControl.orderHistory);
 
 // Products
-user.get('/all-products', checkUserLogin, userProductControl.AllproductsRender);
-user.get('/productDetails/:id', checkUserLogin, userProductControl.productDetails);
-user.get('/product-category/:id', checkUserLogin, userProductControl.productCategory);
-user.post('/filterProducts',checkUserLogin, userProductControl.filterProducts)
+user.get('/all-products', checkUserSessionBlocked, userProductControl.AllproductsRender);
+user.get('/productDetails/:id', checkUserSessionBlocked, userProductControl.productDetails);
+user.get('/product-category/:id', checkUserSessionBlocked, userProductControl.productCategory);
+user.post('/filterProducts',checkUserSessionBlocked, userProductControl.filterProducts)
 
 // Cart
-user.get('/cart', checkUserLogin, cartController.cart);
-user.post('/cart/add/:productId', checkUserLogin, cartController.addToCart);
-user.post('/cart/remove/:productId', checkUserLogin, cartController.removeFromCart);
-user.post('/cart/update/:productId', checkUserLogin, cartController.updateQuantity);
+user.get('/cart', checkUserSession, cartController.cart);
+user.post('/cart/add/:productId', checkUserSession, cartController.addToCart);
+user.post('/cart/remove/:productId', checkUserSession, cartController.removeFromCart);
+user.post('/cart/update/:productId', checkUserSession, cartController.updateQuantity);
 
 //Wishlist
-user.get('/wishlist', checkUserLogin, wishlistcontroller.wishlist)
-user.post('/wishlist/add/:productId', checkUserLogin, wishlistcontroller.addToWishlist)
-user.delete('/wishlist/delete/:productId',checkUserLogin, wishlistcontroller.deleteFromWishlist)
-user.post('/wishlist/addToCart/:productId',checkUserLogin, wishlistcontroller.addToCart)
+user.get('/wishlist', checkUserSession, wishlistcontroller.wishlist)
+user.post('/wishlist/add/:productId', checkUserSession, wishlistcontroller.addToWishlist)
+user.delete('/wishlist/delete/:productId',checkUserSession, wishlistcontroller.deleteFromWishlist)
+user.post('/wishlist/addToCart/:productId',checkUserSession, wishlistcontroller.addToCart)
 
 //Coupon
-user.post('/getAvailableCoupon', checkUserLogin, checkoutController.getAvailableCoupon)
-user.post('/applyCoupon', checkUserLogin, checkoutController.applyCoupon)
+user.post('/getAvailableCoupon', checkUserSession, checkoutController.getAvailableCoupon)
+user.post('/applyCoupon', checkUserSession, checkoutController.applyCoupon)
 
 //Checkout
-user.get('/checkout', checkUserLogin, checkoutController.checkout)
-user.get('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddress)
-user.post('/addAddressCheckout', checkUserLogin, checkoutController.addNewAddressPost)
-user.get('/editAddressCheckout/:addressId', checkUserLogin, checkoutController.editAddressCheckout)
-user.post('/editAddressCheckout/:addressId',checkUserLogin, checkoutController.editAdressCheckoutPost)
-user.delete('/deleteAddressCheckout/:addressId', checkUserLogin, checkoutController.deleteAddressCheckout)
-user.post('/renderPaypal', checkUserLogin, checkoutController.renderPaypal)
-user.post('/renderRazorPay', checkUserLogin, checkoutController.renderRazorpay)
-user.post('/updateOrderPendingStatus',checkUserLogin , checkoutController.updateOrderPendingStatus)
+user.get('/checkout', checkUserSession, checkoutController.checkout)
+user.get('/addAddressCheckout', checkUserSession, checkoutController.addNewAddress)
+user.post('/addAddressCheckout', checkUserSession, checkoutController.addNewAddressPost)
+user.get('/editAddressCheckout/:addressId', checkUserSession, checkoutController.editAddressCheckout)
+user.post('/editAddressCheckout/:addressId',checkUserSession, checkoutController.editAdressCheckoutPost)
+user.delete('/deleteAddressCheckout/:addressId', checkUserSession, checkoutController.deleteAddressCheckout)
+user.post('/renderPaypal', checkUserSession, checkoutController.renderPaypal)
+user.post('/renderRazorPay', checkUserSession, checkoutController.renderRazorpay)
+user.post('/updateOrderPendingStatus',checkUserSession , checkoutController.updateOrderPendingStatus)
 
 //Order
-user.post('/placeOrder', checkUserLogin, orderController.placeOrder )
-user.get('/orderConfirmed/:orderId', checkUserLogin, orderController.orderConfirmed)
-user.post('/cancelOrder/:orderId/:itemId', checkUserLogin, orderController.cancelOrder)
-user.post('/returnOrder/:orderId/:productId',checkUserLogin, orderController.returnOrder)
-user.get('/downloadInvoice/:orderId', checkUserLogin, orderController.downloadInvoice)
-user.post('/reInitiatePayment', checkUserLogin, orderController.reInitiatePayment)
+user.post('/placeOrder', checkUserSession, orderController.placeOrder )
+user.get('/orderConfirmed/:orderId', checkUserSession, orderController.orderConfirmed)
+user.post('/cancelOrder/:orderId/:itemId', checkUserSession, orderController.cancelOrder)
+user.post('/returnOrder/:orderId/:productId',checkUserSession, orderController.returnOrder)
+user.get('/downloadInvoice/:orderId', checkUserSession, orderController.downloadInvoice)
+user.post('/reInitiatePayment', checkUserSession, orderController.reInitiatePayment)
 
 // Logout
 user.post('/logout', userLoginControl.logout);

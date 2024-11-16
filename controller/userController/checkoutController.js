@@ -136,7 +136,7 @@ const checkout = async (req, res) => {
         const category = await categorySchema.find({ isBlocked: 0 });
         const cart = await cartSchema.findOne({ userId: new ObjectId(userId) }).populate({
             path: 'product.productId',
-            select: 'productName productPrice productImage productDiscount'
+            select: 'productName productPrice productImage productDiscount isActive'
         });
 
         const userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
@@ -149,6 +149,12 @@ const checkout = async (req, res) => {
         }
 
         const cartItems = cart.product || [];
+        const activeCartItems = cartItems.filter(item => item.productId.isActive);
+
+        if (activeCartItems.length === 0) {
+            return res.status(400).json({success:false, message:'No active products in the cart. Cannot proceed to payment.'})
+        }
+
         const userAddress = await userSchema.findOne({ _id: userId }, { address: 1, _id: 0 });
 
         let defaultAddress = null;
@@ -163,7 +169,7 @@ const checkout = async (req, res) => {
         }
 
         // Calculate subtotal
-        const subtotal = cartItems.reduce((total, item) => {
+        const subtotal = activeCartItems.reduce((total, item) => {
             const productPrice = item.productId.productPrice || 0;
             const productDiscount = item.productId.productDiscount || 0;
             return total + ((productPrice - productPrice * (productDiscount/100)) * item.quantity);
@@ -186,7 +192,7 @@ const checkout = async (req, res) => {
 
 
         // Update session cart
-        req.session.cart.cartItems = cartItems;
+        req.session.cart.cartItems = activeCartItems;
         req.session.cart.subtotal = subtotal;
         req.session.cart.deliveryCharge = deliveryCharge;
 
@@ -196,11 +202,21 @@ const checkout = async (req, res) => {
 
         // console.log('------------Session:',req.session)
         // console.log(process.env.PAYPAL_CLIENT_ID.trim())
+
+        if (req.headers['x-requested-with'] === 'XMLHttpRequest') { // Check if it's an AJAX request
+            return res.json({
+                success: true,
+                cartItems,
+                subtotal,
+                deliveryCharge,
+                wallet: userWallet,
+            });
+        }
         res.render('user/checkOut', {
             title: 'Checkout',
             user: user,
             cart,
-            cartItems,
+            cartItems : activeCartItems,
             category,
             userAddress,
             defaultAddress : defaultAddress || null,

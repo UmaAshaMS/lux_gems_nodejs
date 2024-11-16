@@ -91,11 +91,24 @@ const productDetails = async (req,res) => {
 const productCategory = async (req, res) => {
     try {
         const categoryId = req.params.id;
+        const page = parseInt(req.query.page) || 1; 
+        const searchQuery = req.query.query ? escapeRegex(req.query.query) : ''; 
+
+    const itemsPerPage = 8;
+    const filterQuery = {};
         if (!mongoose.Types.ObjectId.isValid(categoryId)) {
             return res.status(404).render('pageNotFound', { title: 'Page Not Found' });
         }
 
         const category = await categorySchema.find();
+        const totalProducts = await productSchema.countDocuments({
+            isActive: 1,
+            productName: { $regex: searchQuery, $options: 'i' },
+            ...filterQuery
+        });
+
+        const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
 
         const categorySam = await categorySchema.findById(categoryId);
 
@@ -106,7 +119,8 @@ const productCategory = async (req, res) => {
         const products = await productSchema.find({ 
             productCategory: categorySam._id,
             isActive: true,
-        });
+        }).skip((page - 1) * itemsPerPage)  
+        .limit(itemsPerPage);
 
         const user = req.session.user || null;
 
@@ -116,7 +130,12 @@ const productCategory = async (req, res) => {
             categorySam,
             product: products,
             user,
-            categoryId
+            categoryId,
+            currentPage: page,  
+            totalPages: totalPages, 
+            totalProducts: totalProducts,
+            searchQuery
+
         });
     } catch (err) {
         console.error('Error in loading category-wise products:', err);

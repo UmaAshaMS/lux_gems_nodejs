@@ -1,7 +1,27 @@
 <%- include('./layout/header') %>
     <%- include('./layout/navbar') %>
         <%- include('./layout/category_navbar') %>
+<style>
+.breadcrumbs {
+        font-size: 16px;
+        margin-bottom: 20px;
+        color: #555;
+    }
 
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+</style>
+
+        <div class="breadcrumbs mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="/checkOut" style="text-decoration:none">CheckOut</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Add Your Address</li>
+            </ol>
+        </div>
 
             <div class="container mt-5">
                 <div class="row justify-content-center">
