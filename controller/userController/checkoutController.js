@@ -127,8 +127,6 @@ const applyCoupon = async (req, res) => {
     }
 };
 
-
-
 const checkout = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -136,11 +134,10 @@ const checkout = async (req, res) => {
         const category = await categorySchema.find({ isBlocked: 0 });
         const cart = await cartSchema.findOne({ userId: new ObjectId(userId) }).populate({
             path: 'product.productId',
-            select: 'productName productPrice productImage productDiscount isActive'
+            select: 'productName productPrice productImage productDiscount isActive stock'
         });
 
         const userWallet = await walletSchema.findOne({ userID: new ObjectId(userId) });
-
 
         // Check if cart exists
         if (!cart) {
@@ -152,7 +149,19 @@ const checkout = async (req, res) => {
         const activeCartItems = cartItems.filter(item => item.productId.isActive);
 
         if (activeCartItems.length === 0) {
-            return res.status(400).json({success:false, message:'No active products in the cart. Cannot proceed to payment.'})
+            return res.status(400).json({
+                success:false, 
+                message:'No active products in the cart. Cannot proceed to payment.'
+            })
+        }
+
+        const outOfStockItems = activeCartItems.filter(item => item.productId.stock < 1);
+        if (outOfStockItems.length > 0) {
+            const productNames = outOfStockItems.map(item => item.productId.productName).join(', ');
+            return res.status(400).json({ 
+                success: false, 
+                message: `The following products are out of stock: ${productNames}. Please update your cart.` 
+            });
         }
 
         const userAddress = await userSchema.findOne({ _id: userId }, { address: 1, _id: 0 });

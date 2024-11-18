@@ -28,6 +28,15 @@ const placeOrder = async (req, res) => {
             return res.status(400).json({ message: 'No items in cart to place an order.' });
         }
 
+        for (const item of cart.cartItems) {
+            const product = await productSchema.findById(item.productId._id); 
+            if (!product || product.stock < item.quantity) {
+                return res.status(400).json({ 
+                    message: `Stock unavailable for product: ${item.productId.productName}. Please update your cart.`
+                });
+            }
+        }
+
         let coupon;
         if (couponCode) {
             coupon = await couponSchema.findOne({ couponCode: couponCode });
