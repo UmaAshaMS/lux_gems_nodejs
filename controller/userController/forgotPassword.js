@@ -14,44 +14,47 @@ const ForgotPassword = (req, res) => {
     }
 }
 
+
 const ForgotPasswordpost = async (req, res) => {
     try {
-        const email = await userSchema.findOne({ email: req.body.email })
+        const email = await userSchema.findOne({ email: req.body.email });
+
         if (!email) {
-            req.flash('error', 'Email Id is not registered. Please enter a registered Email.')
-            console.log('Email Id is not registered. Please enter a registered Email.')
-            return res.redirect('/Sign-Up')
+            return res.status(400).json({success : false, message :'Please enter a registered email ID to proceed.'})
         }
+
+
         if (email.isBlocked) {
-            req.flash('error', 'User blocked by admin')
-            console.log('User blockedd by admin')
-            return res.redirect('/login')
+            return res.status(400).json({success: false, message:'Your account has been blocked by the admin. Please contact support.'})
         }
-        const otp = generateOTP()
-        sendOTP(req.body.email, otp)
-        req.flash('success', `OTP sent to the ${req.body.email} `)
-        console.log(`OTP send to the user mail ${req.body.email}`)
 
-        req.session.otp = otp
-        console.log(req.session.otp)
-        // req.session.otpTime = Date.now()
-        req.session.otpTime = Date.now() + (5 * 60 * 1000); 
-        req.session.email = req.body.email
+        // Generate and send OTP
+        const otp = generateOTP();
+        sendOTP(req.body.email, otp);
+        // console.log(`OTP sent to the user mail ${req.body.email}`);
 
-        res.render('user/ForgotPasswordOtp')
+        // Save OTP and email in the session
+        req.session.otp = otp;
+        req.session.otpTime = Date.now() + (2 * 60 * 1000); // 2-minute expiry
+        req.session.email = req.body.email;
+
+        return res.status(200).json({success : true, message :`OTP sent to the user mail ${req.body.email}` })
+
+    } catch (err) {
+        console.error('Error in submitting forgot password page', err);
+        res.status(500).json({success : false, message:'Something went wrong. Please try again later.'})
     }
-    catch (err) {
-        console.error('Error in submitting forgot password page', err)
-    }
-}
+};
+
 
 const ForgotPasswordOtp = (req, res) => {
     try {
+        const otpTime = req.session.otpTime
         res.render('user/ForgotPasswordOtp', { 
             title: 'Forgot-Password OTP', 
             user: req.session.user, 
             email: req.session.email,
-            otpTime: req.session.otpTime,
+            otpTime,
           
         })
     }
@@ -62,49 +65,82 @@ const ForgotPasswordOtp = (req, res) => {
 
 const ForgotPasswordOtpPost = (req, res) => {
     try {
-        if (req.session.otp !== undefined) {
-            if (req.body.otp === req.session.otp) {
-                res.render('user/resetpassword', { title: 'Reset Password' ,user:req.session.user})
-            } else {
-            req.flash('error', 'Invaild OTP')
-            res.redirect('/ForgotPasswordOtp')
-            }
+        const { otp } = req.body;
+
+        if (!req.session.otp || !req.session.otpTime) {
+            console.log('OTP or expiration time is missing in session.');
+            return res.status(400).json({
+                success: false,
+                message: 'An error occurred. Please retry.',
+            });
+        }
+
+        const currentTime = Date.now();
+
+        if (currentTime > req.session.otpExpiration) {
+            console.log('OTP expired.');
+            return res.status(401).json({
+                success: false,
+                message: 'OTP has expired. Please request a new OTP.',
+            });
+        }
+
+        if (otp === req.session.otp) {
+            console.log('OTP validated successfully.');
+            delete req.session.otp; 
+            delete req.session.otpExpiration;
+
+            return res.status(200).json({
+                success: true,
+                message: 'OTP validated successfully.',
+                redirectUrl: '/reset-password', // Send the URL for redirection
+            });
         } else {
-            req.flash('error', 'An error ocuured. Please retry.')
-            console.log('An error ocuured. Please retry.')
-            res.redirect('/Forgot-Password')
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid OTP. Please try again.',
+            });
         }
     } catch (error) {
-        console.log(`Error in forgot otp verification ${error}`)
+        console.error(`Error in forgot OTP verification: ${error}`);
+        return res.status(500).json({
+            success: false,
+            message: 'An unexpected error occurred. Please retry.',
+        });
     }
-}
+};
 
-const resendOTPforgotPassword = async(req, res) => {
+
+
+const resendOTPforgotPassword = async (req, res) => {
     try {
-        const email = req.body.email; // Get email from request body
-        // console.log('Received email:', email); // Log email to verify it is received
-        const otp = generateOTP(); // Generate OTP
-       
+        const email = req.body.email; 
+        const otp = generateOTP(); 
 
-        await sendOTP(email, otp); 
+        await sendOTP(email, otp); // Send OTP to the user's email
         req.session.otp = otp;
-        req.session.otpTime = Date.now() + (5 * 60 * 1000); // OTP valid for 5 minutes
+        req.session.otpTime = Date.now() + (2 * 60 * 1000); 
 
-        req.flash('success', 'OTP resent successfully');
-        res.redirect('/forgotPasswordOtp'); // Redirect to password recovery OTP pag
+        console.log(`OTP resent to ${email}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'OTP resent successfully. Please check your email.',
+        });
     } catch (error) {
-        console.log(`Error while resending OTP: ${error}`);
-        res.status(500).send('Internal Server Error');
+        console.error(`Error while resending OTP: ${error}`);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to resend OTP. Please try again later.',
+        });
     }
-}
-
+};
 
 const resetPassword = (req, res) => {
     try {
         res.render('user/resetPassword', { 
             title: 'Reset Password', 
-            user: req.session.user, 
-            email: req.session.email,
+            email: req.session.user, 
         })
     }
     catch (err) {
@@ -112,24 +148,37 @@ const resetPassword = (req, res) => {
     }
 }
 
-const resetPasswordPost = async(req, res) => {
+
+const resetPasswordPost = async (req, res) => {
     try {
-        console.log(req.body.password)
-        const password = await bcrypt.hash(req.body.password, 10)
-        const update = await userSchema.updateOne({ email: req.session.email },{ password: password })
-        if (update) {
-            req.flash('success', 'Password updated successfully')
-            console.log('Password updated successfully.')
-            res.redirect('/login')
-        } else {
-        req.flash('error', 'Error in setting new password.')
-        console.log('Error in setting new password.')
-        res.redirect('/login')
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Password is required.',
+            });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await userSchema.findOneAndUpdate(
+            { email: req.session.user },
+            { password: hashedPassword }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password has been reset successfully!',
+        });
     } catch (error) {
-        console.log(`Error in reset password post ${error}`)
+        console.error('Error resetting password:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to reset password. Please try again later.',
+        });
     }
-}
+};
+
 
 
 module.exports = {

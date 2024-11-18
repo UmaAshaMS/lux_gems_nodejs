@@ -104,7 +104,6 @@
 
 document.getElementById('loginForm').addEventListener('submit', function(event) {
     event.preventDefault(); 
-    console.log('Form submitted')
 
     
    
@@ -113,7 +112,6 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     userPassword : document.getElementById('userPassword').value
     }
 
-    console.log('Form data :', formData)
 
     // Send data to the server using fetch
     fetch('/login', {
