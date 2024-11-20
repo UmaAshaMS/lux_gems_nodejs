@@ -30,6 +30,7 @@ const getCategoryDetails = async (req, res) => {
 };
 
 const addCategory = async (req, res) => {
+    console.log('Reached category add')
     try {
         const { categoryName } = req.body;
 

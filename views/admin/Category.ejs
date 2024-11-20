@@ -207,14 +207,16 @@
                     <!-- Modal Body -->
                     <div class="modal-body">
                         <form id="categoryForm" action="/admin/addCategory" method="POST"
-                            onsubmit="return checkCategoryName()">
+                            >
                             <div class="mb-3">
                                 <label for="categoryName" class="form-label">Category Name</label>
+                                <!-- <input type="text" class="form-control" id="categoryName" name="categoryName" required value> -->
                                 <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+
                                 <label for="categoryName" class="form-label category-validation text-danger"></label>
 
                             </div>
-                        </form>
+                        
                     </div>
                     <!-- Modal Footer -->
                     <div class="modal-footer">
@@ -222,7 +224,7 @@
                         <button type="reset" class="btn btn-warning" form="categoryForm">Clear</button>
                         <button type="submit" class="btn btn-primary" form="categoryForm">Save</button>
                     </div>
-
+                </form>
                 </div>
             </div>
         </div>
@@ -335,6 +337,10 @@
 
         // Function to check if the category name exists
         async function checkCategoryName() {
+            console.log("fffffffff")
+            return true;
+            console.log("fffffffffww")
+
             const categoryName = document.getElementById('categoryName').value;
             const categoryId = document.getElementById('categoryId') ? document.getElementById('categoryId').value : null;
             try {
@@ -347,7 +353,7 @@
                 });
 
                 const result = await response.json();
-
+                
                 if (result.exists) {
                     alert("Category name already exists!");
 
@@ -454,11 +460,16 @@
         const categoryName = document.getElementById('categoryName')
         const categoryValue = categoryName.value.trim().toLowerCase()
         addCategoryForm.addEventListener('submit', (event) => {
+            
+           
+            addCategoryForm.submit();
+            return;
             event.preventDefault()
             document.getElementsByClassName('category-validation')[0].innerHTML = ''
 
-
+            console.log("categoryValue",categoryValue.value);
             if (categoryValue === '' || categoryName.value.length > 50 || !isNaN(categoryValue)) {
+                console.log("error here")
                 document.getElementsByClassName('category-validation')[0].innerHTML = 'Invalid category';
             }
             else if (existingCategories.includes(categoryValue)) {

@@ -3,7 +3,6 @@ const admin = express.Router()
 const checkAdminLogin = require('../middleware/adminSession')
 const upload = require('../middleware/multer')
 
-
 const adminLoginControl = require('../controller/adminController/loginController')
 const adminDashboardControl = require('../controller/adminController/dashboardController')
 const adminUsercontrol = require('../controller/adminController/userController')
