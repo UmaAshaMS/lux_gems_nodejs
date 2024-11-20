@@ -1,6 +1,6 @@
-const offerSchema = require('../../model/offerSchema')
-const productSchema = require('../../model/productSchema')
 const categorySchema = require('../../model/categorySchema')
+const productSchema = require('../../model/productSchema')
+const offerSchema = require('../../model/offerSchema')
 const { ObjectId } = require('mongodb')
 const mongoose = require('mongoose');
 
@@ -8,7 +8,11 @@ const mongoose = require('mongoose');
 
 const offers = async(req,res) => {
     try{
-        const offers = await offerSchema.find().populate({path: 'referenceId'})
+        const offers = await offerSchema.find()
+        // const offers = await offerSchema.find().populate({path: 'referenceId'})
+
+        console.log(offers);
+
         const products = await productSchema.find({isActive:true})
         const category = await categorySchema.find({isBlocked:false})
 

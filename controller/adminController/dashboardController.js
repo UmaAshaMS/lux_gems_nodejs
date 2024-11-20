@@ -9,34 +9,45 @@ const { order } = require('paypal-rest-sdk');
 
 const home = async (req, res) => {
     try {
-        const orders = await orderSchema.find({status:'Delivered'})
+        const orders = await orderSchema.find({ status: 'Delivered' })
         const totalOrders = orders.length
+
+        const returnOrders = await orderSchema.find({status :'Return Under Process'})
+        const returnOrderIds = returnOrders.map(order => order.orderId);
+        const returnCount = returnOrders.length
 
         let overallOrderAmount = 0;
         let overallDiscount = 0;
         const salesData = new Array(12).fill(0);
+        const dailySalesData = new Array(31).fill(0);
+
+
 
         orders.forEach(order => {
             overallOrderAmount += order.totalAmount;
-        
+
             if (order.couponDiscount) {
-                overallDiscount += order.couponDiscount; 
+                overallDiscount += order.couponDiscount;
             }
-        
-        const month = order.orderDate.getMonth();
-        salesData[month] += order.totalAmount; 
+
+            const month = order.orderDate.getMonth();
+            salesData[month] += order.totalAmount;
+
+            const day = order.orderDate.getDate(); // Day of the month (1-31)
+            dailySalesData[day - 1] += order.totalAmount;
+
         });
 
         const pendingOrdersCount = await orderSchema.countDocuments({ status: 'Pending' });
 
         const distribution = await orderSchema.aggregate([
             {
-                $match: { status: 'Delivered' }  
+                $match: { status: 'Delivered' }
             },
             {
                 $group: {
-                    _id: '$paymentMethod',       
-                    count: { $sum: 1 }          
+                    _id: '$paymentMethod',
+                    count: { $sum: 1 }
                 }
             }
         ]);
@@ -50,17 +61,33 @@ const home = async (req, res) => {
         };
 
         const transformedDistribution = distribution.map(item => ({
-            method: paymentMethodMap[item._id] || 'Unknown', 
+            method: paymentMethodMap[item._id] || 'Unknown',
             count: item.count,
         }));
+
+        const groupedDailySalesData = Array(12).fill(null).map(() => Array(31).fill(0));
+
+        orders.forEach(order => {
+            const month = order.orderDate.getMonth(); // Month (0-11)
+            const day = order.orderDate.getDate(); // Day of the month (1-31)
+            groupedDailySalesData[month][day - 1] += order.totalAmount;
+        }); 
+
         res.render('admin/home', {
             title: 'Home',
             totalOrders,
             overallOrderAmount,
             overallDiscount,
             salesData,
-            distribution : transformedDistribution,
+            dailySalesData,
+            distribution: transformedDistribution,
             pendingOrdersCount,
+            groupedDailySalesData,
+            monthlySalesData: salesData, 
+            returnCount,
+            returnOrderIds,
+
+
         })
     }
     catch (err) {
@@ -72,8 +99,9 @@ const salesReport = async (req, res) => {
     try {
         const searchQuery = req.query.searchQuery || ''
         const salesData = await orderSchema.find()
-        res.render('admin/salesReport', { title: 'SalesReport', searchQuery, salesData, 
-      })
+        res.render('admin/salesReport', {
+            title: 'SalesReport', searchQuery, salesData,
+        })
     }
     catch (error) {
         console.log('Error in rendering sales report', error)
@@ -387,84 +415,86 @@ const salesChart = async (req, res) => {
                     data.push(salesData[dayString] || 0);
                 }
                 break;
-                case 'monthly':
-                    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-                    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-                    for (let i = 1; i <= daysInMonth; i++) {
-                        const date = new Date(startOfMonth);
-                        date.setDate(i);
-                        const weekNumber = `Week ${Math.ceil(i / 7)}`;
-                        labels.push(weekNumber);
-                        data.push(salesData[weekNumber] || 0);
-                    }
-                    break;
-                case 'yearly':
-                    const months = Array.from({ length: 12 }, (_, i) => 
-                        new Date(currentDate.getFullYear(), i).toLocaleString('default', { month: 'long' })
-                    );
-                    months.forEach(month => {
-                        labels.push(month);
-                        data.push(salesData[month] || 0);
-                    });
-                    break;
-            }
+            case 'monthly':
+                const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const date = new Date(startOfMonth);
+                    date.setDate(i);
+                    const weekNumber = `Week ${Math.ceil(i / 7)}`;
+                    labels.push(weekNumber);
+                    data.push(salesData[weekNumber] || 0);
+                }
+                break;
+            case 'yearly':
+                const months = Array.from({ length: 12 }, (_, i) =>
+                    new Date(currentDate.getFullYear(), i).toLocaleString('default', { month: 'long' })
+                );
+                months.forEach(month => {
+                    labels.push(month);
+                    data.push(salesData[month] || 0);
+                });
+                break;
+        }
 
 
-        res.status(200).json({ labels, datasets  : [
-            {
-                label: 'Total Sales',
-                data: data,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1,
-            }
-        ]});
+        res.status(200).json({
+            labels, datasets: [
+                {
+                    label: 'Total Sales',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        });
     } catch (error) {
         console.error(`Error generating sales chart data: ${error}`);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
-const paymentMethodStats = async(req,res) => {
-    try{
-        
+const paymentMethodStats = async (req, res) => {
+    try {
+
 
     }
-    catch(error){
+    catch (error) {
         console.log(`Error in creating payment method pie chart`)
     }
 }
 
-const trendingProducts = async(req,res) => {
+const trendingProducts = async (req, res) => {
     const searchQuery = req.query.searchQuery || ''
 
-    try{
+    try {
         const topProducts = await orderSchema.aggregate([
-            { $unwind: "$items" }, 
+            { $unwind: "$items" },
             {
                 $group: {
-                    _id: "$items.productId", 
-                    totalSold: { $sum: "$items.quantity" } 
+                    _id: "$items.productId",
+                    totalSold: { $sum: "$items.quantity" }
                 }
             },
             {
                 $lookup: {
-                    from: "products", 
-                    localField: "_id", 
+                    from: "products",
+                    localField: "_id",
                     foreignField: "_id",
-                    as: "productInfo" 
+                    as: "productInfo"
                 }
             },
-            { $unwind: "$productInfo" }, 
+            { $unwind: "$productInfo" },
             { $sort: { totalSold: -1 } },
-            { $limit: 3 }, 
+            { $limit: 3 },
             {
                 $project: {
-                    productId: "$_id", 
-                    productName: "$productInfo.productName", 
+                    productId: "$_id",
+                    productName: "$productInfo.productName",
                     productPrice: "$productInfo.productPrice",
-                    productImage:  { $arrayElemAt: ["$productInfo.productImage", 0] },
-                    totalSold: 1 
+                    productImage: { $arrayElemAt: ["$productInfo.productImage", 0] },
+                    totalSold: 1
                 }
             }
         ]);
@@ -473,31 +503,31 @@ const trendingProducts = async(req,res) => {
             { $unwind: "$items" },
             {
                 $group: {
-                    _id: "$items.productId", 
+                    _id: "$items.productId",
                     totalSold: { $sum: "$items.quantity" }
                 }
             },
             {
                 $lookup: {
-                    from: "products", 
-                    localField: "_id", 
-                    foreignField: "_id", 
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
                     as: "productInfo"
                 }
             },
             { $unwind: "$productInfo" },
             {
                 $lookup: {
-                    from: "categories", 
-                    localField: "productInfo.productCategory", 
-                    foreignField: "_id", 
+                    from: "categories",
+                    localField: "productInfo.productCategory",
+                    foreignField: "_id",
                     as: "categoryInfo"
                 }
             },
             { $unwind: "$categoryInfo" },
             {
                 $group: {
-                    _id: "$categoryInfo._id", 
+                    _id: "$categoryInfo._id",
                     categoryName: { $first: "$categoryInfo.name" },
                     totalSold: { $sum: "$totalSold" }
                 }
@@ -506,9 +536,9 @@ const trendingProducts = async(req,res) => {
             { $limit: 3 },
             {
                 $project: {
-                    categoryId: "$_id", 
+                    categoryId: "$_id",
                     categoryName: 1,
-                    totalSold: 1 
+                    totalSold: 1
                 }
             }
         ]);
@@ -516,11 +546,11 @@ const trendingProducts = async(req,res) => {
         res.render('admin/trending', {
             topProducts,
             topCategories,
-            title: 'Trending Products', 
+            title: 'Trending Products',
             searchQuery,
         })
     }
-    catch(error){
+    catch (error) {
         console.log(`Error in getting trending products: ${error}`)
     }
 }

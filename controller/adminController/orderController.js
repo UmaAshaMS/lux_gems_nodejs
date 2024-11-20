@@ -23,7 +23,8 @@ const order = async (req, res) => {
         const totalPages = Math.ceil(totalOrders / limit);
 
         res.render('admin/Order', {
-            title: 'Orders', orderDetails,
+            title: 'Orders', 
+            orderDetails,
             currentPage: page,
             totalPages,
             hasNextPage: page < totalPages,

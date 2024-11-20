@@ -488,8 +488,13 @@ const distributionData = <%- JSON.stringify(distribution) %>;
             </div>
 
             <div class="activities">
-                <h2>Recent Activities / Updates</h2>
-                <canvas id="paymentChart"></canvas>
+                <h2>Return Activities / Updates</h2>
+                <div id="orderList">
+                    <p><strong>Pending Return orders = <%= returnCount  %></strong></p>
+                    <% returnOrderIds.forEach(orderId => { %>
+                        <p>Order Id <%= orderId %> awaits Return approval</p>
+                    <% }); %>
+                </div>
             </div>
 
             <div class="chart-container">
@@ -572,4 +577,54 @@ const distributionData = <%- JSON.stringify(distribution) %>;
             }
         }
     });
+
+
+    const monthlySalesData = <%- JSON.stringify(monthlySalesData) %>; // Monthly total sales
+const groupedDailySalesData = <%- JSON.stringify(groupedDailySalesData) %>; // Daily sales data grouped by month
+
+const monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const dailySalesAverage = groupedDailySalesData.map(month => {
+    const totalDays = month.filter(day => day > 0).length; // Count days with sales
+    const total = month.reduce((sum, value) => sum + value, 0); // Total sales for the month
+    return totalDays > 0 ? (total / totalDays) : 0; // Average daily sales
+});
+
+const monthlyChartCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyChart = new Chart(monthlyChartCtx, {
+    type: 'bar',
+    data: {
+        labels: monthlyLabels,
+        datasets: [
+            {
+                label: 'Monthly Sales',
+                data: monthlySalesData, // Monthly sales total
+                backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1,
+            },
+            {
+                label: 'Daily Sales Average',
+                data: dailySalesAverage, // Average daily sales per month
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+            },
+        ],
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function (value) {
+                        return 'Rs ' + value; // Add "Rs" prefix
+                    },
+                },
+            },
+        },
+    },
+});
+
 </script>
