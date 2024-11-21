@@ -20,8 +20,12 @@ const cart = async (req, res) => {
 }
 
 const addToCart = async (req, res) => {
+    console.log('reached add to cart')
+
     try {
+        console.log('reached add to cart try')
         const user = req.session.user || null;
+        console.log(req.session.user)
         const productId = req.params.productId;
 
         // Check if the user is authenticated

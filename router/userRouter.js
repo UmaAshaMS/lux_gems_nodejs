@@ -69,13 +69,13 @@ user.post('/filterProducts',checkUserSessionBlocked, userProductControl.filterPr
 
 // Cart
 user.get('/cart', checkUserSession, cartController.cart);
-user.post('/cart/add/:productId', checkUserSession, cartController.addToCart);
+user.post('/cart/add/:productId', cartController.addToCart);
 user.post('/cart/remove/:productId', checkUserSession, cartController.removeFromCart);
 user.post('/cart/update/:productId', checkUserSession, cartController.updateQuantity);
 
 //Wishlist
 user.get('/wishlist', checkUserSession, wishlistcontroller.wishlist)
-user.post('/wishlist/add/:productId', checkUserSession, wishlistcontroller.addToWishlist)
+user.post('/wishlist/add/:productId', wishlistcontroller.addToWishlist)
 user.delete('/wishlist/delete/:productId',checkUserSession, wishlistcontroller.deleteFromWishlist)
 user.post('/wishlist/addToCart/:productId',checkUserSession, wishlistcontroller.addToCart)
 

@@ -138,6 +138,7 @@
 
                     // Function to add product to the cart
                     function addToCart(productId) {
+                        console.log('reached add to cart')
                         const URL = `/cart/add/${productId}`;
 
                         fetch(URL, {
@@ -146,6 +147,7 @@
                         })
                             .then(response => response.json().then(data => ({ data, status: response.status })))
                             .then(({ data, status }) => {
+                                console.log('data from server : ', data)
                                 if (status === 200) {
                                     Swal.fire({
                                         title: 'Success',
@@ -153,10 +155,23 @@
                                         text: data.message,  
                                         confirmButtonText: 'OK'
                                     }).then(() => {
-                                        window.location.href = `/productDetails/${productId}`;
-                                        
+                                        window.location.href = `/productDetails/${productId}`;  
                                     });
-                                } else {
+                                } 
+
+                                else if (status === 401) {
+                // Handle unauthenticated user
+                Swal.fire({
+                    title: 'Authentication Required',
+                    icon: 'warning',
+                    text: data.message || 'You need to log in to add products to your cart.',
+                    confirmButtonText: 'Log In',
+                }).then(() => {
+                    window.location.href = '/login'; // Redirect to login page
+                });
+            }
+                                
+                                else {
                                     Swal.fire({
                                         title: 'Error',
                                         icon: 'error',
