@@ -204,7 +204,7 @@ const editProductPost = async (req, res) => {
 
         if (req.files && req.files.length) {
             // Map through uploaded files and get their filenames
-            newProductImages = req.files.map(file => file.filename);
+            newProductImages = req.files.map(file => `uploads/${file.filename}`);
         }
 
         console.log('New images : ', newProductImages)
