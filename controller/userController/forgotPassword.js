@@ -161,10 +161,11 @@ const resetPasswordPost = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await userSchema.findOneAndUpdate(
-            { email: req.session.user },
+        const user = await userSchema.findOneAndUpdate(
+            { email: req.session.email },
             { password: hashedPassword }
         );
+
 
         return res.status(200).json({
             success: true,

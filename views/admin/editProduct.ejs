@@ -348,7 +348,7 @@
 
                         <% if (product.productImage && product.productImage.length> 0) { %>
                             <% product.productImage.forEach(function(img, index) { %>
-                                <% var formattedImgPath= "uploads/" + img.replace(/\\/g, '/' ); %>
+                                <% var formattedImgPath=   img.replace(/\\/g, '/' ); %>
                                     <!-- Replace backslashes with forward slashes -->
                                     <div class="col-md-3 mb-3 image-container"
                                         data-image-path="<%= formattedImgPath %>">
