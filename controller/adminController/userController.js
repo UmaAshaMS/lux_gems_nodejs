@@ -6,7 +6,7 @@ const userDashboard = async (req, res) => {
     try {
         const searchQuery = req.query.searchQuery || ''
         userDetails = await userSchema.find({ name: { $regex: searchQuery, $options: 'i' } })
-        res.render('admin/customers', { title: 'Customers', userDetails, searchQuery });
+        res.render('admin/Customers', { title: 'Customers', userDetails, searchQuery });
 
     }
     catch (err) {
