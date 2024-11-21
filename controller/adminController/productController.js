@@ -156,7 +156,6 @@ const unblockProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     req.body.productCategory = new ObjectId(req.body.productCategory)
-    console.log('Req for delete')
     try {
         const productId = req.params.id;
         if (!productId) {
@@ -165,10 +164,10 @@ const deleteProduct = async (req, res) => {
         //find product by productId
         const product = await productSchema.findByIdAndDelete(productId)
         if (!product) {
-            res.send(404).json({ message: 'Product does not exists.' })
+            res.send(404).json({success:false, message: 'Product does not exists.' })
         }
         //respond as roduct deleted
-        return res.status(200).json({ message: 'Product deleted.' })
+        return res.status(200).json({ success: true, message: 'Product deleted.' })
     }
     catch (err) {
         console.log(`Error : ${err}`)
@@ -194,16 +193,24 @@ const editProduct = async (req, res) => {
 }
 
 const editProductPost = async (req, res) => {
+    console.log('Reached edit product post')
     try {
 
         let newProductImages = [];
-        if (req.files && req.files.productImage) {
+        // if (req.files && req.files.productImage) {
+        //     // Map through uploaded files and get their filenames
+        //     newProductImages = req.files.productImage.map(file => file.filename);
+        // }
+
+        if (req.files && req.files.length) {
             // Map through uploaded files and get their filenames
-            newProductImages = req.files.productImage.map(file => file.filename);
+            newProductImages = req.files.map(file => file.filename);
         }
 
         console.log('New images : ', newProductImages)
         console.log('req.files', req.files)
+        console.log('req.body:', req.body);
+        console.log('req.params:', req.params);
 
         // Extract other form data
         const { productName, productCategory, productPrice, stock, productDescription, productDiscount } = req.body;

@@ -30,6 +30,7 @@ admin.put('/unblockUser/:userId', checkAdminLogin, adminUsercontrol.userUnblock)
 admin.get('/Category', checkAdminLogin, adminCategoryControl.category)
 admin.get('/Category/:id', checkAdminLogin, adminCategoryControl.getCategoryDetails);
 admin.post('/addCategory', checkAdminLogin, adminCategoryControl.addCategory)
+
 admin.put('/editCategory/:id', checkAdminLogin, adminCategoryControl.editCategory)
 admin.put('/blockCategory/:id', checkAdminLogin, adminCategoryControl.blockCategory)
 admin.put('/unblockCategory/:id', checkAdminLogin, adminCategoryControl.unblockCategory)

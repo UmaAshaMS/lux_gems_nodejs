@@ -230,8 +230,8 @@
         </div>
     </div>
     <!-- Edit Modal Form -->
-    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
-        aria-hidden="true">
+
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -239,14 +239,16 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editCategoryForm" onsubmit="submitEditCategoryForm(); return false;">
+                    <form id="editCategoryForm" onsubmit="submitEditCategoryForm(event)">
                         <input type="hidden" id="editCategoryId" name="categoryId">
                         <div class="mb-3">
                             <label for="editCategoryName" class="form-label">Category Name</label>
-                            <input type="text" class="form-control editCatIn" id="editCategoryName" name="categoryName"
-                                required>
+                            <input type="text" class="form-control" id="editCategoryName" name="categoryName" required>
+                            <div id="categoryNameError" class="text-danger mt-2" style="display: none;"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary editCatBtn">Save Changes</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
                     </form>
                 </div>
             </div>
@@ -328,157 +330,88 @@
     </div>
     <script src="../../public/alert.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('editCategoryForm').addEventListener('submit', (event) => {
-                event.preventDefault();
-                submitEditCategoryForm();
-            });
+
+
+// Function to handle form submission
+async function submitEditCategoryForm(event) {
+    event.preventDefault();
+
+    const categoryName = document.getElementById('editCategoryName').value.trim();
+    const categoryId = document.getElementById('editCategoryId').value;
+
+    // Basic validation
+    const categoryNameError = document.getElementById('categoryNameError');
+    console.log(categoryNameError)
+    if (categoryNameError) {
+        categoryNameError.style.display = 'none';
+    }
+
+    // Check if the name contains numbers
+    const containsNumber = /\d/.test(categoryName);
+    if (containsNumber) {
+        categoryNameError.textContent = 'Category name should not contain numbers';
+        categoryNameError.style.display = 'block';
+        return;
+    }
+
+    const formattedName = categoryName;
+
+    try {
+        // Send the data to the server
+        const response = await fetch(`/admin/editCategory/${categoryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: formattedName })
         });
 
-        // Function to check if the category name exists
-        async function checkCategoryName() {
-            console.log("fffffffff")
-            return true;
-            console.log("fffffffffww")
+        const data = await response.json();
 
-            const categoryName = document.getElementById('categoryName').value;
-            const categoryId = document.getElementById('categoryId') ? document.getElementById('categoryId').value : null;
-            try {
-                const response = await fetch('/admin/checkCategoryName', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ categoryName, categoryId })
-                });
-
-                const result = await response.json();
-                
-                if (result.exists) {
-                    alert("Category name already exists!");
-
-                    // // Show SweetAlert notification
-                    // Swal.fire({
-                    //     icon: 'warning',
-                    //     title: 'Category Name Exists',
-                    //     text: 'Category already exists.',
-                    //     confirmButtonText: 'Okay'
-                    // });
-
-                    // Prevent form submission
-                    return false;
+        if (data.success) {
+            // Close the modal and update the category name on the page
+            alert('Category updated successfully!');
+            const row = document.querySelector(`tr[data-id="${categoryId}"]`);
+            if (row) {
+                const nameCell = row.querySelector('.category-name');
+                if (nameCell) {
+                    nameCell.textContent = formattedName;
                 }
-
-                // Allow form submission
-                return true;
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Category already exists.',
-                    confirmButtonText: 'Okay'
-                });
-
-                // Prevent form submission
-                return false;
             }
+            var modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            console.log('Modal element for closing : ',modal)
+            modal.hide(); 
+        } else {
+            alert(data.message || 'Error updating category.');
         }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating the category.');
+    }
+}
 
-
-
-        function editCategory(categoryId) {
-            // console.log('Edit function is called')
-            // Fetch category details to populate the modal
-            fetch(`/admin/Category/${categoryId}`, {
-                method: 'GET',
-
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(`data: ${Object.keys(data)}`)
-
-                    if (data) {
-                        // if (data.success) {
-                        // Swal.fire({
-                        //     icon: 'success',
-                        //     title: 'Success',
-                        //     text:' ',
-                        // })
-                        // Populate modal form fields with category details
-                        // console.log(`data._id: ${data._id}`)
-                        document.getElementById('editCategoryId').value = data._id;
-                        document.getElementById('editCategoryName').value = data.name;
-                        // Show the modal
-                        $('#editCategoryModal').modal('show');
-                    } else {
-                        alert("Category not found.");
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+// Function to populate the modal when editing a category
+function editCategory(categoryId) {
+    fetch(`/admin/Category/${categoryId}`, {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data) {
+            document.getElementById('editCategoryId').value = data._id;
+            document.getElementById('editCategoryName').value = data.name;
+            var modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            modal.show(); // `show()` is used to display the modal in vanilla JS
+        } else {
+            alert('Category not found.');
         }
+    })
+    .catch(error => {
+        console.error('Error in fetching edit data:', error);
+    });
+}
 
-        //Function to handle edit category form submission
-        function submitEditCategoryForm() {
-            const categoryId = document.getElementById('editCategoryId').value;
-            const categoryName = document.getElementById('editCategoryName').value;
-
-            fetch(`/admin/editCategory/${categoryId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name: categoryName })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update existing row in the table
-                        alert('Category updated successfully!');
-                        const row = document.querySelector(`tr[data-id="${categoryId}"]`);
-                        if (row) {
-                            const nameCell = row.querySelector('.category-name');
-                            if (nameCell) {
-                                nameCell.textContent = categoryName;
-                            }
-                        } else {
-                            console.log('Row not found.');
-                        }
-
-                        $('#editCategoryModal').modal('hide');
-
-                    } else {
-                        alert(data.message || 'Error updating category.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-
-        //Function to Add category 
-        const addCategoryForm = document.getElementById('categoryForm')
-        const categoryName = document.getElementById('categoryName')
-        const categoryValue = categoryName.value.trim().toLowerCase()
-        addCategoryForm.addEventListener('submit', (event) => {
-            
-           
-            addCategoryForm.submit();
-            return;
-            event.preventDefault()
-            document.getElementsByClassName('category-validation')[0].innerHTML = ''
-
-            console.log("categoryValue",categoryValue.value);
-            if (categoryValue === '' || categoryName.value.length > 50 || !isNaN(categoryValue)) {
-                console.log("error here")
-                document.getElementsByClassName('category-validation')[0].innerHTML = 'Invalid category';
-            }
-            else if (existingCategories.includes(categoryValue)) {
-                document.getElementsByClassName('category-validation')[0].innerHTML = 'Category already exists';
-            }
-            else {
-                addCategoryForm.submit(); // Submit if all validations pass
-            }
-        })
+      
         //Function to block the Category
         function blockCategory(categoryID) {
             if (confirm("Are you sure you want to block this category?")) {
