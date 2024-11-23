@@ -302,7 +302,7 @@ const addNewAddressPost = async(req,res) => {
         await user.save();
     
         
-        res.status(200).json({ message: 'Address added successfully'});
+        res.status(200).json({success : true,  message: 'Address added successfully'});
 
         console.log('New Address added successfully')
       } 

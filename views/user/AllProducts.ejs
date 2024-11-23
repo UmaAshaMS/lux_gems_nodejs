@@ -75,6 +75,41 @@
 
 
 
+/* For mobile devices (small screens) */
+@media (max-width: 576px) {
+    .product-row {
+        flex-direction: column; /* Stack items vertically */
+        align-items: center;   /* Center-align products */
+    }
+
+    .product-item {
+        flex: 0 0 100%; /* Force each product to take up full width */
+        max-width: 100%; /* Ensure no horizontal overflow */
+        margin: 0 0 20px; /* Add spacing between rows */
+    }
+
+    .product-thumbnail {
+        width: 100%; /* Ensure image spans full width of its container */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    .product-title, .product-price {
+        text-align: center; /* Center-align text for better appearance */
+    }
+}
+
+
+@media (max-width: 992px) {
+    .product-item {
+        flex: 0 1 48%; /* 2 items per row */
+    }
+    
+    .product-thumbnail {
+        height: 250px; /* Reduce height */
+    }
+}
+
+
        
 </style>
 

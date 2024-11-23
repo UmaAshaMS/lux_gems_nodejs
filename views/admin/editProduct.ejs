@@ -380,14 +380,21 @@
             </form>
         </div>
         <!-- Crop Modal -->
-        <div id="cropModal">
-            <h2>Crop Image</h2>
-            <div>
-                <img id="cropImage" src="">
-            </div>
-            <div class="modal-buttons">
-                <button onclick="cropImage()">Crop</button>
-                <button onclick="closeCropModal()">Cancel</button>
+        
+
+        <div class="cropper-main">
+            <div id="cropModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeCropModal()">&times;</span>
+                    <h2>Crop Image</h2>
+                    <div>
+                        <img id="cropImage" src="" alt="Crop preview">
+                    </div>
+                    <div class="modal-buttons">
+                        <button onclick="cropImage()">Crop</button>
+                        <button onclick="closeCropModal()">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
 
